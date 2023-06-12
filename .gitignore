@@ -1,0 +1,8 @@
+# Binary files
+**/__pycache__
+**/QUnfold.egg*
+**/build
+**/dist
+
+# Personal files
+.vscode
