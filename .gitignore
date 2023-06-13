@@ -4,6 +4,9 @@
 **/build
 **/dist
 
+# Study files
+studies/RooUnfold/RooUnfold
+
 # Personal files
 .vscode
 tox.ini

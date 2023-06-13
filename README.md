@@ -6,6 +6,8 @@
 - [Credits](#credits)
   - [Main developers](#main-developers)
   - [Other contributors](#other-contributors)
+- [Studies](#studies)
+  - [Comparison with `RooUnfold`](#comparison-with-roounfold)
 - [Stargazers over time](#stargazers-over-time)
 
 ## Introduction
@@ -13,6 +15,39 @@
 Idea based on the work done by [Riccardo Di Sipio](https://github.com/rdisipio) which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
 Work in progress...
+
+## Studies
+
+This section contains instructions to run unfolding with other packages. All the codes lie under the `studies` directory.
+
+### Comparison with `RooUnfold`
+
+This section is related to the `RooUnfold` comparison studies with `QUnfold`. 
+
+First of all enter the `studies/RooUnfold` directory and make the bash scripts executables:
+
+```shell
+chmod +x fetchRooUnfold.sh
+chmod +x setup.sh
+```
+
+this step is required only once.
+
+To fetch and compile `RooUnfold` do:
+
+```shell
+./fetchRooUnfold.sh
+```
+
+this step should be repeated only once.
+
+Then, to setup `RooUnfold` environment variables do:
+
+```shell
+./setup.sh
+```
+
+this latter step should be repeated every time you plan to run the `RooUnfold` studies.
 
 ## Credits
 
