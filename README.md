@@ -24,6 +24,12 @@ This section contains instructions to run unfolding with other packages. All the
 
 This section is related to the `RooUnfold` comparison studies with `QUnfold`. 
 
+Tools version:
+
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0
+- [`ROOT`](https://root.cern/releases/release-62804/): v6.28/04
+- [`GNU make`](https://www.gnu.org/software/make/): v4.3
+
 First of all enter the `studies/RooUnfold` directory and make the bash scripts executables:
 
 ```shell
