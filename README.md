@@ -10,6 +10,8 @@
 
 ## Introduction
 
+Idea based on the work done by [Riccardo Di Sipio](https://github.com/rdisipio) which can be found [here](https://github.com/rdisipio/quantum_unfolding).
+
 Work in progress...
 
 ## Credits
