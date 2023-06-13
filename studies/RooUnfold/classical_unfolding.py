@@ -57,6 +57,9 @@ def main():
     # Read the response matrix
     response = np.loadtxt(args.response)
     print("INFO: Response matrix: \n{}".format(response))
+    
+    # Todo
+    # ...
 
 # Execute main
 if __name__ == "__main__":
