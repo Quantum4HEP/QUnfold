@@ -10,3 +10,4 @@ studies/RooUnfold/RooUnfold
 # Personal files
 .vscode
 tox.ini
+.tox

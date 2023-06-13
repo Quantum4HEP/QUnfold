@@ -52,8 +52,9 @@ this step should be repeated only once.
 Then, to setup `RooUnfold` environment variables do:
 
 ```shell
-./setup.sh
+source setup.sh
 ```
+> :warning: use `source` command, not `./`.
 
 this latter step should be repeated every time you plan to run the `RooUnfold` studies.
 
