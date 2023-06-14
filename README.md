@@ -34,7 +34,6 @@ First of all enter the `studies/RooUnfold` directory and make the bash scripts e
 
 ```shell
 chmod +x fetchRooUnfold.sh
-chmod +x setup.sh
 chmod +x classical_unfolding.py
 chmod +x classical_unfolding.sh
 ```
@@ -48,15 +47,6 @@ To fetch and compile `RooUnfold` do:
 ```
 
 this step should be repeated only once.
-
-Then, to setup `RooUnfold` environment variables do:
-
-```shell
-source setup.sh
-```
-> :warning: use `source` command, not `./`.
-
-this latter step should be repeated every time you plan to run the `RooUnfold` studies.
 
 To run classical unfolding example:
 
