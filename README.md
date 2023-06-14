@@ -22,25 +22,15 @@ This section contains instructions to run unfolding with other packages. All the
 
 ### Comparison with `RooUnfold`
 
-This section is related to the `RooUnfold` comparison studies with `QUnfold`. 
+This section is related to the `RooUnfold` comparison studies with `QUnfold`.
 
 Tools version:
 
-- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0 (see [here](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods/) for a good user guide)
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold).
 - [`ROOT`](https://root.cern/releases/release-62804/): v6.28/04
 - [`GNU make`](https://www.gnu.org/software/make/): v4.3
 
-First of all enter the `studies/RooUnfold` directory and make the bash scripts executables:
-
-```shell
-chmod +x fetchRooUnfold.sh
-chmod +x classical_unfolding.py
-chmod +x classical_unfolding.sh
-```
-
-this step is required only once.
-
-To fetch and compile `RooUnfold` do:
+First of all enter the `studies/RooUnfold` to fetch and compile `RooUnfold` with this command:
 
 ```shell
 ./fetchRooUnfold.sh
@@ -54,7 +44,7 @@ To run classical unfolding example:
 ./classical_unfolding.sh
 ```
 
-enter the bash script to modify input unfolding parameters.
+enter the bash script to modify the unfolding parameters.
 
 ## Credits
 

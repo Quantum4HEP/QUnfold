@@ -47,11 +47,16 @@ def main():
     INFO("Pseudo-data reco-level: {}".format(pdata_reco))
 
     # Converting the numpy objects into ROOT histograms
-    h_truth = array_to_TH1(truth)
-    h_pdata_truth = array_to_TH1(h_pdata_truth)
-    h_response = array_to_TH2(response)
-    h_reco = array_to_TH1(reco)
-    h_pdata_reco = array_to_TH1(pdata_reco)
+    h_truth = array_to_TH1(truth, "truth")
+    h_pdata_truth = array_to_TH1(pdata_truth, "data_truth")
+    h_response = array_to_TH2(response, "response")
+    h_reco = array_to_TH1(reco, "reco")
+    h_pdata_reco = array_to_TH1(pdata_reco, "data_reco")
+
+    # Todo
+    m_response = r.RooUnfoldResponse(h_reco, h_truth, h_response)
+    print(type(m_response))
+
 
 if __name__ == "__main__":
 
