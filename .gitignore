@@ -1,13 +1,10 @@
-# Binary files
 **/__pycache__
 **/QUnfold.egg*
 **/build
 **/dist
-
-# Study files
+.hypothesis
 studies/RooUnfold/RooUnfold
-
-# Personal files
 .vscode
 tox.ini
 .tox
+.mypy_cache
