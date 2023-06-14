@@ -26,7 +26,7 @@ This section is related to the `RooUnfold` comparison studies with `QUnfold`.
 
 Tools version:
 
-- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0 (see [here](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods/) for a good user guide)
 - [`ROOT`](https://root.cern/releases/release-62804/): v6.28/04
 - [`GNU make`](https://www.gnu.org/software/make/): v4.3
 
