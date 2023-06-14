@@ -38,13 +38,19 @@ First of all enter the `studies/RooUnfold` to fetch and compile `RooUnfold` with
 
 this step should be repeated only once.
 
+Tu setup the [tox](https://tox.wiki/en/latest/user_guide.html) environment and run tests (optional):
+
+```shell
+tox -e tests
+```
+
 To run classical unfolding example:
 
 ```shell
-./classical_unfolding.sh
+tox -e main
 ```
 
-enter the bash script to modify the unfolding parameters.
+enter the `unfolding.sh` bash script to modify the unfolding parameters.
 
 ## Credits
 

@@ -13,4 +13,4 @@ response="../../data/responses/nominal.txt"
 lreg="0.5"
 
 # Run the unfolding
-./classical_unfolding.py --input=${input} --lreg=${lreg} --response=${response}
+./unfolding.py --input=${input} --lreg=${lreg} --response=${response}

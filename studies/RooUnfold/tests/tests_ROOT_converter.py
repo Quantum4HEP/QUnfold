@@ -15,7 +15,7 @@ import numpy as np
 
 # Testing modules
 import pytest as pt
-from hypothesis import given, settings
+from hypothesis import given
 import hypothesis.strategies as st
 from hypothesis.extra.numpy import arrays
 import numpy.testing as nptest

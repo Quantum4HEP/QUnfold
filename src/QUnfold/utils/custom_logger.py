@@ -38,3 +38,14 @@ def ERROR(message):
     """
 
     print("\033[1m\033[31mERROR\033[0m: {}".format(message))
+
+
+def RESULT(message):
+    """
+    Function used to print a log message which represents a result.
+
+    Args:
+        message (str): the input message.
+    """
+
+    print("\033[1m\033[36mRESULT\033[0m: {}".format(message))
