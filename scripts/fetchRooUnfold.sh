@@ -11,6 +11,10 @@
 repo="https://gitlab.cern.ch/RooUnfold/RooUnfold.git"
 tag="3.0.0"
 
+# Enter the HEP deps dir
+mkdir -p HEP_deps
+cd HEP_deps || exit
+
 # Fetch RooUnfold from the official GitLab repository
 echo "Installing RooUnfold v${tag}:"
 echo ""

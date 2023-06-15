@@ -17,25 +17,146 @@ import numpy as np
 import scipy.stats as sc
 
 # Utils modules
-sys.path.append("../../src")
-from QUnfold.utils.custom_logger import INFO, ERROR, RESULT
-from studies.RooUnfold.utils.ROOT_converter import (
+sys.path.extend(["../src", ".."])
+from QUnfold.utils.custom_logger import INFO, RESULT
+from studies.utils.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
     array_to_TH2,
 )
-
-# Loading RooUnfold
-loaded_RooUnfold = r.gSystem.Load("RooUnfold/libRooUnfold.so")
-if not loaded_RooUnfold == 0:
-    ERROR("RooUnfold not found!")
-    sys.exit(0)
+from studies.utils.helpers import load_RooUnfold
 
 # ROOT settings
+load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 
+def plot_response(response):
+    """
+    Plots the unfolding response matrix.
+
+    Args:
+        response (ROOT.RooUnfoldResponse): the response matrix to be plotted.
+    """
+
+    # Basic properties
+    m_response_save = response.HresponseNoOverflow()
+    m_response_canvas = r.TCanvas()
+    m_response_save.SetStats(0)  # delete statistics box
+    m_response_save.Draw("colz")  # to have heatmap
+
+    # Save canvas
+    m_response_canvas.Draw()
+    m_response_canvas.SaveAs("img/RooUnfold/response.png")
+
+
+def plot_truth_reco(h_truth, h_reco):
+    """
+    Plots truth and reco distributions.
+
+    Args:
+        h_truth (ROOT.TH1F): the truth distribution.
+        h_reco (ROOT.TH1F): the reco distribution.
+    """
+
+    # Basic properties
+    input_canvas = r.TCanvas()
+    h_reco.SetStats(0)
+    h_reco.SetFillColor(42)
+    h_reco.GetXaxis().SetTitle("Bins")
+    h_reco.Draw()
+    h_truth.SetStats(0)
+    h_truth.SetFillColor(7)
+    h_truth.Draw("same")
+
+    # Legend
+    leg = r.TLegend(0.55, 0.7, 0.9, 0.9)
+    leg.AddEntry(h_truth, "True Distribution")
+    leg.AddEntry(h_reco, "Predicted Measured")
+    leg.Draw()
+
+    # Save canvas
+    input_canvas.Draw()
+    input_canvas.SaveAs("img/RooUnfold/true-response.png")
+
+
+def unfolder(type, m_response, h_pdata_reco, pdata_truth, dof):
+    """
+    Unfold a distribution based on a certain type of unfolding.
+
+    Args:
+        type (str): the unfolding type (MI, SVD, IBU).
+        m_response (ROOT.TH2F): the response matrix.
+        h_pdata_reco (ROOT.TH1F): the measured pseudo-data.
+        pdata_truth (numpy.array): the truth pseudo-data.
+        dof (int): the number of degrees-of-freedom used to compute chi2.
+
+    Returns:
+        ROOT.TH1F: the unfolded histogram.
+    """
+
+    # Variables
+    unfolder = ""
+
+    # Unfolding type settings
+    if type == "MI":
+        RESULT("Unfolded with matrix inversion:")
+        unfolder = r.RooUnfoldInvert("MI", "Matrix Inversion")
+    elif type == "SVD":
+        RESULT("Unfolded with SVD Tikhonov method:")
+        unfolder = r.RooUnfoldSvd("SVD", "SVD Tikhonov")
+        unfolder.SetKterm(3)
+    elif type == "IBU":
+        RESULT("Unfolded with Iterative Bayesian Unfolding method:")
+        unfolder = r.RooUnfoldBayes("IBU", "Iterative Bayesian")
+        unfolder.SetIterations(4)
+        unfolder.SetSmoothing(0)
+
+    # Generic unfolding settings
+    unfolder.SetVerbose(0)
+    unfolder.SetResponse(m_response)
+    unfolder.SetMeasured(h_pdata_reco)
+    histo = unfolder.Hunfold()
+    histo.SetName("unfolded_{}".format(type))
+    histo_mi_bin_c, histo_mi_bin_e = TH1_to_array(histo)
+
+    # Print other information
+    print("Bin contents: {}".format(histo_mi_bin_c))
+    print("Bin errors: {}".format(histo_mi_bin_e))
+    # chi2_mi, pval_mi = sc.chisquare(histo_mi_bin_c, pdata_truth)
+    # print("chi2 / dof = {} / {} = {}".format(chi2_mi, dof, chi2_mi/float(dof)))
+
+    return histo
+
+
+def plot_unfolding(truth, reco, unfolded):
+
+    # Basic properties
+    canvas = r.TCanvas()
+    unfolded.SetStats(0)
+    truth.SetLineColor(2)
+    unfolded.Draw()
+    truth.Draw("same")
+    reco.Draw("same")
+
+    # Legend settings
+    leg = r.TLegend(0.6, 0.6, 0.9, 0.9)
+    leg.AddEntry(truth, "True distribution", "pl")
+    leg.AddEntry(reco, "Measured distribution", "pl")
+    leg.AddEntry(unfolded, "Unfolded distribution")
+    leg.Draw()
+
+    # Save canvas
+    canvas.Draw()
+    ext = unfolded.GetName().split("_")[-1]
+    canvas.SaveAs("img/RooUnfold/unfolded_{}.png".format(ext))
+
+
 def main():
+
+    # Create dirs
+    if not os.path.exists("img/RooUnfold"):
+        os.makedirs("img/RooUnfold")
 
     # Read unfolding parameters from the input variables file
     input = pd.read_csv(args.input)
@@ -66,47 +187,23 @@ def main():
     m_response.UseOverflow(False)  # disable the overflow bin which takes the outliers
     dof = h_truth.GetNbinsX() - 1
 
-    # Saving the response matrix
-    m_response_save = m_response.HresponseNoOverflow()
-    m_response_canvas = r.TCanvas()
-    m_response_save.SetStats(0)  # delete statistics box
-    m_response_save.Draw("colz")  # to have heatmap
-    m_response_canvas.Draw()
-    if not os.path.exists("img"):
-        os.makedirs("img")
-    m_response_canvas.SaveAs("img/response.png")
+    # Performing the unfolding with different methods
+    unfolded_MI = unfolder(
+        "MI", m_response, h_pdata_reco, pdata_truth, dof
+    )  # matrix inversion
+    unfolded_IBU = unfolder(
+        "IBU", m_response, h_pdata_reco, pdata_truth, dof
+    )  # iterative Bayesian
+    unfolded_SVD = unfolder(
+        "SVD", m_response, h_pdata_reco, pdata_truth, dof
+    )  # Tikhonov
 
-    # Performing the unfolding with matrix inversion
-    # unfolder_mi = r.RooUnfoldInvert("MI", "Matrix Inversion")
-    # unfolder_mi.SetVerbose(0)
-    # unfolder_mi.SetResponse(m_response)
-    # unfolder_mi.SetMeasured(h_pdata_reco)
-    # histo_mi = unfolder_mi.Hunfold()
-    # histo_mi.SetName("unfolded_mi")
-    # histo_mi_bin_c, histo_mi_bin_e = TH1_to_array(histo_mi)
-    # RESULT("Unfolded with matrix inversion:")
-    # print("Bin contents: {}".format(histo_mi_bin_c))
-    # print("Bin errors: {}".format(histo_mi_bin_e))
-    # chi2_mi, pval_mi = sc.chisquare(histo_mi_bin_c, pdata_truth)
-    # print("chi2 / dof = {} / {} = {}".format(chi2_mi, dof, chi2_mi/float(dof)))
-
-    # Performing the unfolding with IBU
-    # ...
-
-    # Performing the unfolding with SVD Tikhonov
-    # unfolder_svd = r.RooUnfoldSvd("SVD", "SVD Tikhonov")
-    # unfolder_svd.SetKterm(3)
-    # unfolder_svd.SetVerbose(0)
-    # unfolder_svd.SetResponse(m_response)
-    # unfolder_svd.SetMeasured(h_pdata_reco)
-    # histo_svd = unfolder_svd.Hunfold()
-    # histo_svd.SetName("unfolder_svd")
-    # histo_svd_bin_c, histo_svd_bin_e = TH1_to_array(histo_svd)
-    # RESULT("Unfolded with SVD Tikhonov algorithm:")
-    # print("Bin contents: {}".format(histo_svd_bin_c))
-    # print("Bin errors: {}".format(histo_svd_bin_e))
-    # chi2_svd, pval_svd = sc.chisquare(histo_svd_bin_c, pdata_truth)
-    # print("chi2 / dof = {} / {} = {}".format(chi2_svd, dof, chi2_svd/float(dof)))
+    # Produce plots
+    plot_truth_reco(h_truth, h_reco)
+    plot_response(m_response)
+    plot_unfolding(h_truth, h_reco, unfolded_MI)
+    plot_unfolding(h_truth, h_reco, unfolded_IBU)
+    plot_unfolding(h_truth, h_reco, unfolded_SVD)
 
 
 if __name__ == "__main__":

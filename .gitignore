@@ -2,8 +2,11 @@
 **/QUnfold.egg*
 **/build
 **/dist
-.hypothesis
+**/.hypothesis
 studies/RooUnfold/RooUnfold
 .vscode
 **/.tox
-.mypy_cache
+**/.mypy_cache
+**/.pytest_cache
+studies/**/img
+HEP_deps

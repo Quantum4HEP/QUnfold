@@ -8,9 +8,9 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-input="../../data/distributions/peak.csv"
-response="../../data/responses/nominal.txt"
+input="../data/distributions/falling.csv"
+response="../data/responses/nominal.txt"
 lreg="0.5"
 
 # Run the unfolding
-./unfolding.py --input=${input} --lreg=${lreg} --response=${response}
+./RooUnfold/unfolding.py --input=${input} --lreg=${lreg} --response=${response}
