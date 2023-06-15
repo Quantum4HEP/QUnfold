@@ -31,55 +31,6 @@ load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 
-def plot_response(response):
-    """
-    Plots the unfolding response matrix.
-
-    Args:
-        response (ROOT.RooUnfoldResponse): the response matrix to be plotted.
-    """
-
-    # Basic properties
-    m_response_save = response.HresponseNoOverflow()
-    m_response_canvas = r.TCanvas()
-    m_response_save.SetStats(0)  # delete statistics box
-    m_response_save.Draw("colz")  # to have heatmap
-
-    # Save canvas
-    m_response_canvas.Draw()
-    m_response_canvas.SaveAs("img/RooUnfold/response.png")
-
-
-def plot_truth_reco(h_truth, h_reco):
-    """
-    Plots truth and reco distributions.
-
-    Args:
-        h_truth (ROOT.TH1F): the truth distribution.
-        h_reco (ROOT.TH1F): the reco distribution.
-    """
-
-    # Basic properties
-    input_canvas = r.TCanvas()
-    h_reco.SetStats(0)
-    h_reco.SetFillColor(42)
-    h_reco.GetXaxis().SetTitle("Bins")
-    h_reco.Draw()
-    h_truth.SetStats(0)
-    h_truth.SetFillColor(7)
-    h_truth.Draw("same")
-
-    # Legend
-    leg = r.TLegend(0.55, 0.7, 0.9, 0.9)
-    leg.AddEntry(h_truth, "True Distribution")
-    leg.AddEntry(h_reco, "Predicted Measured")
-    leg.Draw()
-
-    # Save canvas
-    input_canvas.Draw()
-    input_canvas.SaveAs("img/RooUnfold/true-response.png")
-
-
 def unfolder(type, m_response, h_pdata_reco, pdata_truth, dof):
     """
     Unfold a distribution based on a certain type of unfolding.
@@ -199,8 +150,6 @@ def main():
     )  # Tikhonov
 
     # Produce plots
-    plot_truth_reco(h_truth, h_reco)
-    plot_response(m_response)
     plot_unfolding(h_truth, h_reco, unfolded_MI)
     plot_unfolding(h_truth, h_reco, unfolded_IBU)
     plot_unfolding(h_truth, h_reco, unfolded_SVD)

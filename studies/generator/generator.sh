@@ -9,6 +9,9 @@
 
 # Variables
 distr="bw"
+samples=100000
+
+# Aggiungere parametro numero di samples
 
 # Run script
-./generator/generator.py --distr=${distr}
+./generator/generator.py --distr=${distr} --samples=${samples}
