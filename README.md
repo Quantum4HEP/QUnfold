@@ -7,7 +7,9 @@
   - [Main developers](#main-developers)
   - [Other contributors](#other-contributors)
 - [Studies](#studies)
+  - [Install HEP dependencies](#install-hep-dependencies)
   - [Comparison with `RooUnfold`](#comparison-with-roounfold)
+  - [Tests](#tests)
 - [Stargazers over time](#stargazers-over-time)
 
 ## Introduction
@@ -18,39 +20,39 @@ Work in progress...
 
 ## Studies
 
-This section contains instructions to run unfolding with other packages. All the codes lie under the `studies` directory.
+This section contains instructions to run unfolding with other packages and compare them to `QUnfold`. All the codes lie under the `studies` directory.
+
+### Install HEP dependencies
+
+To run all the studies you will need to install some HEP dependencies:
+
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold). This can be installed from the `root` directory of the repository using the appropriate script:
+
+```shell
+./scripts/fetchRooUnfold.sh
+```
+
+- [`ROOT`](https://root.cern/releases/release-62804/): v6.28/04
 
 ### Comparison with `RooUnfold`
 
-This section is related to the `RooUnfold` comparison studies with `QUnfold`.
+This section is related to the `RooUnfold` studies.
 
-Tools version:
-
-- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold).
-- [`ROOT`](https://root.cern/releases/release-62804/): v6.28/04
-- [`GNU make`](https://www.gnu.org/software/make/): v4.3
-
-First of all enter the `studies/RooUnfold` to fetch and compile `RooUnfold` with this command:
+To run classical unfolding example with `RooUnfold:
 
 ```shell
-./fetchRooUnfold.sh
+tox -e RooUnfold
 ```
 
-this step should be repeated only once.
+enter the `RooUnfold/unfolding.sh` bash script to modify the unfolding parameters.
 
-Tu setup the [tox](https://tox.wiki/en/latest/user_guide.html) environment and run tests (optional):
+### Tests
+
+Tu run the studies tests run (optional):
 
 ```shell
 tox -e tests
 ```
-
-To run classical unfolding example:
-
-```shell
-tox -e main
-```
-
-enter the `unfolding.sh` bash script to modify the unfolding parameters.
 
 ## Credits
 
