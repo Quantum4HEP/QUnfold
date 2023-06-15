@@ -9,3 +9,4 @@ studies/RooUnfold/RooUnfold
 **/.mypy_cache
 **/.pytest_cache
 HEP_deps
+**/output

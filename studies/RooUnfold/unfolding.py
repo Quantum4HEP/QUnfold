@@ -81,6 +81,13 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
         chi2 = histo.Chi2Test(h_truth, "WW")
         print("chi2 / dof = {} / {} = {}".format(chi2, dof, chi2 / float(dof)))
 
+    # Save the unfolded histogram
+    bin_contents, bin_errors = TH1_to_array(histo)
+    np.savetxt(
+        "output/RooUnfold/unfolded_{}_bin_contents.txt".format(type), bin_contents
+    )
+    np.savetxt("output/RooUnfold/unfolded_{}_bin_errors".format(type), bin_errors)
+
     return histo
 
 
@@ -123,6 +130,8 @@ def main():
     # Create dirs
     if not os.path.exists("../img/studies/RooUnfold/{}".format(args.distr)):
         os.makedirs("../img/studies/RooUnfold/{}".format(args.distr))
+    if not os.path.exists("output/RooUnfold"):
+        os.makedirs("output/RooUnfold")
 
     # Variables
     truth_bin_content_path = "../data/{}/truth_bin_content.txt".format(args.distr)

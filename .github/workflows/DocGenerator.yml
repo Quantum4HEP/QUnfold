@@ -18,12 +18,6 @@ jobs:
           pip install doxypypy
           doxygen Doxyfile
 
-      #- name: Doxygen Action
-      #  uses: mattnotmitt/doxygen-action@v1.3.1
-      #  with:
-      #    working-directory: '.'
-      #    doxyfile-path: 'Doxyfile'
-
       - name: Upload Output Directory
         uses: actions/upload-artifact@v2
         with:
