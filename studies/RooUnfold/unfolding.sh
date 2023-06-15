@@ -8,9 +8,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-input="../data/distributions/falling.csv"
-response="../data/responses/nominal.txt"
-lreg="0.5"
+distr="breit-wigner"
 
 # Run the unfolding
-./RooUnfold/unfolding.py --input=${input} --lreg=${lreg} --response=${response}
+./RooUnfold/unfolding.py --distr=${distr}

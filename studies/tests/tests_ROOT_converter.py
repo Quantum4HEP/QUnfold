@@ -31,30 +31,37 @@ from studies.utils.ROOT_converter import (
 
 
 @given(
-    array=arrays(
+    bin_contents=arrays(
         dtype=np.float64,
-        shape=st.integers(min_value=1, max_value=100),
+        shape=40,
         elements=st.floats(0, 100),
-    )
+    ),
+    bin_errors=arrays(
+        dtype=np.float64,
+        shape=40,
+        elements=st.floats(0, 100),
+    ),
 )
-def test_array_to_TH1(array):
+def test_array_to_TH1(bin_contents, bin_errors):
     """
-    Testing the array_to_TH1 function properties.
+    Test the array_to_TH1 function.
 
     Args:
-        array (np.array): the numpy.array used for testing the function.
+        bin_contents (np.array): The NumPy array representing bin contents.
+        bin_errors (np.array): The NumPy array representing bin errors.
     """
 
     # Variables
-    histo = array_to_TH1(array)
+    histo = array_to_TH1(bin_contents, bin_errors)
 
     # Tests
     assert type(histo) == r.TH1F  # type check
-    assert histo.GetNbinsX() == array.shape[0]  # n_bins check
+    assert histo.GetNbinsX() == 40  # n_bins check
     assert histo.GetName() == "histo"  # check histo name
     assert histo.GetTitle() == ""  # check histo title
-    for i in range(array.shape[0]):  # values check
-        assert histo.GetBinContent(i + 1) == pt.approx(array[i])
+    for i in range(40):  # values check
+        assert histo.GetBinContent(i + 1) == pt.approx(bin_contents[i])
+        assert histo.GetBinError(i + 1) == pt.approx(bin_errors[i])
 
 
 def test_TH1_to_array():
@@ -82,10 +89,7 @@ def test_TH1_to_array():
 @given(
     array=arrays(
         dtype=np.float64,
-        shape=st.tuples(
-            st.integers(min_value=1, max_value=100),
-            st.integers(min_value=1, max_value=100),
-        ),
+        shape=(40, 40),
         elements=st.floats(0, 100),
     )
 )
@@ -103,14 +107,14 @@ def test_array_to_TH2(array):
     # Tests
     with pt.raises(AssertionError):
         array_to_TH2(np.array([]))  # check the array dimension
-    assert histo.GetNbinsX() == array.shape[0]  # n_bins check
-    assert histo.GetNbinsY() == array.shape[1]  # n_bins check
+    assert histo.GetNbinsX() == 40  # n_bins check
+    assert histo.GetNbinsY() == 40  # n_bins check
     assert histo.GetName() == "res"  # check histo name
     assert histo.GetTitle() == ""  # check histo title
-    for i in range(array.shape[0]):  # values check
-        for j in range(array.shape[1]):
+    for i in range(40):  # values check
+        for j in range(40):
             assert histo.GetBinContent(i + 1, j + 1) == pt.approx(array[i][j])
-            assert histo.GetBinError(i + 1, j + 1) == pt.approx(0.1 * array[i][j])
+            assert histo.GetBinError(i + 1, j + 1) == pt.approx(array[i][j])
 
 
 def test_TH2_to_array():

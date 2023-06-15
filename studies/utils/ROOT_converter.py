@@ -13,27 +13,29 @@ import ROOT as r
 import numpy as np
 
 
-def array_to_TH1(array, hname="histo"):
+def array_to_TH1(bin_contents, bin_errors, name="histo"):
     """
-    Convert a numpy.array into a ROOT.TH1F histogram.
+    Converts NumPy arrays representing bin contents and bin errors to a ROOT.TH1F histogram.
 
     Args:
-        array (numpy.array): the numpy.array to be converted.
-        hname (str, optional): The name of the new ROOT histogram. Defaults to "h".
+        bin_contents (numpy.array): The NumPy array representing bin contents.
+        bin_errors (numpy.array): The NumPy array representing bin errors.
+        name (str): Name of the ROOT.TH1F histogram. Default is "hist".
 
     Returns:
-        ROOT.TH1F: the new ROOT.TH1F histogram given from the numpy.array conversion.
+        ROOT.TH1F: The converted ROOT.TH1F histogram with bin errors.
     """
 
-    # Declaring histo properties
-    n_bins = array.shape[0]
-    histo = r.TH1F(hname, ";X;Entries", n_bins, 0.5, n_bins + 0.5)
+    # Initial settings
+    n_bins = len(bin_contents)
+    hist = r.TH1F(name, ";X;Entries", 40, -10, 10)
 
-    # Initialize the histogram
+    # Fill histogram with bin contents and errors
     for i in range(n_bins):
-        histo.SetBinContent(i + 1, array[i])
+        hist.SetBinContent(i + 1, bin_contents[i])
+        hist.SetBinError(i + 1, bin_errors[i])
 
-    return histo
+    return hist
 
 
 def TH1_to_array(histo):
@@ -55,14 +57,13 @@ def TH1_to_array(histo):
     return bin_contents, bin_errors
 
 
-def array_to_TH2(array, hname="res", factor=0.10):
+def array_to_TH2(array, hname="res"):
     """
     Convert a 2D numpy.array into a ROOT.TH2F.
 
     Args:
         array (numpy-array): a 2F numpy.array.
         hname (str, optional): The name of the ROOT.TH2F histogram. Defaults to "res".
-        factor (float, optional): Scaling factor for the ROOT.TH2F bin errors. Defaults to 0.10.
 
     Returns:
         ROOT.TH2F: the converted ROOT.TH2F.
@@ -74,22 +75,13 @@ def array_to_TH2(array, hname="res", factor=0.10):
     # Variables and histo properties
     n_bins_x = array.shape[0]
     n_bins_y = array.shape[1]
-    histo = r.TH2F(
-        hname,
-        ";reco;truth",
-        n_bins_x,
-        0.5,
-        n_bins_x + 0.5,
-        n_bins_y,
-        0.5,
-        n_bins_y + 0.5,
-    )
+    histo = r.TH2F(hname, ";reco;truth", 40, -10.0, 10.0, 40, -10.0, 10.0)
 
     # Filling the histo
     for i in range(n_bins_x):
         for j in range(n_bins_y):
             histo.SetBinContent(i + 1, j + 1, array[i][j])
-            histo.SetBinError(i + 1, j + 1, factor * array[i][j])
+            histo.SetBinError(i + 1, j + 1, array[i][j])
 
     return histo
 

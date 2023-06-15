@@ -137,10 +137,12 @@ def main():
     plot_truth_reco(f0, g0)
 
     # Save the histograms as numpy arrays
-    truth = TH1_to_array(f0)
-    np.savetxt("../data/{}/truth.txt".format(args.distr), truth)
-    meas = TH1_to_array(g0)
-    np.savetxt("../data/{}/meas.txt".format(args.distr), meas)
+    truth_bin_content, truth_bin_err = TH1_to_array(f0)
+    np.savetxt("../data/{}/truth_bin_content.txt".format(args.distr), truth_bin_content)
+    np.savetxt("../data/{}/truth_bin_err.txt".format(args.distr), truth_bin_err)
+    meas_bin_content, meas_bin_err = TH1_to_array(g0)
+    np.savetxt("../data/{}/meas_bin_content.txt".format(args.distr), meas_bin_content)
+    np.savetxt("../data/{}/meas_bin_err.txt".format(args.distr), meas_bin_err)
 
     # Save the response matrix as numpy matrix
     np_response = TH2_to_array(response.Hresponse())

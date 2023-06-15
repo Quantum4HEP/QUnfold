@@ -8,5 +8,4 @@ studies/RooUnfold/RooUnfold
 **/.tox
 **/.mypy_cache
 **/.pytest_cache
-studies/**/img
 HEP_deps
