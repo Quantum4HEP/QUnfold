@@ -41,6 +41,7 @@ Current distributions supported for generation:
 
 - [Breit-Wigner](https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution)
 - [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
+- Double peaked
 
 ### Install HEP dependencies
 

@@ -60,6 +60,9 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
         unfolder = r.RooUnfoldBayes("IBU", "Iterative Bayesian")
         unfolder.SetIterations(4)
         unfolder.SetSmoothing(0)
+    elif type == "B2B":
+        RESULT("Unfolded with Bin-by-Bin method:")
+        unfolder = r.RooUnfoldBinByBin("B2B", "Bin-y-Bin")
 
     # Generic unfolding settings
     unfolder.SetVerbose(0)
@@ -72,8 +75,9 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
     # Print other information
     print("Bin contents: {}".format(histo_mi_bin_c))
     print("Bin errors: {}".format(histo_mi_bin_e))
-    chi2 = histo.Chi2Test(h_truth, "WW")
-    print("chi2 / dof = {} / {} = {}".format(chi2, dof, chi2 / float(dof)))
+    if args.chi2 == "yes":
+        chi2 = histo.Chi2Test(h_truth, "WW")
+        print("chi2 / dof = {} / {} = {}".format(chi2, dof, chi2 / float(dof)))
 
     return histo
 
@@ -143,18 +147,9 @@ def main():
     dof = h_truth.GetNbinsX() - 1
 
     # Performing the unfolding with different methods
-    unfolded_MI = unfolder("MI", m_response, h_meas, h_truth, dof)  # matrix inversion
-    print()
-    unfolded_IBU = unfolder(
-        "IBU", m_response, h_meas, h_truth, dof
-    )  # iterative Bayesian
-    print()
-    unfolded_SVD = unfolder("SVD", m_response, h_meas, h_truth, dof)  # Tikhonov
-
-    # Produce plots
-    plot_unfolding(h_truth, h_meas, unfolded_MI)
-    plot_unfolding(h_truth, h_meas, unfolded_IBU)
-    plot_unfolding(h_truth, h_meas, unfolded_SVD)
+    for unf_type in ["MI", "IBU", "SVD", "B2B"]:
+        unfolded = unfolder(unf_type, m_response, h_meas, h_truth, dof)
+        plot_unfolding(h_truth, h_meas, unfolded)
 
 
 if __name__ == "__main__":
@@ -165,8 +160,17 @@ if __name__ == "__main__":
         "-d",
         "--distr",
         default="breit-wigner",
+        choices=["breit-wigner", "normal", "double-peaked"],
         type=str,
         help="Input distribution used for unfolding (used to read data).",
+    )
+    parser.add_argument(
+        "-c",
+        "--chi2",
+        default="no",
+        choices=["no", "yes"],
+        type=str,
+        help="Print or not chi2.",
     )
     args = parser.parse_args()
 

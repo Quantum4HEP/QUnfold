@@ -62,7 +62,7 @@ def plot_response(response):
 
     # Save canvas
     m_response_canvas.Draw()
-    m_response_canvas.SaveAs("../data/{}/response.png".format(args.distr))
+    m_response_canvas.SaveAs("../img/data/{}/response.png".format(args.distr))
 
 
 def plot_truth_reco(h_truth, h_reco):
@@ -93,7 +93,7 @@ def plot_truth_reco(h_truth, h_reco):
 
     # Save canvas
     input_canvas.Draw()
-    input_canvas.SaveAs("../data/{}/true-reco.png".format(args.distr))
+    input_canvas.SaveAs("../img/data/{}/true-reco.png".format(args.distr))
 
 
 def main():
@@ -102,6 +102,9 @@ def main():
     path = "../data/{}".format(args.distr)
     if not os.path.exists(path):
         os.makedirs(path)
+    img_path = "../img/data/{}".format(args.distr)
+    if not os.path.exists(img_path):
+        os.makedirs(img_path)
 
     # Initial message
     INFO("Parameters:")
@@ -176,7 +179,7 @@ if __name__ == "__main__":
     # Parser settings
     parser = ap.ArgumentParser(description="Parsing generator input variables.")
     parser.add_argument(
-        "-t",
+        "-d",
         "--distr",
         choices=["normal", "breit-wigner", "double-peaked"],
         default="normal",
