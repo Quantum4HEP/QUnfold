@@ -49,4 +49,6 @@ jobs:
           author_email: timmer@jlab.org
           message: 'Update docs'
           branch: gh-pages
-          add: '["docs/*"]' 
+          add: |
+            docs/*
+            scripts/py_filter.sh
