@@ -14,17 +14,13 @@ jobs:
 
       - name: Create Filter Script
         run: |
-          mkdir scripts
-          touch scripts/py_filter.sh
-          echo '#!/bin/bash' > scripts/py_filter.sh
-          echo 'doxypypy -a -c $1' >> scripts/py_filter.sh
-          chmod +x scripts/py_filter.sh
+          doxygen Doxyfile
 
-      - name: Doxygen Action
-        uses: mattnotmitt/doxygen-action@v1.3.1
-        with:
-          working-directory: '.'
-          doxyfile-path: 'Doxyfile'
+      #- name: Doxygen Action
+      #  uses: mattnotmitt/doxygen-action@v1.3.1
+      #  with:
+      #    working-directory: '.'
+      #    doxyfile-path: 'Doxyfile'
 
       - name: Upload Output Directory
         uses: actions/upload-artifact@v2
