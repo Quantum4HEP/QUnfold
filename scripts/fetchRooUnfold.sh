@@ -11,12 +11,16 @@
 repo="https://gitlab.cern.ch/RooUnfold/RooUnfold.git"
 tag="3.0.0"
 
+# Install prerequisites
+sudo apt install git build-essential
+echo ""
+
 # Enter the HEP deps dir
 mkdir -p HEP_deps
 cd HEP_deps || exit
 
 # Fetch RooUnfold from the official GitLab repository
-echo "Installing RooUnfold v${tag}:"
+echo "Installing RooUnfold v${tag} in ${PWD}":
 echo ""
 echo "- Fetching the library..."
 if [ -d RooUnfold ] ; then
@@ -41,5 +45,3 @@ else
     cd RooUnfold || exit
     make
 fi
-
-

@@ -8,7 +8,8 @@
   - [Other contributors](#other-contributors)
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
-  - [Comparison with `RooUnfold`](#comparison-with-roounfold)
+  - [Generate pseudo-data](#generate-pseudo-data)
+  - [`RooUnfold`](#roounfold)
   - [Tests](#tests)
 - [Stargazers over time](#stargazers-over-time)
 
@@ -20,23 +21,42 @@ Work in progress...
 
 ## Studies
 
-This section contains instructions to run unfolding with other packages and compare them to `QUnfold`. All the codes lie under the `studies` directory.
+This section contains instructions to run unfolding with other packages in order to do comparisons with `QUnfold`. All the code lies under the `studies` directory.
+
+All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [the ones related to HEP](#install-hep-dependencies).
+
+### Generate pseudo-data
+
+Some pseudo-data used for testing the unfolding lie into the `data` directory. Each sub-directory contains truth data, measured data, response matrix and some plots for data visualization.
+
+To generate new pseudo-data:
+
+```shell
+tox -e generator
+```
+
+To modify the generator parameters (samples, distribution...) open the `generator/generator.sh` script and modify it.
+
+Current distributions supported for generation:
+
+- [Breit-Wigner](https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution)
+- [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
 
 ### Install HEP dependencies
 
 To run all the studies you will need to install some HEP dependencies:
 
-- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): v3.0.0. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold). This can be installed from the `root` directory of the repository using the appropriate script:
+- [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/04**. Soon more instructions to install this.
+
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold). This dependency can be installed from the `root` directory of the repository using the related script:
 
 ```shell
 ./scripts/fetchRooUnfold.sh
 ```
 
-- [`ROOT`](https://root.cern/releases/release-62804/): v6.28/04
+### `RooUnfold`
 
-### Comparison with `RooUnfold`
-
-This section is related to the `RooUnfold` studies.
+This section is related to the `RooUnfold` studies. Be sure of being into the `studies` directory before proceeding.
 
 To run classical unfolding example with `RooUnfold:
 
@@ -44,11 +64,11 @@ To run classical unfolding example with `RooUnfold:
 tox -e RooUnfold
 ```
 
-enter the `RooUnfold/unfolding.sh` bash script to modify the unfolding parameters.
+open the `RooUnfold/unfolding.sh` bash script to modify the unfolding parameters.
 
 ### Tests
 
-Tu run the studies tests run (optional):
+Tu run the tests related to the functions developed for the studies run (optional):
 
 ```shell
 tox -e tests
