@@ -26,6 +26,7 @@ from studies.utils.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
     array_to_TH2,
+    TH2_to_array,
 )
 
 
@@ -110,3 +111,26 @@ def test_array_to_TH2(array):
         for j in range(array.shape[1]):
             assert histo.GetBinContent(i + 1, j + 1) == pt.approx(array[i][j])
             assert histo.GetBinError(i + 1, j + 1) == pt.approx(0.1 * array[i][j])
+
+
+def test_TH2_to_array():
+    """
+    Testing the TH2F_to_numpy function properties. Note that hypothesis is not used since it doesn't support ROOT types.
+    """
+
+    # Create TH2F histogram
+    histo = r.TH2F("Test", ";X;Y", 5, 0.5, 5.5, 3, 0.5, 3.5)
+    for i in range(histo.GetNbinsX()):
+        for j in range(histo.GetNbinsY()):
+            bin_content = i * j
+            histo.SetBinContent(i + 1, j + 1, bin_content)
+
+    # Convert TH2F to NumPy array
+    numpy_array = TH2_to_array(histo)
+
+    # Tests
+    assert numpy_array.shape == (5, 3)  # array shape
+    nptest.assert_array_equal(
+        numpy_array,
+        np.array([[0, 0, 0], [0, 1, 2], [0, 2, 4], [0, 3, 6], [0, 4, 8]]),
+    )  # array content equality

@@ -21,7 +21,7 @@ import numpy as np
 sys.path.extend(["../src", ".."])
 from QUnfold.utils.custom_logger import INFO
 from studies.utils.helpers import load_RooUnfold
-from studies.utils.ROOT_converter import TH1_to_array
+from studies.utils.ROOT_converter import TH1_to_array, TH2_to_array
 
 # ROOT settings
 load_RooUnfold()
@@ -109,15 +109,21 @@ def main():
     print("- Samples: {}".format(args.samples))
     print()
 
-    # Initialize response and histograms
-    response = r.RooUnfoldResponse(40, -10.0, 10.0)
+    # Initialize histograms
     f0 = r.TH1F("f0", "f0", 40, -10, 10)  # truth
     g0 = r.TH1F("g0", "g0", 40, -10, 10)  # measured
+
+    # Generate the response matrix
+    response = r.RooUnfoldResponse(40, -10.0, 10.0)
 
     # Fill the inputs
     INFO("Filling the histograms...")
     for i in tqdm(range(args.samples)):
-        xt = r.gRandom.BreitWigner(0.3, 2.5)
+        xt = 0
+        if args.distr == "breit-wigner":
+            xt = r.gRandom.BreitWigner(0.3, 2.5)
+        elif args.distr == "normal":
+            xt = r.gRandom.Gaus(0.0, 2.0)
         f0.Fill(xt)
         x = smear(xt)
         if x != None:
@@ -130,14 +136,15 @@ def main():
     plot_response(response)
     plot_truth_reco(f0, g0)
 
-    # Save the histograms as pandas.DataFrame
+    # Save the histograms as numpy arrays
     truth = TH1_to_array(f0)
     np.savetxt("../data/{}/truth.txt".format(args.distr), truth)
     meas = TH1_to_array(g0)
     np.savetxt("../data/{}/meas.txt".format(args.distr), meas)
 
-    # Save the response matrix
-    # ...
+    # Save the response matrix as numpy matrix
+    np_response = TH2_to_array(response.Hresponse())
+    np.savetxt("../data/{}/response.txt".format(args.distr), np_response)
 
 
 if __name__ == "__main__":
@@ -147,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-t",
         "--distr",
-        choices=["normal", "bw"],
+        choices=["normal", "breit-wigner"],
         default="normal",
         type=str,
         help="The type of the distribution to be simulated.",

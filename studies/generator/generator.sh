@@ -8,7 +8,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-distr="bw"
+distr="breit-wigner"
 samples=100000
 
 # Aggiungere parametro numero di samples

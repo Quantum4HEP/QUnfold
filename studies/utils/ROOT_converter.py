@@ -92,3 +92,29 @@ def array_to_TH2(array, hname="res", factor=0.10):
             histo.SetBinError(i + 1, j + 1, factor * array[i][j])
 
     return histo
+
+
+def TH2_to_array(histo):
+    """
+    Convert a ROOT.TH2F object into a numpy.array.
+
+    Parameters:
+        hist (ROOT.TH2F): The TH2F object to convert.
+
+    Returns:
+        numpy_array (numpy.array): The numpy.array representing the contents of the TH2F.
+
+    """
+
+    # Variables
+    num_bins_x = histo.GetNbinsX()
+    num_bins_y = histo.GetNbinsY()
+    numpy_array = np.zeros((num_bins_x, num_bins_y))
+
+    # Filling the array
+    for i in range(1, num_bins_x + 1):
+        for j in range(1, num_bins_y + 1):
+            bin_content = histo.GetBinContent(i, j)
+            numpy_array[i - 1, j - 1] = bin_content
+
+    return numpy_array
