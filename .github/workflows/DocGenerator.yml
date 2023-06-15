@@ -22,7 +22,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: doc-files
-          path: docs
+          path: |
+            docs
+            scripts/py_filter.sh
           retention-days: 1
 
   copy:
@@ -40,7 +42,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: doc-files
-          path: docs
+          path: |
+            docs
+            scripts/py_filter.sh
           
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
