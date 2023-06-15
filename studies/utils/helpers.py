@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Created on Thr Jun 15 11:08:00 2023
-Author: Gianluca Bianco
-"""
+# ---------------------- Metadata ----------------------
+#
+# File name:  helpers.py
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
+# Date:       2023-06-14
+# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # STD modules
 import sys

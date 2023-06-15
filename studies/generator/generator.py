@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Created on Wed Jun 14 17:10:00 2023
-Author: Gianluca Bianco
-"""
+# ---------------------- Metadata ----------------------
+#
+# File name:  generator.py
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
+# Date:       2023-06-14
+# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Followed the guide at: https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/#Aproximating-Smearing
 

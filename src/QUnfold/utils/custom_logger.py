@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Created on Tue Jun 14 00:43:00 2023
-Author: Gianluca Bianco
-"""
-
+# ---------------------- Metadata ----------------------
+#
+# File name:  custom_logger.py
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
+# Date:       2023-06-14
+# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 def INFO(message):
     """

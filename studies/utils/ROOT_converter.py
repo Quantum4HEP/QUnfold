@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Created on Tue Jun 13 17:10:00 2023
-Author: Gianluca Bianco
-"""
-
-import sys
+# ---------------------- Metadata ----------------------
+#
+# File name:  ROOT_converter.py
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
+# Date:       2023-06-14
+# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Data science modules
 import ROOT as r

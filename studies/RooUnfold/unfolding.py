@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Created on Tue Jun 13 17:10:00 2023
-Author: Gianluca Bianco
-"""
+# ---------------------- Metadata ----------------------
+#
+# File name:  unfolding.py
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
+# Date:       2023-06-13
+# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Standard modules
 import argparse as ap
