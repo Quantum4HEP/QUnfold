@@ -118,19 +118,41 @@ def main():
 
     # Fill the inputs
     INFO("Filling the histograms...")
-    for i in tqdm(range(args.samples)):
-        xt = 0
-        if args.distr == "breit-wigner":
-            xt = r.gRandom.BreitWigner(0.3, 2.5)
-        elif args.distr == "normal":
-            xt = r.gRandom.Gaus(0.0, 2.0)
-        f0.Fill(xt)
-        x = smear(xt)
-        if x != None:
-            response.Fill(x, xt)
-            g0.Fill(x)
-        else:
-            response.Miss(xt)
+    if any(
+        d in args.distr for d in ["normal", "breit-wigner"]
+    ):  # case for standard distributions
+        for i in tqdm(range(args.samples)):
+            xt = 0
+            if args.distr == "breit-wigner":
+                xt = r.gRandom.BreitWigner(0.3, 2.5)
+            elif args.distr == "normal":
+                xt = r.gRandom.Gaus(0.0, 2.0)
+            f0.Fill(xt)
+            x = smear(xt)
+            if x != None:
+                response.Fill(x, xt)
+                g0.Fill(x)
+            else:
+                response.Miss(xt)
+    elif any(d in args.distr for d in ["double-peaked"]):  # case for double peaked
+        for i in tqdm(range(5000)):
+            xt = r.gRandom.Gaus(2, 1.5)
+            f0.Fill(xt)
+            x = r.gRandom.Gaus(xt, 1.0)
+            if x != None:
+                response.Fill(x, xt)
+                g0.Fill(x)
+            else:
+                response.Miss(xt)
+        for i in tqdm(range(5000)):
+            xt = r.gRandom.Gaus(-2, 1.5)
+            f0.Fill(xt)
+            x = r.gRandom.Gaus(xt, 1.0)
+            if x != None:
+                response.Fill(x, xt)
+                g0.Fill(x)
+            else:
+                response.Miss(xt)
 
     # Save response and histograms plots
     plot_response(response)
@@ -156,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-t",
         "--distr",
-        choices=["normal", "breit-wigner"],
+        choices=["normal", "breit-wigner", "double-peaked"],
         default="normal",
         type=str,
         help="The type of the distribution to be simulated.",

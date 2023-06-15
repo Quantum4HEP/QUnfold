@@ -12,13 +12,11 @@ import sys, os
 
 # Data science modules
 import ROOT as r
-import pandas as pd
 import numpy as np
-import scipy.stats as sc
 
 # Utils modules
 sys.path.extend(["../src", ".."])
-from QUnfold.utils.custom_logger import INFO, RESULT
+from QUnfold.utils.custom_logger import RESULT
 from studies.utils.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
@@ -39,7 +37,7 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
         type (str): the unfolding type (MI, SVD, IBU).
         m_response (ROOT.TH2F): the response matrix.
         h_meas (ROOT.TH1F): the measured pseudo-data.
-        h_truth (numpy.array): the truth pseudo-data.
+        h_truth (ROOT.TH1F): the truth pseudo-data.
         dof (int): the number of degrees-of-freedom used to compute chi2.
 
     Returns:
@@ -74,8 +72,8 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
     # Print other information
     print("Bin contents: {}".format(histo_mi_bin_c))
     print("Bin errors: {}".format(histo_mi_bin_e))
-    # chi2_mi, pval_mi = sc.chisquare(histo_mi_bin_c, h_truth)
-    # print("chi2 / dof = {} / {} = {}".format(chi2_mi, dof, chi2_mi / float(dof)))
+    chi2 = histo.Chi2Test(h_truth, "WW")
+    print("chi2 / dof = {} / {} = {}".format(chi2, dof, chi2 / float(dof)))
 
     return histo
 
@@ -92,14 +90,14 @@ def plot_unfolding(truth, meas, unfolded):
 
     # Basic properties
     canvas = r.TCanvas()
-    unfolded.SetStats(0)
     truth.SetLineColor(2)
+    truth.SetStats(0)
     unfolded.SetLineColor(3)
-    unfolded.GetXaxis().SetTitle("Bins")
-    unfolded.GetYaxis().SetTitle("")
-    unfolded.Draw()
-    truth.Draw("same")
+    truth.GetXaxis().SetTitle("Bins")
+    truth.GetYaxis().SetTitle("")
+    truth.Draw()
     meas.Draw("same")
+    unfolded.Draw("same")
 
     # Legend settings
     leg = r.TLegend(0.6, 0.6, 0.9, 0.9)
@@ -146,9 +144,11 @@ def main():
 
     # Performing the unfolding with different methods
     unfolded_MI = unfolder("MI", m_response, h_meas, h_truth, dof)  # matrix inversion
+    print()
     unfolded_IBU = unfolder(
         "IBU", m_response, h_meas, h_truth, dof
     )  # iterative Bayesian
+    print()
     unfolded_SVD = unfolder("SVD", m_response, h_meas, h_truth, dof)  # Tikhonov
 
     # Produce plots

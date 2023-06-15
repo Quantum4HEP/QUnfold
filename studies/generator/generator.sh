@@ -8,10 +8,8 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-distr="breit-wigner"
+distr="double-peaked"
 samples=100000
-
-# Aggiungere parametro numero di samples
 
 # Run script
 ./generator/generator.py --distr=${distr} --samples=${samples}
