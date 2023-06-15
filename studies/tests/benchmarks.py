@@ -9,7 +9,6 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 import pytest
-import json
 
 
 def my_function():
