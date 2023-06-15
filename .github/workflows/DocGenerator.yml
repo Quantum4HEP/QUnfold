@@ -22,9 +22,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: doc-files
-          path: |
-            docs
-            scripts/py_filter.sh
+          path: docs
           retention-days: 1
 
   copy:
@@ -42,9 +40,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: doc-files
-          path: |
-            docs
-            scripts/py_filter.sh
+          path: docs
           
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
@@ -53,6 +49,4 @@ jobs:
           author_email: timmer@jlab.org
           message: 'Update docs'
           branch: gh-pages
-          add: |
-            docs/*
-            scripts/py_filter.sh
+          add: '["docs/*"]' 
