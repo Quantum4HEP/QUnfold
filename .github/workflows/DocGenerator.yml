@@ -12,9 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Create Filter Script
+      - name: Doxygen Action
         run: |
-          sudo apt install -y doxygen
+          sudo apt install -y doxygen python3-pip
+          pip install doxypypy
           doxygen Doxyfile
 
       #- name: Doxygen Action
