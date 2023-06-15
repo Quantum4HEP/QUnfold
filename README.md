@@ -3,14 +3,15 @@
 ## Table of contents
 
 - [Introduction](#introduction)
-- [Credits](#credits)
-  - [Main developers](#main-developers)
-  - [Other contributors](#other-contributors)
+- [Documentation](#documentation)
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Generate pseudo-data](#generate-pseudo-data)
   - [`RooUnfold`](#roounfold)
   - [Tests](#tests)
+- [Credits](#credits)
+  - [Main developers](#main-developers)
+  - [Other contributors](#other-contributors)
 - [Stargazers over time](#stargazers-over-time)
 
 ## Introduction
@@ -18,6 +19,12 @@
 Idea was born by me and Simone during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
 Work in progress...
+
+## Documentation
+
+Further documentation resources are listed here:
+
+- [Doxygen page](): contains documentation about all the functions and classes of the module.
 
 ## Studies
 
