@@ -24,7 +24,7 @@ Work in progress...
 
 Further documentation resources are listed here:
 
-- [Doxygen page](): contains documentation about all the functions and classes of the module.
+- [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
 
 ## Studies
 
