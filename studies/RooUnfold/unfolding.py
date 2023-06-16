@@ -122,14 +122,14 @@ def plot_unfolding(truth, meas, unfolded):
     # Save canvas
     canvas.Draw()
     ext = unfolded.GetName().split("_")[-1]
-    canvas.SaveAs("../img/studies/RooUnfold/{}/unfolded_{}.png".format(args.distr, ext))
+    canvas.SaveAs("../img/RooUnfold/{}/unfolded_{}.png".format(args.distr, ext))
 
 
 def main():
 
     # Create dirs
-    if not os.path.exists("../img/studies/RooUnfold/{}".format(args.distr)):
-        os.makedirs("../img/studies/RooUnfold/{}".format(args.distr))
+    if not os.path.exists("../img/RooUnfold/{}".format(args.distr)):
+        os.makedirs("../img/RooUnfold/{}".format(args.distr))
     if not os.path.exists("output/RooUnfold"):
         os.makedirs("output/RooUnfold")
 

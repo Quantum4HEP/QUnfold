@@ -13,7 +13,7 @@ find tests -name '*.py' ! -name 'benchmarks.py' -exec pytest {} +
 echo ""
 
 # Variables
-output="../img/studies/benchmarks"
+output="../img/benchmarks"
 distributions="breit-wigner normal double-peaked"
 
 # Run benchmarks for each distribution
@@ -23,7 +23,7 @@ for distr in ${distributions} ; do
     echo ""
     pytest \
         --benchmark-json="output/benchmarks/${distr}.json" \
-        --benchmark-histogram="../img/studies/benchmarks/${distr}" \
+        --benchmark-histogram="../img/benchmarks/${distr}" \
         --distr="${distr}" \
         tests/benchmarks.py
     cairosvg -o "${output}/${distr}".png "${output}/${distr}".svg
