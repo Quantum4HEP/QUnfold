@@ -8,6 +8,7 @@
 # Date:       2023-06-14
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
+
 def INFO(message):
     """
     Function used to print a log message which represents a basic info.

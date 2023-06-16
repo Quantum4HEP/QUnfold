@@ -5,8 +5,9 @@
 #
 # File name:  __init__.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-13
+# Date:       2023-06-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Imports
-from .core import QUnfoldQUBO
+from .QUnfold import QUnfold
+from .QUnfoldQUBO import QUnfoldQUBO

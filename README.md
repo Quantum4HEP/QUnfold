@@ -64,6 +64,7 @@ This dependencies can be easily installed from the `root` directory of the repos
 ./scripts/fetchROOT.sh
 ./scripts/fetchRooUnfold.sh
 ```
+
 > :warning: these installers work only for Ubuntu.
 
 They will be installed into the `HEP_deps` directory of the repository.
@@ -92,7 +93,7 @@ After the pseudo-data generation, create a config file with all the generated di
 ./scripts/create_distr_config.sh
 ```
 
-this will create a Json file into the `config` directory.
+this will create a Json file into the `config` directory. Re-run this script every time you generate new distributions.
 
 ### `RooUnfold`
 
