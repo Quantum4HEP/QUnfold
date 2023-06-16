@@ -8,9 +8,13 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-distr="normal breit-wigner double-peaked"
 only_one_distr="" # intialize to unfold only one distribution
 print_chi2="no"
+
+# Read all the generated distributions from the data dir
+config="../config/distributions.json"
+json=$(cat "$config")
+distr=$(echo "$json" | jq -r '.distributions[]' | tr '\n' ' ')
 
 # Run the unfolding
 if [ -n "${only_one_distr}" ] ; then

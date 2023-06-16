@@ -14,7 +14,11 @@ echo ""
 
 # Variables
 output="../img/benchmarks"
-distributions="breit-wigner normal double-peaked"
+
+# Read all the generated distributions from the data dir
+config="../config/distributions.json"
+json=$(cat "$config")
+distributions=$(echo "$json" | jq -r '.distributions[]' | tr '\n' ' ')
 
 # Run benchmarks for each distribution
 mkdir -p output/benchmarks
