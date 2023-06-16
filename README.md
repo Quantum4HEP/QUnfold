@@ -1,4 +1,4 @@
-![Logo](https://github.com/JustWhit3/QUnfold/blob/main/img/logo.png)
+![Logo](https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png)
 
 <h3 align="center">Unfold statistical distributions using quantum machine learning</h3>
 <p align="center">
