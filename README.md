@@ -56,11 +56,16 @@ To run all the studies you will need to install some HEP dependencies:
 
 - [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/04**. Soon more instructions to install this.
 
-- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold). This dependency can be installed from the `root` directory of the repository using the related script:
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold). 
+
+This dependencies can be easily installed from the `root` directory of the repository using the related scripts:
 
 ```shell
+./scripts/fetchROOT.sh
 ./scripts/fetchRooUnfold.sh
 ```
+
+They will be installed into the `HEP_deps` directory of the repository.
 
 ### Generate pseudo-data
 
