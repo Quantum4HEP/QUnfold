@@ -64,6 +64,7 @@ This dependencies can be easily installed from the `root` directory of the repos
 ./scripts/fetchROOT.sh
 ./scripts/fetchRooUnfold.sh
 ```
+> :warning: these installers work only for Ubuntu.
 
 They will be installed into the `HEP_deps` directory of the repository.
 
