@@ -24,7 +24,7 @@ from studies.utils.ROOT_converter import (
     TH1_to_array,
     array_to_TH2,
 )
-from studies.utils.helpers import load_RooUnfold
+from studies.utils.helpers import load_RooUnfold, load_data
 
 # ROOT settings
 load_RooUnfold()
@@ -133,26 +133,21 @@ def main():
     if not os.path.exists("output/RooUnfold"):
         os.makedirs("output/RooUnfold")
 
-    # Variables
-    truth_bin_content_path = "../data/{}/truth_bin_content.txt".format(args.distr)
-    truth_bin_err_path = "../data/{}/truth_bin_err.txt".format(args.distr)
-    meas_bin_content_path = "../data/{}/meas_bin_content.txt".format(args.distr)
-    meas_bin_err_path = "../data/{}/meas_bin_err.txt".format(args.distr)
-    response_path = "../data/{}/response.txt".format(args.distr)
-
     # Load histograms and response from file
-    np_truth_bin_content = np.loadtxt(truth_bin_content_path)
-    np_truth_bin_err = np.loadtxt(truth_bin_err_path)
-    np_meas_bin_content = np.loadtxt(meas_bin_content_path)
-    np_meas_bin_err = np.loadtxt(meas_bin_err_path)
-    np_response = np.loadtxt(response_path)
+    (
+        np_truth_bin_content,
+        np_truth_bin_err,
+        np_meas_bin_content,
+        np_meas_bin_err,
+        np_response,
+    ) = load_data(args.distr)
 
     # Convert to ROOT variables
     h_truth = array_to_TH1(np_truth_bin_content, np_truth_bin_err, "truth")
     h_meas = array_to_TH1(np_meas_bin_content, np_meas_bin_err, "meas")
     h_response = array_to_TH2(np_response, "response")
 
-    # Initialize the RooUnfold response matrix
+    # Initialize the RooUnfold response matrix from the input data
     m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)
     m_response.UseOverflow(False)  # disable the overflow bin which takes the outliers
     dof = h_truth.GetNbinsX() - 1
