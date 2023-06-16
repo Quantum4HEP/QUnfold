@@ -8,6 +8,7 @@
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Generate pseudo-data](#generate-pseudo-data)
   - [`RooUnfold`](#roounfold)
+  - [Benchmarks](#benchmarks)
   - [Tests](#tests)
 - [Credits](#credits)
   - [Main developers](#main-developers)
@@ -25,30 +26,13 @@ Work in progress...
 Further documentation resources are listed here:
 
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
+> :warning: an input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
 
 ## Studies
 
 This section contains instructions to run unfolding with other packages in order to do comparisons with `QUnfold`. All the code lies under the `studies` directory.
 
 All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [the ones related to HEP](#install-hep-dependencies).
-
-### Generate pseudo-data
-
-Some pseudo-data used for testing the unfolding lie into the `data` directory. Each sub-directory contains truth data, measured data, response matrix and some plots for data visualization.
-
-To generate new pseudo-data:
-
-```shell
-tox -e generator
-```
-
-To modify the generator parameters (samples, distribution...) open the `generator/generator.sh` script and modify it.
-
-Current distributions supported for generation:
-
-- [Breit-Wigner](https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution)
-- [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
-- Double peaked
 
 ### Install HEP dependencies
 
@@ -62,6 +46,32 @@ To run all the studies you will need to install some HEP dependencies:
 ./scripts/fetchRooUnfold.sh
 ```
 
+### Generate pseudo-data
+
+To generate new pseudo-data:
+
+```shell
+tox -e generator
+```
+
+To modify the generator parameters (samples, distribution...) open the `generator/generator.sh` script and modify it.
+
+Pseudo-data used for testing the unfolding lie into the `data` directory. Each sub-directory contains truth data, measured data and response matrix for each generated distribution.
+
+Current distributions supported for generation:
+
+- [Breit-Wigner](https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution)
+- [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
+- Double peaked
+
+After the pseudo-data generation, create a config file with all the generated distributions name, used for the next steps. From the root directory of the repository do:
+
+```shell
+./scripts/create_distr_config.sh
+```
+
+this will create a Json file into the `config` directory.
+
 ### `RooUnfold`
 
 This section is related to the `RooUnfold` studies. Be sure of being into the `studies` directory before proceeding.
@@ -74,9 +84,21 @@ tox -e RooUnfold
 
 open the `RooUnfold/unfolding.sh` bash script to modify the unfolding parameters.
 
+Data of the unfolded histogram will be saved into the `studies/output/RooUnfold` directory, while comparisons among measured, truth and unfolded (reco) histograms into the `img/RooUnfold` directory.
+
+### Benchmarks
+
+Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them:
+
+```shell
+tox -e tests
+```
+
+The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.
+
 ### Tests
 
-Tu run the tests related to the functions developed for the studies run (optional):
+Tu run unit tests related to the functions developed for the studies run (optional):
 
 ```shell
 tox -e tests
