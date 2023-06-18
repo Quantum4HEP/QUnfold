@@ -1,5 +1,15 @@
 ![Logo](https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png)
 
+<h3 align="center">Unfold statistical distributions using quantum machine learning</h3>
+<p align="center">
+  <img title="v0.0" alt="v0.0" src="https://img.shields.io/badge/version-v0.0-informational?style=flat-square">
+  <img title="MIT License" alt="license" src="https://img.shields.io/badge/license-MIT-informational?style=flat-square">
+	<img title="Python" alt="Python" src="https://img.shields.io/badge/Lang-Python-informational?style=flat-square">
+	<img title="Code size" alt="code size" src="https://img.shields.io/github/languages/code-size/JustWhit3/QUnfold"></br>
+  <img title="codeq" alt="codeq" src="https://github.com/JustWhit3/QUnfold/actions/workflows/codeql-analysis.yml/badge.svg">
+  <img title="doc" alt="doc" src="https://github.com/JustWhit3/QUnfold/actions/workflows/DocGenerator.yml/badge.svg">
+</p>
+
 ***
 
 ## Table of contents
@@ -19,10 +29,6 @@
 
 ## Introduction
 
-Info: ![Version Badge](https://img.shields.io/badge/version-v0.0-informational?style=flat-square) ![License badge](https://img.shields.io/badge/license-MIT-informational?style=flat-square) ![Language Badge](https://img.shields.io/badge/Lang-Python-informational?style=flat-square)
-Repo dimension: ![Code Size](https://img.shields.io/github/languages/code-size/JustWhit3/QUnfold?color=red) ![Repo Size](https://img.shields.io/github/repo-size/JustWhit3/QUnfold?color=red)
-Workflows: ![Code Quality](https://github.com/JustWhit3/QUnfold/actions/workflows/codeql-analysis.yml/badge.svg) ![Documentation](https://github.com/JustWhit3/QUnfold/actions/workflows/DocGenerator.yml/badge.svg)
-
 Idea was born by me and Simone during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
 The project is currently at its beginning stages.
@@ -34,7 +40,6 @@ Work in progress...
 Further documentation resources are listed here:
 
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
-
 > :warning: an input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
 
 ## Studies
