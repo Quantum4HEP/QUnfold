@@ -30,18 +30,15 @@ if [ -d RooUnfold ] ; then
     git checkout $tag
 else
     git clone --branch $tag $repo
+    cd RooUnfold || exit
 fi
 
 # Compile RooUnfold
-echo ""
 if [ -d build ] ; then
+    echo ""
     echo "- Clean previous build..."
     make clean
-    echo ""
-    echo "- Compiling the library..."
-    make
-else
-    echo "- Compiling the library..."
-    cd RooUnfold || exit
-    make
 fi
+echo ""
+echo "- Compiling the library..."
+make
