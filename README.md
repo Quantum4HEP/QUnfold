@@ -2,10 +2,10 @@
 
 <h3 align="center">Unfold statistical distributions using quantum machine learning</h3>
 <p align="center">
-  <img title="v0.0" alt="v0.0" src="https://img.shields.io/badge/version-v0.0-informational?style=flat-square">
-  <img title="MIT License" alt="license" src="https://img.shields.io/badge/license-MIT-informational?style=flat-square">
-	<img title="Python" alt="Python" src="https://img.shields.io/badge/Lang-Python-informational?style=flat-square">
-	<img title="Code size" alt="code size" src="https://img.shields.io/github/languages/code-size/JustWhit3/QUnfold"></br>
+	<img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br>
+  <img title="v0.0" alt="v0.0" src="https://img.shields.io/badge/version-v0.0-informational?style=flat-square&color=red">
+  <img title="MIT License" alt="license" src="https://img.shields.io/badge/license-MIT-informational?style=flat-square&color=red">
+	<img title="Python" alt="Python" src="https://img.shields.io/badge/Lang-Python-informational?style=flat-square&color=red"></br>
   <img title="codeq" alt="codeq" src="https://github.com/JustWhit3/QUnfold/actions/workflows/codeql-analysis.yml/badge.svg">
   <img title="doc" alt="doc" src="https://github.com/JustWhit3/QUnfold/actions/workflows/DocGenerator.yml/badge.svg">
 </p>
