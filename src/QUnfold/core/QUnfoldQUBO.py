@@ -27,4 +27,3 @@ class QUnfoldQUBO(QUnfold):
 
         # Call the QUnfold constructor
         super().__init__(*args)
-        

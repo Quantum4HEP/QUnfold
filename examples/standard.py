@@ -25,13 +25,14 @@ def main():
     response = np.loadtxt("data/normal/response.txt")
 
     # Create histograms from bin content and bin errors
+    meas_histo = np.histogram(meas_bin_content, meas_bin_err) # ERROR
+    truth_histo = None
 
     # Initialise response? maybe better doing it into the QUnfold constructor
     # ...
 
     # Unfolding
-    # unfolder = QUnfoldQUBO(response, measured)
-    unfolder = QUnfoldQUBO(response, meas_bin_content, meas_bin_err)
+    # unfolder = QUnfoldQUBO(response, meas_histo)
 
     # Plot unfolding with a method of the class
     # ...

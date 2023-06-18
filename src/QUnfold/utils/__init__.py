@@ -5,9 +5,9 @@
 #
 # File name:  __init__.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-16
+# Date:       2023-06-17
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Core imports
-from .QUnfold import QUnfold
-from .QUnfoldQUBO import QUnfoldQUBO
+from .custom_logger import ERROR, WARNING, RESULT, INFO
+from .linear_algebra import is_matrix
+from .statistics import is_histogram
