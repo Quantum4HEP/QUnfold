@@ -22,7 +22,7 @@ class QUnfoldQUBO(QUnfold):
 
     def __init__(self, *args):
         """
-        Todo
+        Perform the unfolding using the QUBO approach.
         """
 
         # Call the QUnfold constructor

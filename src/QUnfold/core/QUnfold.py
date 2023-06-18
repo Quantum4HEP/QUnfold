@@ -8,12 +8,10 @@
 # Date:       2023-06-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Data science modules
-import numpy as np
-
 # Utils modules
 from ..utils.linear_algebra import is_matrix
 from ..utils.statistics import is_histogram
+from ..utils.custom_logger import ERROR
 
 
 class QUnfold:
@@ -34,26 +32,18 @@ class QUnfold:
         # QUnfold(response, measured)
         elif len(args) == 2:
 
+            # Check that inputs are corrects
+            assert is_matrix(
+                args[0]
+            ), "The first element of the 2-dim constructor must be a NumPy matrix (response)!"
+            assert is_histogram(
+                args[1]
+            ), "The second element of the 2-dim constructor must be a NumPy histogram (measured histo)"
+
             # Initialize variables
             self.response = args[0]
             self.measured = args[1]
 
-            # Check that inputs are corrects
-            assert is_matrix(
-                self.response
-            ), "The first element of the 2-dim constructor must be a NumPy matrix!"
-            assert is_histogram(
-                self.measured
-            ), "THe second element of the 2-dim constructor must be a NumPy histogram"
-
-        # QUnfold(response,measured_bin_content,measured_bin_errors)
-        elif len(args) == 3:
-
-            # Check that inputs are correct
-            # ...
-
-            # Initialize variables
-            self.measured = args[0]
-
-            # Create histogram
-            # ...
+        # Other conditions are not possible
+        else:
+            assert False, "This constructor signature is not supported!"
