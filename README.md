@@ -60,6 +60,7 @@ This dependencies can be easily installed from the `root` directory of the repos
 
 ```shell
 ./scripts/fetchROOT.sh
+source HEP_deps/root/bin/thisroot.sh
 ./scripts/fetchRooUnfold.sh
 ```
 
