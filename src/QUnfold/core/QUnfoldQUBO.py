@@ -14,7 +14,7 @@ from .QUnfold import QUnfold
 
 class QUnfoldQUBO(QUnfold):
     """
-    Represents the QUnfold class which uses QUBO algorithms.
+    Represents the QUnfold class which uses QUBO approach to solve the unfolding problem.
 
     Args:
         QUnfold: the mother class holding basic QUnfold properties.
@@ -22,8 +22,19 @@ class QUnfoldQUBO(QUnfold):
 
     def __init__(self, *args):
         """
-        Perform the unfolding using the QUBO approach.
+        Initialize the QUBOUnfold object.
+
+        Args:
+            *args: Variable-length arguments. These arguments are passed to the parent class QUnfold's constructor.
         """
 
         # Call the QUnfold constructor
         super().__init__(*args)
+
+    def unfold(self):
+        """
+        Method used to perform the unfolding using QUBO approach.
+        """
+
+        # Todo...
+        pass

@@ -35,6 +35,16 @@ from QUnfold.utils import is_matrix
     ),
 )
 def test_QUnfold_constructor(response, bin_contents):
+    """
+    Test the constructor of the QUnfold class.
+
+    Args:
+        response (np.ndarray): The response matrix.
+        bin_contents (np.ndarray): The bin contents of the measured histogram.
+
+    Returns:
+        None
+    """
 
     # Declaring the histogram
     hist_values = np.histogram(bin_contents, bins=40, range=(-10, 10))
