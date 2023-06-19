@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 
 # Utils modules
 from ..utils.linear_algebra import is_matrix
-from ..utils.statistics import is_histogram
 from ..utils.custom_logger import INFO
 
 
@@ -26,6 +25,9 @@ class QUnfold:
     Base class of QUnfold algorithms. It stores all the common properties of each QUnfold derived class. Do not use this for unfolding, instead use the other derived classes.
     """
 
+    # ==============================================
+    #     Constructor
+    # ==============================================
     def __init__(self, *args):
         """
         Initialize a QUnfold object.
@@ -42,34 +44,32 @@ class QUnfold:
         # QUnfold()
         if len(args) == 0:
             self.response = None
-            self.measured = None
+            self.measured_bin_contents = None
+            self.measured_bin_edges = None
 
         # QUnfold(response, measured)
-        elif len(args) == 2:
+        elif len(args) == 3:
 
-            # Check that inputs are corrects
+            # Check that input matrix is correct
             assert is_matrix(
                 args[0]
             ), "The first element of the 2-dim constructor must be a NumPy matrix (response)!"
-            assert is_histogram(
-                args[1]
-            ), "The second element of the 2-dim constructor must be a NumPy histogram (measured histo)"
 
             # Initialize variables
             self.response = args[0]
-            self.measured = args[1]
+            self.measured_bin_contents = args[1]
+            self.measured_bin_edges = args[2]
 
         # Other conditions are not possible
         else:
             assert False, "This constructor signature is not supported!"
 
-        # Save bin contents and bin edges
-        self.bin_contents = self.measured[0]
-        self.bin_edges = self.measured[1]
-
         # Transform the inputs into binary
         # ...
 
+    # ==============================================
+    #     Print methods
+    # ==============================================
     def printResponse(self):
         """
         Print the response matrix.
@@ -82,26 +82,35 @@ class QUnfold:
         Print the measured histogram.
         """
 
-        INFO("Measured histogram bin contents are:\n{}".format(self.bin_contents))
-        INFO("Measured histogram bin edges are:\n{}".format(self.bin_edges))
+        INFO(
+            "Measured histogram bin contents are:\n{}".format(
+                self.measured_bin_contents
+            )
+        )
+        INFO("Measured histogram bin edges are:\n{}".format(self.measured_bin_edges))
 
+    # ==============================================
+    #     Plot methods
+    # ==============================================
     def __plotResponseSetup(self):
         """
         Set up the response matrix plot for drawing or saving: the response matrix is set up as a heatmap, with the column representing the measured variable and the row representing the truth variable.
         """
 
         # Check if response matrix has been initialized
-        assert self.response.any() != None, True
+        assert (
+            self.response.any() != None
+        ), "Response matrix should be initialized before plotting it!"
 
         # Set up plot settings
         plt.imshow(
             np.transpose(self.response),
             cmap="viridis",
             extent=[
-                self.bin_edges[0],
-                self.bin_edges[-1],
-                self.bin_edges[0],
-                self.bin_edges[-1],
+                self.measured_bin_edges[0],
+                self.measured_bin_edges[-1],
+                self.measured_bin_edges[0],
+                self.measured_bin_edges[-1],
             ],
             origin="lower",
         )
@@ -117,6 +126,7 @@ class QUnfold:
 
         self.__plotResponseSetup()
         plt.show()
+        plt.close()
 
     def saveResponsePlot(self, path):
         """
@@ -128,3 +138,25 @@ class QUnfold:
 
         self.__plotResponseSetup()
         plt.savefig(path)
+        plt.close()
+
+    def __plotMeasuredSetup(self):
+
+        plt.bar(
+            self.measured_bin_edges[:-1],
+            self.measured_bin_contents,
+            width=np.diff(self.measured_bin_edges),
+            align="edge",
+        )
+        plt.xlabel("Value")
+        plt.ylabel("Frequency")
+        plt.title("Histogram")
+
+    def plotMeasured(self):
+        pass
+
+    def saveMeasuredPlot(self, path):
+
+        self.__plotMeasuredSetup()
+        plt.savefig(path)
+        plt.close()
