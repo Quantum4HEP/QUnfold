@@ -35,7 +35,7 @@ class QUnfold:
         Args:
             *args: Variable-length arguments. The supported constructor signatures are:
                 - QUnfold(): Initializes an empty QUnfold object.
-                - QUnfold(response, measured): Initializes a QUnfold object with the given response matrix and measured histogram.
+                - QUnfold(response, measured_bin_contents): Initializes a QUnfold object with the given response matrix and measured histogram bin contents.
 
         Raises:
             AssertionError: If the constructor signature is not supported or the inputs are incorrect.
@@ -47,7 +47,7 @@ class QUnfold:
             self.measured_bin_contents = None
             self.measured_bin_edges = None
 
-        # QUnfold(response, measured)
+        # QUnfold(response, measured_bin_contents)
         elif len(args) == 3:
 
             # Check that input matrix is correct
@@ -79,7 +79,7 @@ class QUnfold:
 
     def printMeasured(self):
         """
-        Print the measured histogram.
+        Print the measured histogram bin contents and bin edges.
         """
 
         INFO(
@@ -141,6 +141,9 @@ class QUnfold:
         plt.close()
 
     def __plotMeasuredSetup(self):
+        """
+        Create a bar chart histogram based on the bin contents and bin edges of the measured distribution.
+        """
 
         plt.bar(
             self.measured_bin_edges[:-1],
@@ -148,14 +151,26 @@ class QUnfold:
             width=np.diff(self.measured_bin_edges),
             align="edge",
         )
-        plt.xlabel("Value")
+        plt.xlabel("Bins")
         plt.ylabel("Frequency")
-        plt.title("Histogram")
+        plt.title("Measured histogram")
 
     def plotMeasured(self):
-        pass
+        """
+        Plot the measured distribution histogram.
+        """
+        
+        self.__plotMeasuredSetup()
+        plt.show()
+        plt.close()
 
     def saveMeasuredPlot(self, path):
+        """
+        Save the plot of the measured distribution histogram into path.
+
+        Args:
+            path (str): The file path to save the plot.
+        """
 
         self.__plotMeasuredSetup()
         plt.savefig(path)

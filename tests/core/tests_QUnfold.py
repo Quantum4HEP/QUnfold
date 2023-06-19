@@ -41,30 +41,29 @@ def test_QUnfold_constructor(response, bin_contents):
     Args:
         response (np.ndarray): The response matrix.
         bin_contents (np.ndarray): The bin contents of the measured histogram.
-
-    Returns:
-        None
     """
 
-    # Declaring the histogram
-    hist_values = np.histogram(bin_contents, bins=40, range=(-10, 10))
+    # Variables
+    bin_edges = np.linspace(-10, 10, 41)
 
     # Check the 1-dim constructor
     unfolded_1 = QUnfold()
-    assert unfolded_1.measured == None
+    assert unfolded_1.measured_bin_contents == None
+    assert unfolded_1.measured_bin_edges == None
     assert unfolded_1.response == None
 
     # Check the 2-dim constructor
     if is_matrix(response):
-        unfolded_2 = QUnfold(response, hist_values)
-        assert unfolded_2.measured == hist_values, True
+        unfolded_2 = QUnfold(response, bin_contents, bin_edges)
+        assert unfolded_2.measured_bin_contents == bin_contents, True
+        assert unfolded_2.measured_bin_edges == bin_edges, True
         assert unfolded_2.response == response, True
     else:
         with pytest.raises(AssertionError):
-            QUnfold(response, hist_values)
+            QUnfold(response, bin_contents, bin_edges)
 
     # Check >2-dim constructor
     with pytest.raises(AssertionError):
         QUnfold(response)
         QUnfold(response, response)
-        QUnfold(response, hist_values, hist_values)
+        QUnfold(response, bin_contents, bin_contents)
