@@ -28,7 +28,7 @@ def array_to_TH1(bin_contents, bin_errors, name="histo"):
 
     # Initial settings
     n_bins = len(bin_contents)
-    hist = r.TH1F(name, ";X;Entries", 40, -10, 10)
+    hist = r.TH1F(name, ";X;Entries", n_bins, -10, 10)
 
     # Fill histogram with bin contents and errors
     for i in range(n_bins):
@@ -75,7 +75,7 @@ def array_to_TH2(array, hname="res"):
     # Variables and histo properties
     n_bins_x = array.shape[0]
     n_bins_y = array.shape[1]
-    histo = r.TH2F(hname, ";reco;truth", 40, -10.0, 10.0, 40, -10.0, 10.0)
+    histo = r.TH2F(hname, ";reco;truth", n_bins_x, -10.0, 10.0, n_bins_y, -10.0, 10.0)
 
     # Filling the histo
     for i in range(n_bins_x):

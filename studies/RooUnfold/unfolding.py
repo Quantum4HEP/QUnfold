@@ -166,7 +166,6 @@ if __name__ == "__main__":
         "-d",
         "--distr",
         default="breit-wigner",
-        choices=["breit-wigner", "normal", "double-peaked"],
         type=str,
         help="Input distribution used for unfolding (used to read data).",
     )
