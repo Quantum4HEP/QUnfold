@@ -67,3 +67,4 @@ def test_QUnfold_constructor(response, bin_contents):
         QUnfold(response)
         QUnfold(response, response)
         QUnfold(response, bin_contents, bin_contents)
+        QUnfold(response, bin_contents, [1, 2, 3])
