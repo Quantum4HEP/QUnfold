@@ -34,7 +34,15 @@ class BinaryEncoder:
     def encode(self, array: np.ndarray):
 
         # Variables
-        array_bin = np.zeros(self)
+        pass
+        """array_bin = np.zeros(self)
+        n_bits_total = int(sum(self.rho))
+        array_length = array.shape[0]
 
         # Encode the vector
-        pass
+        for i in range(array_length - 1, -1, -1):
+            n = int(self.encoding_bits[i])
+            array_bin = array[i] - self.alpha[i]
+
+            for j in range(0, n - 1):
+                a = int(np.sum(self.rho[:i]) + j)"""
