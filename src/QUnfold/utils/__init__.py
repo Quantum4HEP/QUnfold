@@ -10,3 +10,4 @@
 
 from .custom_logger import ERROR, WARNING, RESULT, INFO
 from .linear_algebra import is_matrix
+from .binary_encoder import BinaryEncoder
