@@ -70,9 +70,6 @@ class QUnfold:
         else:
             assert False, "This constructor signature is not supported!"
 
-        # Transform the inputs into binary
-        # ...
-
     # ==============================================
     #     Print methods
     # ==============================================
@@ -136,7 +133,7 @@ class QUnfold:
         plt.show()
         plt.close()
 
-    def saveResponsePlot(self, path):
+    def saveResponsePlot(self, path: str):
         """
         Save the plotted response matrix with matplotlib style to a file.
 
@@ -189,7 +186,7 @@ class QUnfold:
         plt.show()
         plt.close()
 
-    def saveMeasuredPlot(self, path):
+    def saveMeasuredPlot(self, path: str):
         """
         Save the plot of the measured distribution histogram into path.
 

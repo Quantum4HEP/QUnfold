@@ -31,6 +31,17 @@ class QUnfoldQUBO(QUnfold):
         # Call the QUnfold constructor
         super().__init__(*args)
 
+        # Transform the inputs into binary
+        # ...
+
+    # @encoding_bits.setter
+    # def encoding_bits(self, value):
+
+    #     if isinstance(value, int):
+    #         pass
+    #     else:
+    #         self.encoding_bits = value
+
     def unfold(self):
         """
         Method used to perform the unfolding using QUBO approach.

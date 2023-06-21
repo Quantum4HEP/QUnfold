@@ -32,32 +32,27 @@ from QUnfold.utils import BinaryEncoder
         shape=st.integers(min_value=1, max_value=1),
         elements=st.floats(0, 100),
     ),
+    encoding=arrays(
+        dtype=np.float64,
+        shape=st.integers(min_value=1, max_value=1),
+        elements=st.floats(4, 12),
+    ),
 )
-def test_QUnfold_constructor(alpha, beta):
+def test_QUnfold_constructor(alpha, beta, encoding):
     """
     Test the QUnfold constructor when encoding bits is set to 8.
 
     Parameters:
         alpha (np.ndarray): The alpha parameter array.
         beta (np.ndarray): The beta parameter array.
+        encoding (np.ndarray): The encoding array.
 
     Raises:
         AssertionError: If any of the assertions fail.
     """
 
-    # Check the 1-dim constructor
-    encoder = BinaryEncoder()
-    assert encoder.alpha == None
-    assert encoder.beta == None
-    assert encoder.encoding_bits == None
-
-    # Check the 2-dim constructor
-    encoder_par = BinaryEncoder(alpha, beta, 8)
+    # Check the constructor
+    encoder_par = BinaryEncoder(alpha, beta, encoding)
     assert encoder_par.alpha == alpha
     assert encoder_par.beta == beta
-    assert encoder_par.encoding_bits == 8
-
-    # Check >2-dim constructor
-    with pytest.raises(AssertionError):
-        BinaryEncoder(alpha, beta, alpha)
-        BinaryEncoder(alpha, beta)
+    assert encoder_par.encoding_bits == encoding
