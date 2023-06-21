@@ -1,10 +1,10 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "Gianluca"
-  given-names: "Bianco"
-- family-names: "Simone"
-  given-names: "Gasperini"
+- family-names: "Bianco"
+  given-names: "Gianluca"
+- family-names: "Gasperini"
+  given-names: "Simone"
 title: "QUnfold"
 version: 0.0.1
 doi: https://zenodo.org/badge/latestdoi/652649177
