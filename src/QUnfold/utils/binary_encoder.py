@@ -10,6 +10,7 @@
 
 # Data science modules
 import numpy as np
+from decimal import Decimal
 
 
 class BinaryEncoder:
@@ -23,26 +24,56 @@ class BinaryEncoder:
 
         Args:
             alpha (np.ndarray): The alpha parameter array.
-            beta (np.ndarray): The beta parameter array.
+            beta (np.ndarray): The beta parameter array (it is a matrix).
             encoding_bits (np.ndarray): The number of encoding bits.
         """
 
         self.alpha = alpha
-        self.beta = beta
+        self._beta = beta
         self.encoding_bits = encoding_bits
+        
+    @property
+    def beta(self):
+        return self._beta
+
+    @beta.setter
+    def __compute_beta_ij(self, value: np.ndarray):
+
+        self._beta = np.array([])
+        lenght = len(value)
+        for i in range(lenght):
+            self._beta = np.concatenate(self._beta, np.array(value[i]))
 
     def encode(self, array: np.ndarray):
+        """
+        Encodes the given array using the specified encoding parameters.
+
+        Args:
+            array (np.ndarray): The array to be encoded.
+
+        Returns:
+            np.ndarray: The encoded binary representation of the array.
+
+        """
 
         # Variables
-        pass
-        """array_bin = np.zeros(self)
-        n_bits_total = int(sum(self.rho))
+        n_bits_total = int(sum(self.encoding_bits))
+        array_bin = np.zeros(n_bits_total, dtype="uint")
         array_length = array.shape[0]
 
-        # Encode the vector
+        # Convert each element of the array
         for i in range(array_length - 1, -1, -1):
             n = int(self.encoding_bits[i])
-            array_bin = array[i] - self.alpha[i]
+            array_dec = array[i] - self.alpha[i]
 
+            # Develope the sum from 0 to n-1
             for j in range(0, n - 1):
-                a = int(np.sum(self.rho[:i]) + j)"""
+                a = int(np.sum(self.encoding_bits[:i]) + j)
+                more_than = Decimal(array_dec) // Decimal(self.beta[i][a])
+                equal_to = np.isclose(array_dec, self.beta[i][a])
+                array_bin[a] = min([1, more_than or equal_to])
+                array_dec = array_dec - array_bin[a] * self.beta[i][a]
+
+        return array_bin
+
+    # Setter ?

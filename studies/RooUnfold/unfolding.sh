@@ -9,7 +9,7 @@
 
 # Variables
 only_one_distr="" # intialize to unfold only one distribution
-print_chi2="no"
+print_chi2="yes"
 
 # Read all the generated distributions from the data dir
 config="../config/distributions.json"

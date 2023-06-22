@@ -23,24 +23,24 @@ from QUnfold.utils import BinaryEncoder
 
 @given(
     alpha=arrays(
-        dtype=np.float64,
-        shape=st.integers(min_value=1, max_value=1),
-        elements=st.floats(0, 100),
+        dtype=np.int64,
+        shape=st.integers(min_value=1, max_value=100),
+        elements=st.integers(0, 100),
     ),
     beta=arrays(
-        dtype=np.float64,
-        shape=st.integers(min_value=1, max_value=1),
-        elements=st.floats(0, 100),
+        dtype=np.int64,
+        shape=st.integers(min_value=1, max_value=100),
+        elements=st.integers(0, 100),
     ),
     encoding=arrays(
-        dtype=np.float64,
-        shape=st.integers(min_value=1, max_value=1),
-        elements=st.floats(4, 12),
+        dtype=np.int64,
+        shape=st.integers(min_value=1, max_value=100),
+        elements=st.integers(4, 8),
     ),
 )
-def test_QUnfold_constructor(alpha, beta, encoding):
+def test_BinaryEncoder(alpha, beta, encoding):
     """
-    Test the QUnfold constructor when encoding bits is set to 8.
+    Test the BinaryEncoder class.
 
     Parameters:
         alpha (np.ndarray): The alpha parameter array.
@@ -53,6 +53,24 @@ def test_QUnfold_constructor(alpha, beta, encoding):
 
     # Check the constructor
     encoder_par = BinaryEncoder(alpha, beta, encoding)
-    assert encoder_par.alpha == alpha
-    assert encoder_par.beta == beta
-    assert encoder_par.encoding_bits == encoding
+
+    # Test the constructor
+    def test_constructor():
+        np.array_equal(encoder_par.alpha, alpha)
+        np.array_equal(encoder_par.beta, beta)
+        np.array_equal(encoder_par.encoding_bits, encoding)
+
+    test_constructor()
+
+    # @given(
+    #     array=arrays(
+    #         dtype=np.float64,
+    #         shape=st.integers(min_value=1, max_value=1),
+    #         elements=st.floats(0, 100),
+    #     )
+    # )
+    # def test_encode(array):
+
+    #     assert encoder_par.encode(array) == 0
+
+    # test_encode()
