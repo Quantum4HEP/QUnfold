@@ -1,0 +1,6 @@
+pytest
+pytest-sugar
+pytest-benchmark
+hypothesis
+pygal
+cairosvg
