@@ -9,5 +9,4 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 from .custom_logger import ERROR, WARNING, RESULT, INFO
-from .linear_algebra import is_matrix
 from .binary_encoder import BinaryEncoder

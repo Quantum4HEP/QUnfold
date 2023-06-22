@@ -8,6 +8,5 @@
 # Date:       2023-06-13
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Imports
-from .core import QUnfold
 from .core import QUnfoldQUBO
+from .plot import QUnfoldPlotter

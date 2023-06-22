@@ -8,39 +8,29 @@
 # Date:       2023-06-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# QUnfold modules
-from .QUnfold import QUnfold
 
-
-class QUnfoldQUBO(QUnfold):
+class QUnfoldQUBO:
     """
     Represents the QUnfold class which uses QUBO approach to solve the unfolding problem.
-
-    Args:
-        QUnfold: the mother class holding basic QUnfold properties.
     """
 
-    def __init__(self, *args):
+    def __init__(self, response, meas_bin_contents, meas_bin_edges):
         """
-        Initialize the QUBOUnfold object.
+        Construct a QUnfoldQUBO object with measured histogram and response matrix.
 
         Args:
-            *args: Variable-length arguments. These arguments are passed to the parent class QUnfold's constructor.
+            response (np.ndarray): 2-dim NumPy array which represents the response matrix.
+            meas_bin_contents (np.ndarray): 1-dim NumPy array which represents the measured histogram bin contents.
+            meas_bin_edges (np.ndarray): 1-dim NumPy array which represents the measured histogram bin edges.
         """
 
-        # Call the QUnfold constructor
-        super().__init__(*args)
+        # Initialize variables
+        self.response = response
+        self.measured_bin_contents = meas_bin_contents
+        self.measured_bin_edges = meas_bin_edges
 
         # Transform the inputs into binary
         # ...
-
-    # @encoding_bits.setter
-    # def encoding_bits(self, value):
-
-    #     if isinstance(value, int):
-    #         pass
-    #     else:
-    #         self.encoding_bits = value
 
     def unfold(self):
         """
