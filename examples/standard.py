@@ -16,7 +16,6 @@ from QUnfold.core import QUnfoldQUBO
 
 
 def main():
-
     # Load normal distribution data
     truth_bin_content = np.loadtxt("data/normal/truth_bin_content.txt")
     truth_bin_err = np.loadtxt("data/normal/truth_bin_err.txt")

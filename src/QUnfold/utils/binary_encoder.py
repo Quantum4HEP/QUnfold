@@ -31,14 +31,13 @@ class BinaryEncoder:
         self.alpha = alpha
         self._beta = beta
         self.encoding_bits = encoding_bits
-        
+
     @property
     def beta(self):
         return self._beta
 
     @beta.setter
-    def __compute_beta_ij(self, value: np.ndarray):
-
+    def beta(self, value: np.ndarray):
         self._beta = np.array([])
         lenght = len(value)
         for i in range(lenght):
