@@ -40,7 +40,7 @@ Work in progress...
 Further documentation resources are listed here:
 
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
-> :warning: an input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
+> :warning: An input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
 
 ## Studies
 
@@ -64,9 +64,17 @@ source HEP_deps/root/bin/thisroot.sh
 ./scripts/fetchRooUnfold.sh
 ```
 
-> :warning: these installers work only for Ubuntu.
+> :warning: These installers work only for Ubuntu.
 
 They will be installed into the `HEP_deps` directory of the repository.
+
+If you want to use the `ROOT` version of the repo you must do this command every time you plan to run a code which contains the `ROOT` package:
+
+```shell
+source HEP_deps/root/bin/thisroot.sh
+```
+
+> :warning: If you want to avoid this, install `ROOT` in your computer.
 
 ### Generate pseudo-data
 
