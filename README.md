@@ -5,7 +5,7 @@
 	<img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br>
   <img title="v0.0" alt="v0.0" src="https://img.shields.io/badge/version-v0.0-informational?style=flat-square&color=red">
   <img title="MIT License" alt="license" src="https://img.shields.io/badge/license-MIT-informational?style=flat-square&color=red">
-	<img title="Python" alt="Python" src="https://img.shields.io/badge/Lang-Python-informational?style=flat-square&color=red"></br>
+	<img title="Python" alt="Python" src="https://img.shields.io/badge/Python-3.8 / 3.9 / 3.10 / 3.11-informational?style=flat-square&color=red"></br>
   <img title="codeq" alt="codeq" src="https://github.com/JustWhit3/QUnfold/actions/workflows/codeql-analysis.yml/badge.svg">
   <img title="doc" alt="doc" src="https://github.com/JustWhit3/QUnfold/actions/workflows/DocGenerator.yml/badge.svg">
 </p>
@@ -40,6 +40,8 @@ Work in progress...
 Further documentation resources are listed here:
 
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
+- [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
+
 > :warning: An input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
 
 ## Studies
