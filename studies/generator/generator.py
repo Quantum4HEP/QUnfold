@@ -48,6 +48,111 @@ def smear(xt):
     return xt + xsmear
 
 
+def generate_standard(f0, g0, response, type):
+    """
+    Generate data for standard distributions.
+
+    Args:
+        f0 (ROOT.TH1F): truth histogram.
+        g0 (ROOT.TH1F): measured histogram.
+        response (ROOT.TH2F): response matrix.
+        type (str): type of data generation (data or response).
+
+    Returns:
+        ROOT.TH1F: the filled truth histogram.
+        ROOT.TH1F: the filled measured histogram.
+        ROOT.TH2F: the filled response matrix.
+    """
+
+    # Data generation
+    if type == "data":
+        r.gRandom.SetSeed(12345)
+        for i in tqdm(range(args.samples)):
+            xt = 0
+            if args.distr == "breit-wigner":
+                xt = r.gRandom.BreitWigner(0.3, 2.5)
+            elif args.distr == "normal":
+                xt = r.gRandom.Gaus(0.0, 2.0)
+            f0.Fill(xt)
+            x = smear(xt)
+            if x != None:
+                g0.Fill(x)
+
+        return f0, g0
+
+    # Response generation
+    elif type == "response":
+        r.gRandom.SetSeed(556)
+        for i in tqdm(range(args.samples)):
+            xt = 0
+            if args.distr == "breit-wigner":
+                xt = r.gRandom.BreitWigner(0.3, 2.5)
+            elif args.distr == "normal":
+                xt = r.gRandom.Gaus(0.0, 2.0)
+            x = smear(xt)
+            if x != None:
+                response.Fill(x, xt)
+            else:
+                response.Miss(xt)
+
+        return response
+
+
+def generate_double_peaked(f0, g0, response, type):
+    """
+    Generate data for the double peaked distributions.
+
+    Args:
+        f0 (ROOT.TH1F): truth histogram.
+        g0 (ROOT.TH1F): measured histogram.
+        response (ROOT.TH2F): response matrix.
+        type (str): type of data generation (data or response).
+
+    Returns:
+        ROOT.TH1F: the filled truth histogram.
+        ROOT.TH1F: the filled measured histogram.
+        ROOT.TH2F: the filled response matrix.
+    """
+
+    # Data generation
+    if type == "data":
+        r.gRandom.SetSeed(12345)
+        for i in tqdm(range(5000)):
+            xt = r.gRandom.Gaus(2, 1.5)
+            f0.Fill(xt)
+            x = r.gRandom.Gaus(xt, 1.0)
+            if x != None:
+                g0.Fill(x)
+        for i in tqdm(range(5000)):
+            xt = r.gRandom.Gaus(-2, 1.5)
+            f0.Fill(xt)
+            x = r.gRandom.Gaus(xt, 1.0)
+            if x != None:
+                g0.Fill(x)
+
+        return f0, g0
+
+    # Response generation
+    elif type == "response":
+        r.gRandom.SetSeed(556)
+        for i in tqdm(range(5000)):
+            xt = r.gRandom.Gaus(2, 1.5)
+            x = r.gRandom.Gaus(xt, 1.0)
+            if x != None:
+                response.Fill(x, xt)
+            else:
+                response.Miss(xt)
+        for i in tqdm(range(5000)):
+            xt = r.gRandom.Gaus(-2, 1.5)
+            x = r.gRandom.Gaus(xt, 1.0)
+            if x != None:
+                response.Fill(x, xt)
+            else:
+                response.Miss(xt)
+
+        return response
+
+
 def plot_response(response):
     """
     Plots the unfolding response matrix.
@@ -127,46 +232,13 @@ def main():
 
     # Case for standard distributions
     if any(d in args.distr for d in ["normal", "breit-wigner"]):
+        f0, g0 = generate_standard(f0, g0, response, "data")
+        response = generate_standard(f0, g0, response, "response")
 
-        # Generate data
-        r.gRandom.SetSeed(12345)
-        for i in tqdm(range(args.samples)):
-            xt = 0
-            if args.distr == "breit-wigner":
-                xt = r.gRandom.BreitWigner(0.3, 2.5)
-            elif args.distr == "normal":
-                xt = r.gRandom.Gaus(0.0, 2.0)
-            f0.Fill(xt)
-            x = smear(xt)
-            if x != None:
-                response.Fill(x, xt)
-                g0.Fill(x)
-            else:
-                response.Miss(xt)
-
-    # Case for double peaked
+    # Generate data for double peaked distributions
     elif any(d in args.distr for d in ["double-peaked"]):
-        
-        # Generate data
-        r.gRandom.SetSeed(12345)
-        for i in tqdm(range(5000)):
-            xt = r.gRandom.Gaus(2, 1.5)
-            f0.Fill(xt)
-            x = r.gRandom.Gaus(xt, 1.0)
-            if x != None:
-                response.Fill(x, xt)
-                g0.Fill(x)
-            else:
-                response.Miss(xt)
-        for i in tqdm(range(5000)):
-            xt = r.gRandom.Gaus(-2, 1.5)
-            f0.Fill(xt)
-            x = r.gRandom.Gaus(xt, 1.0)
-            if x != None:
-                response.Fill(x, xt)
-                g0.Fill(x)
-            else:
-                response.Miss(xt)
+        f0, g0 = generate_double_peaked(f0, g0, response, "data")
+        response = generate_double_peaked(f0, g0, response, "response")
 
     # Save response and histograms plots
     plot_response(response)

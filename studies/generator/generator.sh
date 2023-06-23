@@ -13,7 +13,7 @@ samples=100000
 max_bin=10
 min_bin=-10
 bins=41
-only_one_distr="normal" # intialize to generate only one distribution
+only_one_distr="" # intialize to generate only one distribution
 
 # Run script
 if [ -n "${only_one_distr}" ] ; then
@@ -33,7 +33,7 @@ else
         echo "Generating data for the ${distr_} distribution:"
         echo ""
         ./generator/generator.py \
-            --distr="${only_one_distr}" \
+            --distr="${distr_}" \
             --samples=${samples} \
             --max_bin=${max_bin} \
             --min_bin=${min_bin} \
