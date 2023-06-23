@@ -72,21 +72,19 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
     unfolder.SetMeasured(h_meas)
     histo = unfolder.Hunfold()
     histo.SetName("unfolded_{}".format(type))
-    histo_mi_bin_c, histo_mi_bin_e = TH1_to_array(histo)
+    histo_mi_bin_c = TH1_to_array(histo)
 
     # Print other information
     print("Bin contents: {}".format(histo_mi_bin_c))
-    print("Bin errors: {}".format(histo_mi_bin_e))
     if args.chi2 == "yes":
         chi2 = histo.Chi2Test(h_truth, "WW")
         print("chi2 / dof = {} / {} = {}".format(chi2, dof, chi2 / float(dof)))
 
     # Save the unfolded histogram
-    bin_contents, bin_errors = TH1_to_array(histo)
+    bin_contents = TH1_to_array(histo)
     np.savetxt(
         "output/RooUnfold/unfolded_{}_bin_contents.txt".format(type), bin_contents
     )
-    np.savetxt("output/RooUnfold/unfolded_{}_bin_errors".format(type), bin_errors)
 
     return histo
 
@@ -136,15 +134,13 @@ def main():
     # Load histograms and response from file
     (
         np_truth_bin_content,
-        np_truth_bin_err,
         np_meas_bin_content,
-        np_meas_bin_err,
         np_response,
     ) = load_data(args.distr)
 
     # Convert to ROOT variables
-    h_truth = array_to_TH1(np_truth_bin_content, np_truth_bin_err, "truth")
-    h_meas = array_to_TH1(np_meas_bin_content, np_meas_bin_err, "meas")
+    h_truth = array_to_TH1(np_truth_bin_content, "truth")
+    h_meas = array_to_TH1(np_meas_bin_content, "meas")
     h_response = array_to_TH2(np_response, "response")
 
     # Initialize the RooUnfold response matrix from the input data

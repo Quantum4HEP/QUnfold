@@ -41,15 +41,13 @@ def load_input(request):
     distr = request.config.getoption("--distr")
     (
         np_truth_bin_content,
-        np_truth_bin_err,
         np_meas_bin_content,
-        np_meas_bin_err,
         np_response,
     ) = load_data(distr)
 
     # Convert to ROOT variables
-    h_truth = array_to_TH1(np_truth_bin_content, np_truth_bin_err, "truth")
-    h_meas = array_to_TH1(np_meas_bin_content, np_meas_bin_err, "meas")
+    h_truth = array_to_TH1(np_truth_bin_content, "truth")
+    h_meas = array_to_TH1(np_meas_bin_content, "meas")
     h_response = array_to_TH2(np_response, "response")
 
     # Initialize the RooUnfold response matrix from the input data

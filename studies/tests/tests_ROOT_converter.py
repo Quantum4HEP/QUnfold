@@ -37,24 +37,18 @@ from studies.utils.ROOT_converter import (
         dtype=np.float64,
         shape=40,
         elements=st.floats(0, 100),
-    ),
-    bin_errors=arrays(
-        dtype=np.float64,
-        shape=40,
-        elements=st.floats(0, 100),
-    ),
+    )
 )
-def test_array_to_TH1(bin_contents, bin_errors):
+def test_array_to_TH1(bin_contents):
     """
     Test the array_to_TH1 function.
 
     Args:
         bin_contents (np.array): The NumPy array representing bin contents.
-        bin_errors (np.array): The NumPy array representing bin errors.
     """
 
     # Variables
-    histo = array_to_TH1(bin_contents, bin_errors)
+    histo = array_to_TH1(bin_contents)
 
     # Tests
     assert type(histo) == r.TH1F  # type check
@@ -63,7 +57,6 @@ def test_array_to_TH1(bin_contents, bin_errors):
     assert histo.GetTitle() == ""  # check histo title
     for i in range(40):  # values check
         assert histo.GetBinContent(i + 1) == pt.approx(bin_contents[i])
-        assert histo.GetBinError(i + 1) == pt.approx(bin_errors[i])
 
 
 def test_TH1_to_array():
@@ -75,17 +68,13 @@ def test_TH1_to_array():
     histo = r.TH1F("Test", ";X;Entries", 5, 0.5, 5.5)
     for i in range(histo.GetNbinsX()):
         histo.SetBinContent(i + 1, i)
-    bin_contents, bin_errors = TH1_to_array(histo)
+    bin_contents = TH1_to_array(histo)
 
     # Tests
     assert bin_contents.shape[0] == 5  # array size
-    assert bin_errors.shape[0] == 5  # array size
     nptest.assert_array_equal(
         bin_contents, np.array([0, 1, 2, 3, 4])
     )  # bin contents equality
-    nptest.assert_allclose(
-        bin_errors, np.array([0, 1, 1.414214, 1.732051, 2]), rtol=1e-5
-    )  # bin errors equality
 
 
 @given(
@@ -116,7 +105,6 @@ def test_array_to_TH2(array):
     for i in range(40):  # values check
         for j in range(40):
             assert histo.GetBinContent(i + 1, j + 1) == pt.approx(array[i][j])
-            assert histo.GetBinError(i + 1, j + 1) == pt.approx(array[i][j])
 
 
 def test_TH2_to_array():
@@ -128,8 +116,7 @@ def test_TH2_to_array():
     histo = r.TH2F("Test", ";X;Y", 5, 0.5, 5.5, 3, 0.5, 3.5)
     for i in range(histo.GetNbinsX()):
         for j in range(histo.GetNbinsY()):
-            bin_content = i * j
-            histo.SetBinContent(i + 1, j + 1, bin_content)
+            histo.SetBinContent(i + 1, j + 1, i * j)
 
     # Convert TH2F to NumPy array
     numpy_array = TH2_to_array(histo)

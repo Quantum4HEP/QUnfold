@@ -1,6 +1,6 @@
 ![Logo](https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png)
 
-<h3 align="center">Unfold statistical distributions using quantum machine learning</h3>
+<h3 align="center">Unfolding statistical distributions using quantum machine learning</h3>
 <p align="center">
 	<img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br>
   <img title="v0.0" alt="v0.0" src="https://img.shields.io/badge/version-v0.0-informational?style=flat-square&color=red">
@@ -56,7 +56,7 @@ To run all the studies you will need to install some HEP dependencies:
 
 - [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/04**. Soon more instructions to install this.
 
-- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold). 
+- [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold).
 
 This dependencies can be easily installed from the `root` directory of the repository using the related scripts:
 

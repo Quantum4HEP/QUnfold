@@ -13,27 +13,25 @@ import ROOT as r
 import numpy as np
 
 
-def array_to_TH1(bin_contents, bin_errors, name="histo"):
+def array_to_TH1(bin_contents, name="histo"):
     """
-    Converts NumPy arrays representing bin contents and bin errors to a ROOT.TH1F histogram.
+    Converts NumPy arrays representing bin contents of a ROOT.TH1F histogram.
 
     Args:
         bin_contents (numpy.array): The NumPy array representing bin contents.
-        bin_errors (numpy.array): The NumPy array representing bin errors.
         name (str): Name of the ROOT.TH1F histogram. Default is "hist".
 
     Returns:
-        ROOT.TH1F: The converted ROOT.TH1F histogram with bin errors.
+        ROOT.TH1F: The converted ROOT.TH1F histogram.
     """
 
     # Initial settings
     n_bins = len(bin_contents)
     hist = r.TH1F(name, ";X;Entries", n_bins, -10, 10)
 
-    # Fill histogram with bin contents and errors
+    # Fill histogram with bin contents
     for i in range(n_bins):
         hist.SetBinContent(i + 1, bin_contents[i])
-        hist.SetBinError(i + 1, bin_errors[i])
 
     return hist
 
@@ -47,14 +45,12 @@ def TH1_to_array(histo):
 
     Returns:
         numpy.array: a numpy.array of the histo bin contents.
-        numpy.array: a numpy.array of the histo bin errors.
     """
 
     n_bins = histo.GetNbinsX()
     bin_contents = np.array([histo.GetBinContent(i + 1) for i in range(n_bins)])
-    bin_errors = np.array([histo.GetBinError(i + 1) for i in range(n_bins)])
 
-    return bin_contents, bin_errors
+    return bin_contents
 
 
 def array_to_TH2(array, hname="res"):
@@ -81,7 +77,6 @@ def array_to_TH2(array, hname="res"):
     for i in range(n_bins_x):
         for j in range(n_bins_y):
             histo.SetBinContent(i + 1, j + 1, array[i][j])
-            histo.SetBinError(i + 1, j + 1, array[i][j])
 
     return histo
 
@@ -106,7 +101,6 @@ def TH2_to_array(histo):
     # Filling the array
     for i in range(1, num_bins_x + 1):
         for j in range(1, num_bins_y + 1):
-            bin_content = histo.GetBinContent(i, j)
-            numpy_array[i - 1, j - 1] = bin_content
+            numpy_array[i - 1, j - 1] = histo.GetBinContent(i, j)
 
     return numpy_array

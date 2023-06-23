@@ -32,30 +32,22 @@ def tests_load_data():
 
         # File names
         truth_bin_content_path = "../data/{}/truth_bin_content.txt".format(distr)
-        truth_bin_err_path = "../data/{}/truth_bin_err.txt".format(distr)
         meas_bin_content_path = "../data/{}/meas_bin_content.txt".format(distr)
-        meas_bin_err_path = "../data/{}/meas_bin_err.txt".format(distr)
         response_path = "../data/{}/response.txt".format(distr)
 
         # Load data related to the distribution
         np_truth_bin_content = np.loadtxt(truth_bin_content_path)
-        np_truth_bin_err = np.loadtxt(truth_bin_err_path)
         np_meas_bin_content = np.loadtxt(meas_bin_content_path)
-        np_meas_bin_err = np.loadtxt(meas_bin_err_path)
         np_response = np.loadtxt(response_path)
 
         # Load data using the helper function
         (
             np_truth_bin_content_,
-            np_truth_bin_err_,
             np_meas_bin_content_,
-            np_meas_bin_err_,
             np_response_,
         ) = load_data(distr)
 
         # Check for equality
         nptest.assert_allclose(np_truth_bin_content, np_truth_bin_content_, rtol=1e-5)
-        nptest.assert_allclose(np_truth_bin_err, np_truth_bin_err_, rtol=1e-5)
         nptest.assert_allclose(np_meas_bin_content, np_meas_bin_content_, rtol=1e-5)
-        nptest.assert_allclose(np_meas_bin_err, np_meas_bin_err_, rtol=1e-5)
         nptest.assert_allclose(np_response, np_response_, rtol=1e-5)

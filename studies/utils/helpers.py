@@ -41,30 +41,22 @@ def load_data(distr):
     Returns:
         tuple: A tuple containing numpy arrays representing the following data:
             - np_truth_bin_content: Array loaded from 'truth_bin_content.txt' file.
-            - np_truth_bin_err: Array loaded from 'truth_bin_err.txt' file.
             - np_meas_bin_content: Array loaded from 'meas_bin_content.txt' file.
-            - np_meas_bin_err: Array loaded from 'meas_bin_err.txt' file.
             - np_response: Array loaded from 'response.txt' file.
     """
 
     # File names
     truth_bin_content_path = "../data/{}/truth_bin_content.txt".format(distr)
-    truth_bin_err_path = "../data/{}/truth_bin_err.txt".format(distr)
     meas_bin_content_path = "../data/{}/meas_bin_content.txt".format(distr)
-    meas_bin_err_path = "../data/{}/meas_bin_err.txt".format(distr)
     response_path = "../data/{}/response.txt".format(distr)
 
     # Load data related to the distribution
     np_truth_bin_content = np.loadtxt(truth_bin_content_path)
-    np_truth_bin_err = np.loadtxt(truth_bin_err_path)
     np_meas_bin_content = np.loadtxt(meas_bin_content_path)
-    np_meas_bin_err = np.loadtxt(meas_bin_err_path)
     np_response = np.loadtxt(response_path)
 
     return (
         np_truth_bin_content,
-        np_truth_bin_err,
         np_meas_bin_content,
-        np_meas_bin_err,
         np_response,
     )
