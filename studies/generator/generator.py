@@ -32,7 +32,7 @@ r.gROOT.SetBatch(True)
 
 def smear(xt):
     """
-    Applies a smearing effect to a given input value, xt.
+    Applies a Gaussian smearing effect to a given input value, xt.
 
     Args:
         xt (float): The input value to apply the smearing to.
@@ -112,14 +112,15 @@ def main():
     INFO("Parameters:")
     print("- Distribution: {}".format(args.distr))
     print("- Samples: {}".format(args.samples))
+    print("- Binning: ({}, {}, {})".format(args.bins, args.min_bin, args.max_bin))
     print()
 
     # Initialize histograms
-    f0 = r.TH1F("f0", "f0", 40, -10, 10)  # truth
-    g0 = r.TH1F("g0", "g0", 40, -10, 10)  # measured
+    f0 = r.TH1F("f0", "f0", args.bins, args.min_bin, args.max_bin)  # truth
+    g0 = r.TH1F("g0", "g0", args.bins, args.min_bin, args.max_bin)  # measured
 
     # Generate the response matrix
-    response = r.RooUnfoldResponse(40, -10.0, 10.0)
+    response = r.RooUnfoldResponse(args.bins, args.min_bin, args.max_bin)
 
     # Fill the inputs
     INFO("Filling the histograms...")
@@ -192,6 +193,27 @@ if __name__ == "__main__":
         default=100000,
         type=int,
         help="Number of samples to be generated.",
+    )
+    parser.add_argument(
+        "-M",
+        "--max_bin",
+        default=10,
+        type=int,
+        help="The maximum bin edge.",
+    )
+    parser.add_argument(
+        "-m",
+        "--min_bin",
+        default=-10,
+        type=int,
+        help="The minimum bin edge.",
+    )
+    parser.add_argument(
+        "-b",
+        "--bins",
+        default=40,
+        type=int,
+        help="The number of bins.",
     )
     args = parser.parse_args()
 
