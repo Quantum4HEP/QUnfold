@@ -124,9 +124,12 @@ def main():
 
     # Fill the inputs
     INFO("Filling the histograms...")
-    if any(
-        d in args.distr for d in ["normal", "breit-wigner"]
-    ):  # case for standard distributions
+
+    # Case for standard distributions
+    if any(d in args.distr for d in ["normal", "breit-wigner"]):
+
+        # Generate data
+        r.gRandom.SetSeed(12345)
         for i in tqdm(range(args.samples)):
             xt = 0
             if args.distr == "breit-wigner":
@@ -140,7 +143,12 @@ def main():
                 g0.Fill(x)
             else:
                 response.Miss(xt)
-    elif any(d in args.distr for d in ["double-peaked"]):  # case for double peaked
+
+    # Case for double peaked
+    elif any(d in args.distr for d in ["double-peaked"]):
+        
+        # Generate data
+        r.gRandom.SetSeed(12345)
         for i in tqdm(range(5000)):
             xt = r.gRandom.Gaus(2, 1.5)
             f0.Fill(xt)

@@ -13,7 +13,7 @@ samples=100000
 max_bin=10
 min_bin=-10
 bins=41
-only_one_distr="" # intialize to generate only one distribution
+only_one_distr="normal" # intialize to generate only one distribution
 
 # Run script
 if [ -n "${only_one_distr}" ] ; then
