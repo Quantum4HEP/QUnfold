@@ -83,7 +83,8 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
     # Save the unfolded histogram
     bin_contents = TH1_to_array(histo)
     np.savetxt(
-        "output/RooUnfold/unfolded_{}_bin_contents.txt".format(type), bin_contents
+        "output/RooUnfold/{}/unfolded_{}_bin_contents.txt".format(args.distr, type),
+        bin_contents,
     )
 
     return histo
@@ -128,20 +129,26 @@ def main():
     # Create dirs
     if not os.path.exists("../img/RooUnfold/{}".format(args.distr)):
         os.makedirs("../img/RooUnfold/{}".format(args.distr))
-    if not os.path.exists("output/RooUnfold"):
-        os.makedirs("output/RooUnfold")
+    if not os.path.exists("output/RooUnfold/{}".format(args.distr)):
+        os.makedirs("output/RooUnfold/{}".format(args.distr))
 
     # Load histograms and response from file
     (
         np_truth_bin_content,
         np_meas_bin_content,
         np_response,
+        np_binning,
     ) = load_data(args.distr)
+    bins = int(np_binning[0])
+    min_bin = int(np_binning[1])
+    max_bin = int(np_binning[2])
 
     # Convert to ROOT variables
-    h_truth = array_to_TH1(np_truth_bin_content, "truth")
-    h_meas = array_to_TH1(np_meas_bin_content, "meas")
-    h_response = array_to_TH2(np_response, "response")
+    h_truth = array_to_TH1(np_truth_bin_content, bins, min_bin, max_bin, "truth")
+    h_meas = array_to_TH1(np_meas_bin_content, bins, min_bin, max_bin, "meas")
+    h_response = array_to_TH2(
+        np_response, bins, min_bin, max_bin, bins, min_bin, max_bin, "response"
+    )
 
     # Initialize the RooUnfold response matrix from the input data
     m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)

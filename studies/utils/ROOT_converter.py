@@ -13,12 +13,15 @@ import ROOT as r
 import numpy as np
 
 
-def array_to_TH1(bin_contents, name="histo"):
+def array_to_TH1(bin_contents, bins, min_bin, max_bin, name="histo"):
     """
     Converts NumPy arrays representing bin contents of a ROOT.TH1F histogram.
 
     Args:
         bin_contents (numpy.array): The NumPy array representing bin contents.
+        bins (int): The number of bins of the histogram.
+        min_bin (int): The minimum bin value.
+        max_bin (int): The maximum bin value.
         name (str): Name of the ROOT.TH1F histogram. Default is "hist".
 
     Returns:
@@ -26,14 +29,46 @@ def array_to_TH1(bin_contents, name="histo"):
     """
 
     # Initial settings
-    n_bins = len(bin_contents)
-    hist = r.TH1F(name, ";X;Entries", n_bins, -10, 10)
+    histo = r.TH1F(name, ";X;Entries", bins, min_bin, max_bin)
 
     # Fill histogram with bin contents
-    for i in range(n_bins):
-        hist.SetBinContent(i + 1, bin_contents[i])
+    for i in range(bins):
+        histo.SetBinContent(i + 1, bin_contents[i])
 
-    return hist
+    return histo
+
+
+def array_to_TH2(
+    array, bins_x, min_bin_x, max_bin_x, bins_y, min_bin_y, max_bin_y, hname="res"
+):
+    """
+    Convert a 2D numpy.array into a ROOT.TH2F.
+
+    Args:
+        array (numpy-array): a 2F numpy.array.
+        bins_x (int): The number of bins of the histogram in the x-axis.
+        min_bin_x (int): The minimum bin value of the x-axis.
+        max_bin_x (int): The maximum bin value of the x-axis.
+        bins_y (int): The number of bins of the histogram in the y-axis.
+        min_bin_y (int): The minimum bin value in the y-axis.
+        max_bin_y (int): The maximum bin value in the y-axis.
+        hname (str, optional): The name of the ROOT.TH2F histogram. Defaults to "res".
+
+    Returns:
+        ROOT.TH2F: the converted ROOT.TH2F.
+    """
+
+    # Variables and histo properties
+    histo = r.TH2F(
+        hname, ";reco;truth", bins_x, min_bin_x, max_bin_x, bins_y, min_bin_y, max_bin_y
+    )
+
+    # Filling the histo
+    for i in range(bins_x):
+        for j in range(bins_y):
+            histo.SetBinContent(i + 1, j + 1, array[i][j])
+
+    return histo
 
 
 def TH1_to_array(histo):
@@ -51,34 +86,6 @@ def TH1_to_array(histo):
     bin_contents = np.array([histo.GetBinContent(i + 1) for i in range(n_bins)])
 
     return bin_contents
-
-
-def array_to_TH2(array, hname="res"):
-    """
-    Convert a 2D numpy.array into a ROOT.TH2F.
-
-    Args:
-        array (numpy-array): a 2F numpy.array.
-        hname (str, optional): The name of the ROOT.TH2F histogram. Defaults to "res".
-
-    Returns:
-        ROOT.TH2F: the converted ROOT.TH2F.
-    """
-
-    # Sanity check
-    assert len(array.shape) == 2
-
-    # Variables and histo properties
-    n_bins_x = array.shape[0]
-    n_bins_y = array.shape[1]
-    histo = r.TH2F(hname, ";reco;truth", n_bins_x, -10.0, 10.0, n_bins_y, -10.0, 10.0)
-
-    # Filling the histo
-    for i in range(n_bins_x):
-        for j in range(n_bins_y):
-            histo.SetBinContent(i + 1, j + 1, array[i][j])
-
-    return histo
 
 
 def TH2_to_array(histo):

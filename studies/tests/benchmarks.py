@@ -43,12 +43,18 @@ def load_input(request):
         np_truth_bin_content,
         np_meas_bin_content,
         np_response,
+        np_binning,
     ) = load_data(distr)
+    bins = int(np_binning[0])
+    min_bin = int(np_binning[1])
+    max_bin = int(np_binning[2])
 
     # Convert to ROOT variables
-    h_truth = array_to_TH1(np_truth_bin_content, "truth")
-    h_meas = array_to_TH1(np_meas_bin_content, "meas")
-    h_response = array_to_TH2(np_response, "response")
+    h_truth = array_to_TH1(np_truth_bin_content, bins, min_bin, max_bin, "truth")
+    h_meas = array_to_TH1(np_meas_bin_content, bins, min_bin, max_bin, "meas")
+    h_response = array_to_TH2(
+        np_response, bins, min_bin, max_bin, bins, min_bin, max_bin, "response"
+    )
 
     # Initialize the RooUnfold response matrix from the input data
     m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)

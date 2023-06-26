@@ -43,20 +43,19 @@ def load_data(distr):
             - np_truth_bin_content: Array loaded from 'truth_bin_content.txt' file.
             - np_meas_bin_content: Array loaded from 'meas_bin_content.txt' file.
             - np_response: Array loaded from 'response.txt' file.
+            - np_binning: Array of binning information.
     """
 
     # File names
     truth_bin_content_path = "../data/{}/truth_bin_content.txt".format(distr)
     meas_bin_content_path = "../data/{}/meas_bin_content.txt".format(distr)
     response_path = "../data/{}/response.txt".format(distr)
+    binning_path = "../data/{}/binning.txt".format(distr)
 
     # Load data related to the distribution
     np_truth_bin_content = np.loadtxt(truth_bin_content_path)
     np_meas_bin_content = np.loadtxt(meas_bin_content_path)
     np_response = np.loadtxt(response_path)
+    np_binning = np.loadtxt(binning_path)
 
-    return (
-        np_truth_bin_content,
-        np_meas_bin_content,
-        np_response,
-    )
+    return (np_truth_bin_content, np_meas_bin_content, np_response, np_binning)

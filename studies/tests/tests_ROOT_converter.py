@@ -48,7 +48,7 @@ def test_array_to_TH1(bin_contents):
     """
 
     # Variables
-    histo = array_to_TH1(bin_contents)
+    histo = array_to_TH1(bin_contents, 40, 10, -10)
 
     # Tests
     assert type(histo) == r.TH1F  # type check
@@ -57,24 +57,6 @@ def test_array_to_TH1(bin_contents):
     assert histo.GetTitle() == ""  # check histo title
     for i in range(40):  # values check
         assert histo.GetBinContent(i + 1) == pt.approx(bin_contents[i])
-
-
-def test_TH1_to_array():
-    """
-    Testing the TH1_to_array function properties. Note that hypothesis is not used since it doesn't support ROOT types.
-    """
-
-    # Variables
-    histo = r.TH1F("Test", ";X;Entries", 5, 0.5, 5.5)
-    for i in range(histo.GetNbinsX()):
-        histo.SetBinContent(i + 1, i)
-    bin_contents = TH1_to_array(histo)
-
-    # Tests
-    assert bin_contents.shape[0] == 5  # array size
-    nptest.assert_array_equal(
-        bin_contents, np.array([0, 1, 2, 3, 4])
-    )  # bin contents equality
 
 
 @given(
@@ -93,11 +75,9 @@ def test_array_to_TH2(array):
     """
 
     # Variables
-    histo = array_to_TH2(array)
+    histo = array_to_TH2(array, 40, -10, 10, 40, -10, -10)
 
     # Tests
-    with pt.raises(AssertionError):
-        array_to_TH2(np.array([]))  # check the array dimension
     assert histo.GetNbinsX() == 40  # n_bins check
     assert histo.GetNbinsY() == 40  # n_bins check
     assert histo.GetName() == "res"  # check histo name
@@ -105,6 +85,24 @@ def test_array_to_TH2(array):
     for i in range(40):  # values check
         for j in range(40):
             assert histo.GetBinContent(i + 1, j + 1) == pt.approx(array[i][j])
+
+
+def test_TH1_to_array():
+    """
+    Testing the TH1_to_array function properties. Note that hypothesis is not used since it doesn't support ROOT types.
+    """
+
+    # Variables
+    histo = r.TH1F("Test", ";X;Entries", 5, 0.5, 5.5)
+    for i in range(histo.GetNbinsX()):
+        histo.SetBinContent(i + 1, i)
+    bin_contents = TH1_to_array(histo)
+
+    # Tests
+    assert bin_contents.shape[0] == 5  # array size
+    nptest.assert_array_equal(
+        bin_contents, np.array([0, 1, 2, 3, 4])
+    )  # bin contents equality
 
 
 def test_TH2_to_array():

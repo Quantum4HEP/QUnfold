@@ -12,7 +12,7 @@ distr="breit-wigner normal double-peaked"
 samples=100000
 max_bin=10
 min_bin=-10
-bins=41
+bins=40
 only_one_distr="" # intialize to generate only one distribution
 
 # Run script

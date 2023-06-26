@@ -254,6 +254,12 @@ def main():
     np_response = TH2_to_array(response.Hresponse())
     np.savetxt("../data/{}/response.txt".format(args.distr), np_response)
 
+    # Save the binning
+    with open("../data/{}/binning.txt".format(args.distr), "w") as f:
+        f.write("{}\n".format(args.bins))
+        f.write("{}\n".format(args.min_bin))
+        f.write("{}\n".format(args.max_bin))
+
 
 if __name__ == "__main__":
 
