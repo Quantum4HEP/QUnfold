@@ -5,3 +5,4 @@ hypothesis
 pygal
 cairosvg
 tqdm
+scipy

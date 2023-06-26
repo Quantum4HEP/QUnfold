@@ -31,7 +31,7 @@ load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 
-def unfolder(type, m_response, h_meas, h_truth, dof):
+def unfolder(type, m_response, h_meas):
     """
     Unfold a distribution based on a certain type of unfolding.
 
@@ -39,8 +39,6 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
         type (str): the unfolding type (MI, SVD, IBU).
         m_response (ROOT.TH2F): the response matrix.
         h_meas (ROOT.TH1F): the measured pseudo-data.
-        h_truth (ROOT.TH1F): the truth pseudo-data.
-        dof (int): the number of degrees-of-freedom used to compute chi2.
 
     Returns:
         ROOT.TH1F: the unfolded histogram.
@@ -76,9 +74,6 @@ def unfolder(type, m_response, h_meas, h_truth, dof):
 
     # Print other information
     print("Bin contents: {}".format(histo_mi_bin_c))
-    if args.chi2 == "yes":
-        chi2 = histo.Chi2Test(h_truth, "WW")
-        print("chi2 / dof = {} / {} = {}".format(chi2, dof, chi2 / float(dof)))
 
     # Save the unfolded histogram
     bin_contents = TH1_to_array(histo)
@@ -153,11 +148,10 @@ def main():
     # Initialize the RooUnfold response matrix from the input data
     m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)
     m_response.UseOverflow(False)  # disable the overflow bin which takes the outliers
-    dof = h_truth.GetNbinsX() - 1
 
     # Performing the unfolding with different methods
     for unf_type in ["MI", "IBU", "SVD", "B2B"]:
-        unfolded = unfolder(unf_type, m_response, h_meas, h_truth, dof)
+        unfolded = unfolder(unf_type, m_response, h_meas)
         plot_unfolding(h_truth, h_meas, unfolded)
 
 
@@ -171,14 +165,6 @@ if __name__ == "__main__":
         default="breit-wigner",
         type=str,
         help="Input distribution used for unfolding (used to read data).",
-    )
-    parser.add_argument(
-        "-c",
-        "--chi2",
-        default="no",
-        choices=["no", "yes"],
-        type=str,
-        help="Print or not chi2.",
     )
     args = parser.parse_args()
 

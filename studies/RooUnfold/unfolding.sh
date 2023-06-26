@@ -9,7 +9,6 @@
 
 # Variables
 only_one_distr="" # intialize to unfold only one distribution
-print_chi2="yes"
 
 # Read all the generated distributions from the data dir
 config="../config/distributions.json"
@@ -20,7 +19,7 @@ distr=$(echo "$json" | jq -r '.distributions[]' | tr '\n' ' ')
 if [ -n "${only_one_distr}" ] ; then
     echo "Unfolding only the ${only_one_distr} distribution:"
     echo ""
-    ./RooUnfold/unfolding.py --distr="${only_one_distr}" --chi2=${print_chi2}
+    ./RooUnfold/unfolding.py --distr="${only_one_distr}"
 else
     echo "Unfolding all the distributions:"
     echo ""
@@ -28,7 +27,7 @@ else
     do
         echo "Unfolding the ${distr_} distribution:"
         echo ""
-        ./RooUnfold/unfolding.py --distr="${distr_}" --chi2=${print_chi2}
+        ./RooUnfold/unfolding.py --distr="${distr_}"
         echo ""
     done
 fi
