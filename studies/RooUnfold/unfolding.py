@@ -18,7 +18,7 @@ import numpy as np
 
 # Utils modules
 sys.path.extend(["../src", ".."])
-from QUnfold.utils.custom_logger import RESULT
+from studies.utils.custom_logger import RESULT
 from studies.utils.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,

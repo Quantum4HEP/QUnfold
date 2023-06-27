@@ -21,7 +21,7 @@ import numpy as np
 
 # Utils modules
 sys.path.extend(["../src", ".."])
-from QUnfold.utils.custom_logger import INFO
+from studies.utils.custom_logger import INFO
 from studies.utils.helpers import load_RooUnfold
 from studies.utils.ROOT_converter import TH1_to_array, TH2_to_array
 

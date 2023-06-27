@@ -17,7 +17,7 @@ import numpy as np
 
 # Utils modules
 sys.path.append("../src")
-from QUnfold.utils.custom_logger import ERROR
+from studies.utils.custom_logger import ERROR
 
 
 def load_RooUnfold():
