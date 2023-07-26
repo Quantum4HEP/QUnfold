@@ -22,6 +22,7 @@
   - [Generate pseudo-data](#generate-pseudo-data)
   - [`RooUnfold`](#roounfold)
   - [Benchmarks](#benchmarks)
+  - [Comparisons](#comparisons)
   - [Tests](#tests)
 - [Credits](#credits)
   - [Main developers](#main-developers)
@@ -149,6 +150,33 @@ open the `RooUnfold/unfolding.sh` bash script to modify the unfolding parameters
 
 Data of the unfolded histogram will be saved into the `studies/output/RooUnfold` directory, while comparisons among measured, truth and unfolded (reco) histograms into the `img/RooUnfold` directory.
 
+<div align="center">
+  <p><b>Example of unfolding with different standard methods for a double-peaked distribution</b></p>
+  <div>
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_B2B.png" width="350" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_IBU.png" width="350" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_MI.png" width="350" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_SVD.png" width="350" style="display:inline-block;">
+  </div>
+</div>
+
+### Comparisons
+
+Comparisons among each unfolding method of the previous studies is performed as one of the latest steps. To run comparisons:
+
+```shell
+tox -e comparisons
+```
+
+The output plots, for each distribution, will be saved into the `img/comparisons` directory.
+
+<div align="center">
+  <p><b>Performance comparisons among different unfolding methods for a double-peaked distribution</b></p>
+  <div>
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="350" style="display:inline-block;">
+  </div>
+</div>
+
 ### Benchmarks
 
 Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them:
@@ -158,6 +186,13 @@ tox -e tests
 ```
 
 The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.
+
+<div align="center">
+  <p><b>Example of benchmarks for different unfolding methods for a double-peaked distribution</b></p>
+  <div>
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="350" style="display:inline-block;">
+  </div>
+</div>
 
 ### Tests
 
