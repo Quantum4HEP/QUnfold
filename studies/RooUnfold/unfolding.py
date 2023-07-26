@@ -54,7 +54,7 @@ def unfolder(type, m_response, h_meas):
     elif type == "SVD":
         RESULT("Unfolded with SVD Tikhonov method:")
         unfolder = r.RooUnfoldSvd("SVD", "SVD Tikhonov")
-        unfolder.SetKterm(3)
+        unfolder.SetKterm(2)
     elif type == "IBU":
         RESULT("Unfolded with Iterative Bayesian Unfolding method:")
         unfolder = r.RooUnfoldBayes("IBU", "Iterative Bayesian")
