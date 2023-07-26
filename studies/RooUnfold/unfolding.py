@@ -107,15 +107,22 @@ def plot_unfolding(truth, meas, unfolded):
     unfolded.Draw("same")
 
     # Legend settings
-    leg = r.TLegend(0.6, 0.6, 0.9, 0.9)
-    leg.AddEntry(truth, "True distribution", "pl")
-    leg.AddEntry(meas, "Measured distribution", "pl")
-    leg.AddEntry(unfolded, "Unfolded distribution")
+    leg = r.TLegend(0.7, 0.7, 0.9, 0.9)
+    leg.AddEntry(truth, "True", "pl")
+    leg.AddEntry(meas, "Measured", "pl")
+    ext = unfolded.GetName().split("_")[-1]
+    if ext == "MI":
+        leg.AddEntry(unfolded, "Unfolded (MI)")
+    elif ext == "SVD":
+        leg.AddEntry(unfolded, "Unfolded (SVD)")
+    elif ext == "IBU":
+        leg.AddEntry(unfolded, "Unfolded (IBU)")
+    elif ext == "B2B":
+        leg.AddEntry(unfolded, "Unfolded (B2B)")
     leg.Draw()
 
     # Save canvas
     canvas.Draw()
-    ext = unfolded.GetName().split("_")[-1]
     canvas.SaveAs("../img/RooUnfold/{}/unfolded_{}.png".format(args.distr, ext))
 
 

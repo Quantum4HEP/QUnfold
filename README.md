@@ -162,13 +162,13 @@ Data of the unfolded histogram will be saved into the `studies/output/RooUnfold`
 
 ### Comparisons
 
-Comparisons among each unfolding method of the previous studies is performed as one of the latest steps. To run comparisons:
+Comparisons among each unfolding method of the previous studies are performed as one of the latest steps. To run comparisons:
 
 ```shell
 tox -e comparisons
 ```
 
-The output plots, for each distribution, will be saved into the `img/comparisons` directory.
+The output plots and chi2 for each distribution will be saved into the `img/comparisons` directory.
 
 <div align="center">
   <p><b>Performance comparisons among different unfolding methods for a double-peaked distribution</b></p>
