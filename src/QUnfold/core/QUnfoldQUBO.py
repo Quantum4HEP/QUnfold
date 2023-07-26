@@ -15,46 +15,48 @@ from dwave.samplers import SimulatedAnnealingSampler
 
 class QUnfoldQUBO:
 
-    def __init__(self):
-        pass
+    def __init__(self, response, measured):
+        self.response = np.array(response).astype(float)
+        self.measured = np.array(measured).astype(int)
 
     @staticmethod
     def _get_laplacian(dim):
         diag = np.ones(dim, dtype=int) * -2
         ones = np.ones(dim-1, dtype=int)
-        return np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
+        D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
+        return D
 
-    @staticmethod
-    def _compute_linear(R, d):
-        return -2. * np.matmul(np.transpose(R), d)
+    def _compute_linear(self):
+        a = -2. * (self.response.T @ self.measured)
+        return a
 
-    @staticmethod
-    def _compute_quadratic(R, G, lam):
-        return np.matmul(np.transpose(R), R) + lam * np.matmul(np.transpose(G), G)
+    def _compute_quadratic(self, G, lam):
+        B = (self.response.T @ self.response) + lam * (G.T @ G)
+        return B
 
-    def _get_pyqubo_model(self, response, data, lam):
-        num_bins = len(data)
-        num_entries = int(sum(data))
+    def _get_pyqubo_model(self, lam):
+        num_bins = len(self.measured)
+        num_entries = int(sum(self.measured))
         labels = [f'x{i}' for i in range(num_bins)]
         # variables binary encoding
         x = [LogEncInteger(label=label, value_range=(0, num_entries))
              for label in labels]
         hamiltonian = 0
         # linear terms
-        a = self._compute_linear(R=response, d=data)
+        a = self._compute_linear()
         for i in range(len(x)):
             hamiltonian += a[i] * x[i]
         # quadratic terms
         G = self._get_laplacian(dim=num_bins)
-        B = self._compute_quadratic(R=response, G=G, lam=lam)
+        B = self._compute_quadratic(G, lam)
         for i in range(len(x)):
             for j in range(len(x)):
                 hamiltonian += B[i, j] * x[i] * x[j]
         model = hamiltonian.compile()
         return labels, model
 
-    def run_simulated_annealing(self, response, data, lam=0.1, num_reads=100):
-        labels, model = self._get_pyqubo_model(response, data, lam)
+    def run_simulated_annealing(self, lam=0.1, num_reads=100):
+        labels, model = self._get_pyqubo_model(lam)
         sampler = SimulatedAnnealingSampler()
         sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads)
         decoded_sampleset = model.decode_sampleset(sampleset)
