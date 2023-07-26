@@ -58,13 +58,19 @@ To setup the environment for `QUnfold` development you need two dependencies:
 - [`tox`](https://tox.wiki/en/latest/): at least v4.
 - [`conda`](https://docs.conda.io/en/latest/).
 
-To setup the `conda` conda environment to work with the repository:
+To setup the `conda` conda environment to work with the repository (only the first time):
 
 ```shell
 conda create --name qunfold-dev python==3.8
 conda activate qunfold-dev
 pip install -r requirements-dev.txt
 pip cache purge && pip check
+```
+
+and every time you open a new shell:
+
+```shell
+conda activate qunfold-dev
 ```
 
 ### Install HEP dependencies
