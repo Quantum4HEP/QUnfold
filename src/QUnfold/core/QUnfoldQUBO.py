@@ -16,8 +16,24 @@ from dwave.samplers import SimulatedAnnealingSampler
 class QUnfoldQUBO:
 
     def __init__(self, response, measured):
-        self.response = np.array(response).astype(float)
-        self.measured = np.array(measured).astype(int)
+        _response = np.array(response).astype(float)
+        _measured = np.array(measured).astype(int)
+        if not self._is_normalized(_response):
+            _response = self._normalize(_response)
+        self.response = _response
+        self.measured = _measured
+
+    @staticmethod
+    def _is_normalized(matrix):
+        return np.allclose(np.sum(matrix, axis=1), 1)
+
+    @staticmethod
+    def _normalize(matrix):
+        row_sums = np.sum(matrix, axis=1)
+        mask = np.nonzero(row_sums)
+        norm_matrix = np.copy(matrix)
+        norm_matrix[mask] /= row_sums[mask][:, np.newaxis]
+        return norm_matrix
 
     @staticmethod
     def _get_laplacian(dim):
