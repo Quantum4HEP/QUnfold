@@ -130,8 +130,8 @@ this will create a Json file into the `config` directory. Re-run this script eve
 <div align="center">
   <p><b>Example of generated pseudo-data for a double-peaked distribution</b></p>
   <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/true-reco.png" width="300" style="display:inline-block;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/response.png" width="300" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/true-reco.png" width="350" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/response.png" width="350" style="display:inline-block;">
   </div>
 </div>
 
