@@ -17,6 +17,7 @@
 - [Introduction](#introduction)
 - [Documentation](#documentation)
 - [Studies](#studies)
+  - [Setup the environment](#setup-the-environment)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Generate pseudo-data](#generate-pseudo-data)
   - [`RooUnfold`](#roounfold)
@@ -49,6 +50,22 @@ Further documentation resources are listed here:
 This section contains instructions to run unfolding with other packages in order to do comparisons with `QUnfold`. All the code lies under the `studies` directory.
 
 All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [the ones related to HEP](#install-hep-dependencies).
+
+### Setup the environment
+
+To setup the environment for `QUnfold` development you need two dependencies:
+
+- [`tox`](https://tox.wiki/en/latest/): at least v4.
+- [`conda`](https://docs.conda.io/en/latest/).
+
+To setup the `conda` conda environment to work with the repository:
+
+```shell
+conda create --name qunfold-dev python==3.8
+conda activate qunfold-dev
+pip install -r requirements-dev.txt
+pip cache purge && pip check
+```
 
 ### Install HEP dependencies
 
