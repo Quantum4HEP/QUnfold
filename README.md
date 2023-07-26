@@ -173,7 +173,7 @@ The output plots, for each distribution, will be saved into the `img/comparisons
 <div align="center">
   <p><b>Performance comparisons among different unfolding methods for a double-peaked distribution</b></p>
   <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="350" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/comparisons/double-peaked.png" width="450" style="display:inline-block;">
   </div>
 </div>
 
@@ -190,7 +190,7 @@ The output data will be saved into the `studies/output/benchmarks` directory, wh
 <div align="center">
   <p><b>Example of benchmarks for different unfolding methods for a double-peaked distribution</b></p>
   <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="350" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="450" style="display:inline-block;">
   </div>
 </div>
 
