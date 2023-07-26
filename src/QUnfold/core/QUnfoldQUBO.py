@@ -57,7 +57,7 @@ class QUnfoldQUBO:
         labels, model = self._get_pyqubo_model(response, data, lam)
         sampler = SimulatedAnnealingSampler()
         sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads)
-        decoded_sampleset = self._model.decode_sampleset(sampleset)
+        decoded_sampleset = model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
         solution = np.array([best_sample.subh[label] for label in labels])
         return solution.astype(int)
