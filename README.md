@@ -127,6 +127,14 @@ After the pseudo-data generation, create a config file with all the generated di
 
 this will create a Json file into the `config` directory. Re-run this script every time you generate new distributions.
 
+<div align="center">
+  <p><b>Example of generated pseudo-data for a double-peaked distribution</b></p>
+  <div>
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/true-reco.png" width="300" style="display:inline-block;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/response.png" width="300" style="display:inline-block;">
+  </div>
+</div>
+
 ### `RooUnfold`
 
 This section is related to the `RooUnfold` studies. Be sure of being into the `studies` directory before proceeding.
