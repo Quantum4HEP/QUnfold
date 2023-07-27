@@ -9,11 +9,12 @@
 
 # Variables
 distr="breit-wigner normal double-peaked"
-samples=100000
+samples=10000
 max_bin=10
 min_bin=-10
 bins=40
 only_one_distr="" # intialize to generate only one distribution
+remove_empty_bins="no"
 
 # Run script
 if [ -n "${only_one_distr}" ] ; then
@@ -24,7 +25,8 @@ if [ -n "${only_one_distr}" ] ; then
         --samples=${samples} \
         --max_bin=${max_bin} \
         --min_bin=${min_bin} \
-        --bins=${bins}
+        --bins=${bins} \
+        --remove_empty_bins=${remove_empty_bins}
 else
     echo "Generating all the distributions data:"
     echo ""
@@ -37,7 +39,8 @@ else
             --samples=${samples} \
             --max_bin=${max_bin} \
             --min_bin=${min_bin} \
-            --bins=${bins}
+            --bins=${bins} \
+            --remove_empty_bins=${remove_empty_bins}
         echo ""
     done
 fi

@@ -111,3 +111,97 @@ def TH2_to_array(histo):
             numpy_array[i - 1, j - 1] = histo.GetBinContent(i, j)
 
     return numpy_array
+
+
+def remove_zero_entries_bins(g0, f0, response):
+    """
+    Remove zero entries bins from histograms g0 (measured) and f0 (truth) and the corresponding bins in the response matrix.
+
+    Parameters:
+        g0 (ROOT.TH1): The input measured histogram g0.
+        f0 (ROOT.TH1): The input truth histogram f0 with the same binning as g0.
+        response (ROOT.TH2): The response matrix with y-axis representing the bins of g0 and x-axis representing the bins of f0.
+
+    Returns:
+        tuple: A tuple containing three objects:
+               g0_new (ROOT.TH1): The new measured histogram g0 with zero entries bins removed.
+               f0_new (ROOT.TH1): The new truth histogram f0 with zero entries bins removed.
+               response_new (ROOT.TH2): The new response matrix with corresponding bins removed.
+    """
+
+    # Find the first non-empty bin of g0
+    first_non_empty_bin = next(
+        (
+            bin_idx
+            for bin_idx in range(1, g0.GetNbinsX() + 1)
+            if g0.GetBinContent(bin_idx) > 0
+        ),
+        None,
+    )
+
+    # Find the last non-empty bin of g0
+    last_non_empty_bin = next(
+        (
+            bin_idx
+            for bin_idx in range(g0.GetNbinsX(), first_non_empty_bin - 1, -1)
+            if g0.GetBinContent(bin_idx) > 0
+        ),
+        None,
+    )
+
+    # Get the minimum and maximum values of the binning in g0
+    x_min = g0.GetXaxis().GetBinLowEdge(first_non_empty_bin)
+    x_max = g0.GetXaxis().GetBinUpEdge(last_non_empty_bin)
+
+    # Count the number of non-empty bins in g0
+    num_non_empty_bins = sum(
+        1
+        for bin_idx in range(first_non_empty_bin, last_non_empty_bin + 1)
+        if g0.GetBinContent(bin_idx) > 0
+    )
+
+    # Create new histograms and matrices
+    g0_new = r.TH1F(
+        g0.GetName() + "_new", g0.GetTitle(), num_non_empty_bins, x_min, x_max
+    )
+
+    # Create a new histogram f0_new with the same binning as g0_new
+    f0_new = r.TH1F(
+        f0.GetName() + "_new", f0.GetTitle(), num_non_empty_bins, x_min, x_max
+    )
+
+    # Create a new response matrix with corresponding bins removed
+    response_new = r.TH2F(
+        response.GetName() + "_new",
+        response.GetTitle(),
+        num_non_empty_bins,
+        x_min,
+        x_max,
+        num_non_empty_bins,
+        x_min,
+        x_max,
+    )
+
+    # Loop over all bins in g0
+    new_bin_idx = 1
+    for bin_idx in range(first_non_empty_bin, last_non_empty_bin + 1):
+        bin_entries = g0.GetBinContent(bin_idx)
+
+        # If the bin has more than 0 entries, fill histograms g0_new and f0_new with the content of the corresponding bin
+        if bin_entries > 0:
+            g0_new.SetBinContent(new_bin_idx, bin_entries)
+            f0_new.SetBinContent(new_bin_idx, f0.GetBinContent(bin_idx))
+
+            # Copy the corresponding row and column in the response matrix
+            for y_bin_idx in range(1, response.GetNbinsY() + 1):
+                response_new.SetBinContent(
+                    new_bin_idx, y_bin_idx, response.GetBinContent(bin_idx, y_bin_idx)
+                )
+            for x_bin_idx in range(1, response.GetNbinsX() + 1):
+                response_new.SetBinContent(
+                    x_bin_idx, new_bin_idx, response.GetBinContent(x_bin_idx, bin_idx)
+                )
+
+            new_bin_idx += 1
+
+    return g0_new, f0_new, response_new

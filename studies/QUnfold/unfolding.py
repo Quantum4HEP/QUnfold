@@ -51,7 +51,7 @@ def main():
         # Compute the unfolding result
         RESULT("Unfolded with {} annealing:".format(unf_type))
         unfolder = QUnfoldQUBO(response, measured)
-        unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=300)
+        unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
         print("Bin contents: {}".format(unfolded))
 
         # Save unfolded data

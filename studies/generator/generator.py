@@ -23,7 +23,11 @@ import numpy as np
 sys.path.extend(["../src", ".."])
 from studies.utils.custom_logger import INFO
 from studies.utils.helpers import load_RooUnfold
-from studies.utils.ROOT_converter import TH1_to_array, TH2_to_array
+from studies.utils.ROOT_converter import (
+    TH1_to_array,
+    TH2_to_array,
+    remove_zero_entries_bins,
+)
 
 # ROOT settings
 load_RooUnfold()
@@ -120,13 +124,15 @@ def generate_double_peaked(f0, g0, response, type):
         for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(2, 1.5)
             f0.Fill(xt)
-            x = r.gRandom.Gaus(xt, 1.0)
+            x = r.gRandom.Gaus(
+                xt,
+            )
             if x != None:
                 g0.Fill(x)
         for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(-2, 1.5)
             f0.Fill(xt)
-            x = r.gRandom.Gaus(xt, 1.0)
+            x = r.gRandom.Gaus(xt, 1)
             if x != None:
                 g0.Fill(x)
 
@@ -137,14 +143,14 @@ def generate_double_peaked(f0, g0, response, type):
         r.gRandom.SetSeed(556)
         for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(2, 1.5)
-            x = r.gRandom.Gaus(xt, 1.0)
+            x = r.gRandom.Gaus(xt, 1)
             if x != None:
                 response.Fill(x, xt)
             else:
                 response.Miss(xt)
         for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(-2, 1.5)
-            x = r.gRandom.Gaus(xt, 1.0)
+            x = r.gRandom.Gaus(xt, 1)
             if x != None:
                 response.Fill(x, xt)
             else:
@@ -165,6 +171,8 @@ def plot_response(response):
     m_response_save = response.HresponseNoOverflow()
     m_response_canvas = r.TCanvas()
     m_response_save.SetStats(0)  # delete statistics box
+    m_response_save.GetXaxis().SetTitle("Truth")
+    m_response_save.GetYaxis().SetTitle("Measured")
     m_response_save.Draw("colz")  # to have heatmap
 
     # Save canvas
@@ -213,13 +221,6 @@ def main():
     if not os.path.exists(img_path):
         os.makedirs(img_path)
 
-    # Initial message
-    INFO("Parameters:")
-    print("- Distribution: {}".format(args.distr))
-    print("- Samples: {}".format(args.samples))
-    print("- Binning: ({}, {}, {})".format(args.bins, args.min_bin, args.max_bin))
-    print()
-
     # Initialize histograms
     f0 = r.TH1F("f0", "f0", args.bins, args.min_bin, args.max_bin)  # truth
     g0 = r.TH1F("g0", "g0", args.bins, args.min_bin, args.max_bin)  # measured
@@ -240,6 +241,14 @@ def main():
         f0, g0 = generate_double_peaked(f0, g0, response, "data")
         response = generate_double_peaked(f0, g0, response, "response")
 
+    # Remove measured bins with 0 entries and the corresponding bins of the true
+    if args.remove_empty_bins == "yes":
+        INFO("Removing empty bins...")
+        g0, f0, m_response = remove_zero_entries_bins(
+            g0, f0, response.HresponseNoOverflow()
+        )
+        response = r.RooUnfoldResponse(g0, f0, m_response)
+
     # Save response and histograms plots
     plot_response(response)
     plot_truth_reco(f0, g0)
@@ -256,9 +265,21 @@ def main():
 
     # Save the binning
     with open("../data/{}/binning.txt".format(args.distr), "w") as f:
-        f.write("{}\n".format(args.bins))
-        f.write("{}\n".format(args.min_bin))
-        f.write("{}\n".format(args.max_bin))
+        f.write("{}\n".format(g0.GetNbinsX()))
+        f.write("{}\n".format(int(g0.GetXaxis().GetBinLowEdge(1))))
+        f.write("{}\n".format(int(g0.GetXaxis().GetBinUpEdge(g0.GetNbinsX()))))
+
+    # Final message
+    INFO("\n\nParameters:")
+    print("- Distribution: {}".format(args.distr))
+    print("- Samples: {}".format(args.samples))
+    print(
+        "- Binning: ({}, {}, {})".format(
+            g0.GetNbinsX(),
+            int(g0.GetXaxis().GetBinLowEdge(1)),
+            int(g0.GetXaxis().GetBinUpEdge(g0.GetNbinsX())),
+        )
+    )
 
 
 if __name__ == "__main__":
@@ -300,6 +321,14 @@ if __name__ == "__main__":
         default=40,
         type=int,
         help="The number of bins.",
+    )
+    parser.add_argument(
+        "-r",
+        "--remove_empty_bins",
+        default="yes",
+        type=str,
+        choices=["yes", "no"],
+        help="Remove or not the empty bins.",
     )
     args = parser.parse_args()
 

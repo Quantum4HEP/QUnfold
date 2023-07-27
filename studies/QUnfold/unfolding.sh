@@ -8,7 +8,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-only_one_distr="double-peaked" # intialize to unfold only one distribution
+only_one_distr="" # intialize to unfold only one distribution
 
 # Read all the generated distributions from the data dir
 config="../config/distributions.json"
