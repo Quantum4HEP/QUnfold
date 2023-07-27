@@ -71,11 +71,12 @@ class QUnfoldQUBO:
         model = hamiltonian.compile()
         return labels, model
 
-    def run_simulated_annealing(self, lam=0.1, num_reads=100):
+    def solve_simulated_annealing(self, lam=0.1, num_reads=100):
         labels, model = self._get_pyqubo_model(lam)
         sampler = SimulatedAnnealingSampler()
         sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads)
         decoded_sampleset = model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
         solution = np.array([best_sample.subh[label] for label in labels])
-        return solution.astype(int)
+        self.unfolded = solution.astype(int)
+        return self.unfolded
