@@ -11,6 +11,7 @@
 # Data science modules
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 
 class QUnfoldPlotter:
@@ -18,17 +19,21 @@ class QUnfoldPlotter:
     Class used to plot QUnfold data and results.
     """
 
-    def __init__(self, unfolder):
+    def __init__(self, unfolder, truth, binning):
         """
         Construct a QUnfoldPlotter class from the unfolder type of QUnfold.
 
         Args:
             unfolder (QUnfoldQUBO): the used unfolder.
+            truth (np.array): the true distribution.
+            binning (np.array): the binning of the histograms.
         """
 
         self.response = unfolder.response
-        self.meas_bin_contents = unfolder.measured_bin_contents
-        self.meas_bin_edges = unfolder.measured_bin_edges
+        self.measured = unfolder.measured
+        self.unfolded = unfolder.unfolded
+        self.truth = truth
+        self.binning = binning
 
     def __plotResponseSetup(self):
         """
@@ -40,10 +45,10 @@ class QUnfoldPlotter:
             np.transpose(self.response),
             cmap="viridis",
             extent=[
-                self.meas_bin_edges[0],
-                self.meas_bin_edges[-1],
-                self.meas_bin_edges[0],
-                self.meas_bin_edges[-1],
+                self.binning[0],
+                self.binning[-1],
+                self.binning[0],
+                self.binning[-1],
             ],
             origin="lower",
         )
@@ -63,7 +68,7 @@ class QUnfoldPlotter:
         plt.show()
         plt.close()
 
-    def saveResponsePlot(self, path: str):
+    def saveResponse(self, path: str):
         """
         Save the plotted response matrix with matplotlib style to a file.
 
@@ -75,47 +80,84 @@ class QUnfoldPlotter:
         plt.savefig(path)
         plt.close()
 
-    def __plotMeasuredSetup(self):
+    def __plotSetup(self, method):
         """
-        Create a bar chart histogram based on the bin contents and bin edges of the measured distribution.
+        Create an histogram comparison among measured, truth and unfolded distributions, with the chi2 among unfolded and truth distribution.
+
+        Args:
+            method (str): Unfolding method type.
         """
 
-        # Set style
-        plt.style.use("seaborn-whitegrid")
+        # Initial settings
+        sns.set()
 
-        # Set up plot
-        plt.bar(
-            self.meas_bin_edges[:-1],
-            self.meas_bin_contents,
-            width=np.diff(self.meas_bin_edges),
-            align="edge",
-            facecolor="#2ab0ff",
-            edgecolor="#e0e0e0",
-            linewidth=0.5,
+        # Measured histogram
+        plt.step(
+            x=np.concatenate(
+                (
+                    [self.binning[0] - (self.binning[1] - self.binning[0])],
+                    self.binning[:-1],
+                )
+            ),
+            y=np.concatenate(([self.measured[0]], self.measured)),
+            label="Measured",
+            color="blue",
+        )
+
+        # Truth histogram
+        plt.step(
+            x=np.concatenate(
+                (
+                    [self.binning[0] - (self.binning[1] - self.binning[0])],
+                    self.binning[:-1],
+                )
+            ),
+            y=np.concatenate(([self.truth[0]], self.truth)),
+            label="Truth",
+            color="red",
+        )
+
+        # Unfolded histogram
+        plt.step(
+            x=np.concatenate(
+                (
+                    [self.binning[0] - (self.binning[1] - self.binning[0])],
+                    self.binning[:-1],
+                )
+            ),
+            y=np.concatenate(([self.unfolded[0]], self.unfolded)),
+            label="Unfolded",
+            color="green",
         )
 
         # Plot settings
+        plt.title(method)
         plt.xlabel("Bins")
         plt.ylabel("Events")
-        plt.title("Measured histogram")
+        plt.tight_layout()
+        plt.legend()
 
-    def plotMeasured(self):
+    def plot(self, method=""):
         """
         Plot the measured distribution histogram.
+
+        Args:
+            method (str): Unfolding method type. Default "".
         """
 
-        self.__plotMeasuredSetup()
+        self.__plotSetup(method)
         plt.show()
         plt.close()
 
-    def saveMeasuredPlot(self, path: str):
+    def savePlot(self, path: str, method=""):
         """
         Save the plot of the measured distribution histogram into path.
 
         Args:
             path (str): The file path to save the plot.
+            method (str): Unfolding method type. Default "".
         """
 
-        self.__plotMeasuredSetup()
+        self.__plotSetup(method)
         plt.savefig(path)
         plt.close()

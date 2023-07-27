@@ -1,3 +1,4 @@
 dwave-ocean-sdk
 pyqubo
 matplotlib
+seaborn

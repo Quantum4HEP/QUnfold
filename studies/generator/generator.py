@@ -117,13 +117,13 @@ def generate_double_peaked(f0, g0, response, type):
     # Data generation
     if type == "data":
         r.gRandom.SetSeed(12345)
-        for i in tqdm(range(5000)):
+        for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(2, 1.5)
             f0.Fill(xt)
             x = r.gRandom.Gaus(xt, 1.0)
             if x != None:
                 g0.Fill(x)
-        for i in tqdm(range(5000)):
+        for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(-2, 1.5)
             f0.Fill(xt)
             x = r.gRandom.Gaus(xt, 1.0)
@@ -135,14 +135,14 @@ def generate_double_peaked(f0, g0, response, type):
     # Response generation
     elif type == "response":
         r.gRandom.SetSeed(556)
-        for i in tqdm(range(5000)):
+        for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(2, 1.5)
             x = r.gRandom.Gaus(xt, 1.0)
             if x != None:
                 response.Fill(x, xt)
             else:
                 response.Miss(xt)
-        for i in tqdm(range(5000)):
+        for i in tqdm(range(args.samples)):
             xt = r.gRandom.Gaus(-2, 1.5)
             x = r.gRandom.Gaus(xt, 1.0)
             if x != None:

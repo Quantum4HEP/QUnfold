@@ -19,23 +19,25 @@ from QUnfold.plot import QUnfoldPlotter
 def main():
 
     # Load normal distribution data
-    truth_bin_content = np.loadtxt("data/normal/truth_bin_content.txt")
-    meas_bin_content = np.loadtxt("data/normal/meas_bin_content.txt")
+    truth = np.loadtxt("data/normal/truth_bin_content.txt")
+    measured = np.loadtxt("data/normal/meas_bin_content.txt")
     response = np.loadtxt("data/normal/response.txt")
 
-    # Declare the unfolder (bin errors are not necessary since they are computed from bins content)
-    unfolder = QUnfoldQUBO(response, meas_bin_content, np.linspace(-10, 10, 41))
+    # Unfold with simulated annealing
+    unfolder = QUnfoldQUBO(
+        response,
+        measured,
+    )
+    unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
 
-    # Plot response and measured histo
-    plotter = QUnfoldPlotter(unfolder)
-    plotter.saveResponsePlot("img/examples/standard/response.png")
-    plotter.saveMeasuredPlot("img/examples/standard/measured.png")
-
-    # Perform the unfolding
-    unfolder.unfold()
-
-    # Plot unfolding with a method of the class
-    # ...
+    # Plot information
+    plotter = QUnfoldPlotter(
+        unfolder=unfolder, truth=truth, binning=np.linspace(-10, 10, 41)
+    )
+    plotter.saveResponse("img/examples/standard/response.png")
+    plotter.savePlot(
+        "img/examples/standard/comparison.png", "Simulated Annealing Unfolding"
+    )
 
 
 if __name__ == "__main__":

@@ -14,7 +14,6 @@ from dwave.samplers import SimulatedAnnealingSampler
 
 
 class QUnfoldQUBO:
-
     def __init__(self, response, measured):
         _response = np.array(response).astype(float)
         _measured = np.array(measured).astype(int)
@@ -38,12 +37,12 @@ class QUnfoldQUBO:
     @staticmethod
     def _get_laplacian(dim):
         diag = np.ones(dim, dtype=int) * -2
-        ones = np.ones(dim-1, dtype=int)
+        ones = np.ones(dim - 1, dtype=int)
         D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
         return D
 
     def _compute_linear(self):
-        a = -2. * (self.response.T @ self.measured)
+        a = -2.0 * (self.response.T @ self.measured)
         return a
 
     def _compute_quadratic(self, G, lam):
@@ -53,10 +52,11 @@ class QUnfoldQUBO:
     def _get_pyqubo_model(self, lam):
         num_bins = len(self.measured)
         num_entries = int(sum(self.measured))
-        labels = [f'x{i}' for i in range(num_bins)]
+        labels = [f"x{i}" for i in range(num_bins)]
         # variables binary encoding
-        x = [LogEncInteger(label=label, value_range=(0, num_entries))
-             for label in labels]
+        x = [
+            LogEncInteger(label=label, value_range=(0, num_entries)) for label in labels
+        ]
         hamiltonian = 0
         # linear terms
         a = self._compute_linear()
