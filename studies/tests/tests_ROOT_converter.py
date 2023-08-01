@@ -24,7 +24,7 @@ import numpy.testing as nptest
 
 # Utils modules
 sys.path.append("..")
-from studies.utils.ROOT_converter import (
+from studies.functions.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
     array_to_TH2,

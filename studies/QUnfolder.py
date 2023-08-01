@@ -23,9 +23,9 @@ import ROOT as r
 import numpy as np
 
 # Utils modules
-from utils.custom_logger import INFO
+from functions.custom_logger import INFO
 from functions.generator import generate_standard, generate_double_peaked
-from utils.ROOT_converter import (
+from functions.ROOT_converter import (
     TH1_to_array,
     TH2_to_array
 )

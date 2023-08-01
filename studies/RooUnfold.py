@@ -23,8 +23,8 @@ import ROOT as r
 import numpy as np
 
 # Utils modules
-from utils.custom_logger import INFO
-from utils.ROOT_converter import (
+from functions.custom_logger import INFO
+from functions.ROOT_converter import (
     TH1_to_array
 )
 from functions.generator import generate_standard, generate_double_peaked

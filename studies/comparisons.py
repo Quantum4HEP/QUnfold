@@ -21,7 +21,7 @@ import numpy as np
 from scipy.stats import chisquare
 
 # Utils modules
-from utils.custom_logger import INFO
+from functions.custom_logger import INFO
 
 
 def plot_errorbar(bin_edges, bin_contents, color, marker, method, chi2):

@@ -19,7 +19,7 @@ import numpy.testing as nptest
 
 # Utils modules
 sys.path.append("..")
-from studies.utils.helpers import load_data
+from studies.functions.helpers import load_data
 
 
 def tests_load_data():

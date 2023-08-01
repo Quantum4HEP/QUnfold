@@ -26,7 +26,7 @@ import ROOT as r
 import numpy as np
 
 # Utils modules
-from utils.helpers import load_RooUnfold
+from functions.helpers import load_RooUnfold
 
 # ROOT settings
 load_RooUnfold()
