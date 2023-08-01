@@ -39,7 +39,7 @@ def smear(xt, eff=1):
     x = r.gRandom.Rndm()
     if x > eff:
         return None
-    xsmear = r.gRandom.Gaus(-2.5, 0.2)  #  bias and smear
+    xsmear = r.gRandom.Gaus(2.5, 0.2)  #  bias and smear
     return xt + xsmear
 
 
@@ -70,6 +70,8 @@ def generate_standard(truth, meas, response, type, distr, samples):
                 xt = r.gRandom.BreitWigner(0.3, 2.5)
             elif distr == "normal":
                 xt = r.gRandom.Gaus(0.0, 2.0)
+            elif distr == "exponential":
+                xt = r.gRandom.Exp(1.0)
             truth.Fill(xt)
             x = smear(xt)
             if x != None:
@@ -86,6 +88,8 @@ def generate_standard(truth, meas, response, type, distr, samples):
                 xt = r.gRandom.BreitWigner(0.3, 2.5)
             elif distr == "normal":
                 xt = r.gRandom.Gaus(0.0, 2.0)
+            elif distr == "exponential":
+                xt = r.gRandom.Exp(1.0)
             x = smear(xt)
             if x != None:
                 response.Fill(x, xt)
@@ -169,6 +173,10 @@ def generate(distr, bins, min_bin, max_bin, samples, overflow=True):
         ROOT.TH1F: The histogram representing the measured distribution.
         ROOT.RooUnfoldResponse: The response object used for unfolding.
     """
+    
+    # Case for exponential
+    if distr == "exponential":
+        min_bin = 0
 
     # Initialize variables
     truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
@@ -176,7 +184,7 @@ def generate(distr, bins, min_bin, max_bin, samples, overflow=True):
     response = r.RooUnfoldResponse(bins, min_bin, max_bin)
     
     # Fill histograms
-    if any(d in distr for d in ["normal", "breit-wigner"]):
+    if any(d in distr for d in ["normal", "breit-wigner", "exponential"]):
         truth, meas = generate_standard(truth, meas, response, "data", distr, samples)
         response = generate_standard(truth, meas, response, "response", distr, samples)
     elif any(d in distr for d in ["double-peaked"]):

@@ -9,7 +9,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Input variables
-distributions=["breit-wigner", "normal", "double-peaked"]
+distributions=["breit-wigner", "normal", "double-peaked", "exponential"]
 samples=10000
 max_bin=10
 min_bin=-10
