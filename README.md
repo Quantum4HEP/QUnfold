@@ -64,7 +64,7 @@ To setup the `conda` conda environment to work with the repository (only the fir
 ```shell
 conda create --name qunfold-dev python==3.8
 conda activate qunfold-dev
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 pip cache purge && pip check
 ```
 
