@@ -156,7 +156,7 @@ def generate_double_peaked(truth, meas, response, type, samples):
 
         return response
 
-def generate(distr, bins, min_bin, max_bin, samples, overflow=True):
+def generate(distr, bins, min_bin, max_bin, samples):
     """
     Generate simulated data and response for a given distribution.
 
@@ -166,7 +166,6 @@ def generate(distr, bins, min_bin, max_bin, samples, overflow=True):
         min_bin (float): The minimum value of the histogram range.
         max_bin (float): The maximum value of the histogram range.
         samples (int): The number of data samples to generate.
-        overflow (bool, optional): If True, allow the overflow bin for histograms. Defaults to True.
 
     Returns:
         ROOT.TH1F: The histogram representing the truth distribution.
@@ -190,9 +189,5 @@ def generate(distr, bins, min_bin, max_bin, samples, overflow=True):
     elif any(d in distr for d in ["double-peaked"]):
         truth, meas = generate_double_peaked(truth, meas, response, "data", samples)
         response = generate_double_peaked(truth, meas, response, "response", samples)
-        
-    # Overflow check
-    if not overflow:
-        response.UseOverflow(False)
     
     return truth, meas, response

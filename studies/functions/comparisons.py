@@ -8,9 +8,6 @@
 # Date:       2023-06-26
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Input variables
-distributions=["breit-wigner", "normal", "double-peaked"]
-
 # STD modules
 import argparse as ap
 import os
@@ -71,7 +68,7 @@ def compute_chi2_dof(bin_contents, truth_bin_contents):
     return chi2_dof
 
 
-def plot_unfolded_distr(data, distr):
+def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
     """
     Plots the unfolded distributions for different unfolding methods.
 
@@ -81,48 +78,40 @@ def plot_unfolded_distr(data, distr):
     """
 
     # Get binning information
-    binning_file = "../data/{}/binning.txt".format(distr)
-    binning = np.loadtxt(binning_file)
-    bins = int(binning[0])
-    min_bin = int(binning[1])
-    max_bin = int(binning[2])
-    bin_edges = np.linspace(min_bin, max_bin, bins + 1)
+    
 
     # Plot truth distribution
+    bin_edges = np.linspace(min_bin, max_bin, bins + 1)
     marker_offset = (bin_edges[1] - bin_edges[0]) / 2.0
-    truth_bin_contents = np.loadtxt(
-        "../data/{}/truth_bin_content.txt".format(distr)
-    )
     plt.step(
         x=np.concatenate(
             ([bin_edges[0] - (bin_edges[1] - bin_edges[0])], bin_edges[:-1])
         ),
-        y=np.concatenate(([truth_bin_contents[0]], truth_bin_contents)),
+        y=np.concatenate(([truth[0]], truth)),
         label="Truth",
         color="black",
         linestyle="dashed",
     )
 
     # Iterate over the unfolding methods
-    for method, file in data.items():
+    for method, unfolded in data.items():
 
         # Plot each unfolding method
-        bin_contents = np.loadtxt(file)
-        truth_bin_contents = np.where(
-            truth_bin_contents == 0, 1e-6, truth_bin_contents
+        truth = np.where(
+            truth == 0, 1e-6, truth
         )  # Trick for chi2
-        chi2_dof = compute_chi2_dof(bin_contents, truth_bin_contents)
+        chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":
             plot_errorbar(
-                bin_edges - marker_offset, bin_contents, "red", "o", method, chi2_dof
+                bin_edges - marker_offset, unfolded, "red", "o", method, chi2_dof
             )
         elif method == "B2B":
             plot_errorbar(
-                bin_edges - marker_offset, bin_contents, "blue", "o", method, chi2_dof
+                bin_edges - marker_offset, unfolded, "blue", "o", method, chi2_dof
             )
         elif method == "SVD":
             plot_errorbar(
-                bin_edges - marker_offset, bin_contents, "green", "o", method, chi2_dof
+                bin_edges - marker_offset, unfolded, "green", "o", method, chi2_dof
             )
 
         # Plot settings
@@ -134,32 +123,6 @@ def plot_unfolded_distr(data, distr):
         plt.savefig("../img/comparisons/{}.png".format(distr))
 
     plt.close()
-    print("Done.")
 
 
-def main():
-    
-    # Iterate over distributions
-    print()
-    for distr in distributions:
-        INFO("Producing comparisons for the {} distribution".format(distr))
 
-        # Read input data for the given distribution
-        data = {
-            "IBU4": "output/RooUnfold/{}/unfolded_IBU_bin_contents.txt".format(distr),
-            "B2B": "output/RooUnfold/{}/unfolded_B2B_bin_contents.txt".format(distr),
-            "MI": "output/RooUnfold/{}/unfolded_MI_bin_contents.txt".format(distr),
-            "SVD": "output/RooUnfold/{}/unfolded_SVD_bin_contents.txt".format(distr),
-        }
-
-        # Creating the output directory
-        if not os.path.exists("../img/comparisons"):
-            os.makedirs("../img/comparisons")
-
-        # Plot the unfolded distributions for comparison with truth
-        plot_unfolded_distr(data, distr)
-        print()
-
-
-if __name__ == "__main__":
-    main()

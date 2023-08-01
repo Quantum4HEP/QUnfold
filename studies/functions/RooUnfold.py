@@ -8,31 +8,16 @@
 # Date:       2023-06-13
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Input variables
-distributions=["breit-wigner", "normal", "double-peaked", "exponential"]
-samples=10000
-max_bin=10
-min_bin=-10
-bins=40
-
-# Standard modules
+# STD modules
 import os
 
 # Data science modules
 import ROOT as r
-import numpy as np
-
-# Utils modules
-from functions.custom_logger import INFO
-from functions.ROOT_converter import (
-    TH1_to_array
-)
-from functions.generator import generate_standard, generate_double_peaked, generate
 
 # ROOT settings
 r.gROOT.SetBatch(True)
 
-def plot_response(response, distr):
+def RooUnfold_plot_response(response, distr):
     """
     Plots the unfolding response matrix.
 
@@ -40,6 +25,10 @@ def plot_response(response, distr):
         response (ROOT.RooUnfoldResponse): the response matrix to be plotted.
         distr (distr): the distribution to be generated.
     """
+    
+    # Creating the path
+    if not os.path.exists("../img/RooUnfold/{}".format(distr)):
+        os.makedirs("../img/RooUnfold/{}".format(distr))
 
     # Basic properties
     m_response_save = response.HresponseNoOverflow()
@@ -54,7 +43,7 @@ def plot_response(response, distr):
     m_response_canvas.SaveAs("../img/RooUnfold/{}/response.png".format(distr))
 
 
-def unfolder(type, m_response, h_meas, distr):
+def RooUnfold_unfolder(type, m_response, h_meas):
     """
     Unfold a distribution based on a certain type of unfolding.
 
@@ -62,7 +51,6 @@ def unfolder(type, m_response, h_meas, distr):
         type (str): the unfolding type (MI, SVD, IBU).
         m_response (ROOT.TH2F): the response matrix.
         h_meas (ROOT.TH1F): the measured pseudo-data.
-        distr (distr): the generated distribution.
 
     Returns:
         ROOT.TH1F: the unfolded histogram.
@@ -91,17 +79,10 @@ def unfolder(type, m_response, h_meas, distr):
     histo = unfolder.Hunfold()
     histo.SetName("unfolded_{}".format(type))
 
-    # Save the unfolded histogram
-    bin_contents = TH1_to_array(histo)
-    np.savetxt(
-        "output/RooUnfold/{}/unfolded_{}_bin_contents.txt".format(distr, type),
-        bin_contents,
-    )
-
     return histo
 
 
-def plot_unfolding(truth, meas, unfolded, distr):
+def RooUnfold_plot(truth, meas, unfolded, distr):
     """
     Plots the unfolding results.
 
@@ -141,36 +122,3 @@ def plot_unfolding(truth, meas, unfolded, distr):
     # Save canvas
     canvas.Draw()
     canvas.SaveAs("../img/RooUnfold/{}/unfolded_{}.png".format(distr, ext))
-
-
-def main():
-    
-    # Iterate over distributions
-    print()
-    for distr in distributions:
-        INFO("Unfolding the {} distribution".format(distr))
-
-        # Create dirs
-        if not os.path.exists("../img/RooUnfold/{}".format(distr)):
-            os.makedirs("../img/RooUnfold/{}".format(distr))
-        if not os.path.exists("output/RooUnfold/{}".format(distr)):
-            os.makedirs("output/RooUnfold/{}".format(distr))
-            
-        # Generating the distribution
-        truth, meas, response = generate(distr, bins, min_bin, max_bin, samples, overflow=False)
-        plot_response(response, distr)
-
-        # Performing the unfolding with different methods
-        for unf_type in ["MI", "IBU", "SVD", "B2B"]:
-            unfolded = unfolder(unf_type, response, meas, distr)
-            plot_unfolding(truth, meas, unfolded, distr)
-            
-        # Deleting histograms
-        del meas, truth, response
-        
-        print()
-    print("Done.")
-
-
-if __name__ == "__main__":
-    main()
