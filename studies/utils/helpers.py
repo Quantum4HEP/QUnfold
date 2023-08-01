@@ -16,8 +16,7 @@ import ROOT as r
 import numpy as np
 
 # Utils modules
-sys.path.append("../src")
-from studies.utils.custom_logger import ERROR
+from utils.custom_logger import ERROR
 
 
 def load_RooUnfold():

@@ -8,14 +8,20 @@
 # Date:       2023-06-26
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
+# Input variables
+distributions=["breit-wigner", "normal", "double-peaked"]
+
 # STD modules
 import argparse as ap
-import sys, os
+import os
 
 # Data science modules
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import chisquare
+
+# Utils modules
+from utils.custom_logger import INFO
 
 
 def plot_errorbar(bin_edges, bin_contents, color, marker, method, chi2):
@@ -65,16 +71,17 @@ def compute_chi2_dof(bin_contents, truth_bin_contents):
     return chi2_dof
 
 
-def plot_unfolded_distr(data):
+def plot_unfolded_distr(data, distr):
     """
     Plots the unfolded distributions for different unfolding methods.
 
     Args:
         data (dict): A dictionary containing the data for each unfolding method. The keys represent the method names, and the values represent the corresponding file paths.
+        distr (distr): the generated distribution.
     """
 
     # Get binning information
-    binning_file = "../data/{}/binning.txt".format(args.distr)
+    binning_file = "../data/{}/binning.txt".format(distr)
     binning = np.loadtxt(binning_file)
     bins = int(binning[0])
     min_bin = int(binning[1])
@@ -84,7 +91,7 @@ def plot_unfolded_distr(data):
     # Plot truth distribution
     marker_offset = (bin_edges[1] - bin_edges[0]) / 2.0
     truth_bin_contents = np.loadtxt(
-        "../data/{}/truth_bin_content.txt".format(args.distr)
+        "../data/{}/truth_bin_content.txt".format(distr)
     )
     plt.step(
         x=np.concatenate(
@@ -124,41 +131,35 @@ def plot_unfolded_distr(data):
         plt.legend()
 
         # Save plot
-        plt.savefig("../img/comparisons/{}.png".format(args.distr))
+        plt.savefig("../img/comparisons/{}.png".format(distr))
 
+    plt.close()
     print("Done.")
 
 
 def main():
+    
+    # Iterate over distributions
+    print()
+    for distr in distributions:
+        INFO("Producing comparisons for the {} distribution".format(distr))
 
-    # Read input data for the given distribution
-    data = {
-        "IBU4": "output/RooUnfold/{}/unfolded_IBU_bin_contents.txt".format(args.distr),
-        "B2B": "output/RooUnfold/{}/unfolded_B2B_bin_contents.txt".format(args.distr),
-        "MI": "output/RooUnfold/{}/unfolded_MI_bin_contents.txt".format(args.distr),
-        "SVD": "output/RooUnfold/{}/unfolded_SVD_bin_contents.txt".format(args.distr),
-    }
+        # Read input data for the given distribution
+        data = {
+            "IBU4": "output/RooUnfold/{}/unfolded_IBU_bin_contents.txt".format(distr),
+            "B2B": "output/RooUnfold/{}/unfolded_B2B_bin_contents.txt".format(distr),
+            "MI": "output/RooUnfold/{}/unfolded_MI_bin_contents.txt".format(distr),
+            "SVD": "output/RooUnfold/{}/unfolded_SVD_bin_contents.txt".format(distr),
+        }
 
-    # Creating the output directory
-    if not os.path.exists("../img/comparisons"):
-        os.makedirs("../img/comparisons")
+        # Creating the output directory
+        if not os.path.exists("../img/comparisons"):
+            os.makedirs("../img/comparisons")
 
-    # Plot the unfolded distributions for comparison with truth
-    plot_unfolded_distr(data)
+        # Plot the unfolded distributions for comparison with truth
+        plot_unfolded_distr(data, distr)
+        print()
 
 
 if __name__ == "__main__":
-
-    # Parser settings
-    parser = ap.ArgumentParser(description="Parsing comparisons input variables.")
-    parser.add_argument(
-        "-d",
-        "--distr",
-        default="normal",
-        type=str,
-        help="The type of the distribution to be used for comparison.",
-    )
-    args = parser.parse_args()
-
-    # Run main function
     main()

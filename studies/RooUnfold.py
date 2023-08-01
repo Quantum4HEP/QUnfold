@@ -8,30 +8,31 @@
 # Date:       2023-06-13
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
+# Input variables
+distributions=["breit-wigner", "normal", "double-peaked"]
+
 # Standard modules
-import argparse as ap
-import sys, os
+import os
 
 # Data science modules
 import ROOT as r
 import numpy as np
 
 # Utils modules
-sys.path.extend(["../src", ".."])
-from studies.utils.custom_logger import RESULT
-from studies.utils.ROOT_converter import (
+from utils.custom_logger import INFO
+from utils.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
     array_to_TH2,
 )
-from studies.utils.helpers import load_RooUnfold, load_data
+from utils.helpers import load_RooUnfold, load_data
 
 # ROOT settings
 load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 
-def unfolder(type, m_response, h_meas):
+def unfolder(type, m_response, h_meas, distr):
     """
     Unfold a distribution based on a certain type of unfolding.
 
@@ -39,6 +40,7 @@ def unfolder(type, m_response, h_meas):
         type (str): the unfolding type (MI, SVD, IBU).
         m_response (ROOT.TH2F): the response matrix.
         h_meas (ROOT.TH1F): the measured pseudo-data.
+        distr (distr): the generated distribution.
 
     Returns:
         ROOT.TH1F: the unfolded histogram.
@@ -49,19 +51,19 @@ def unfolder(type, m_response, h_meas):
 
     # Unfolding type settings
     if type == "MI":
-        RESULT("Unfolded with matrix inversion:")
+        print("- Unfolding with matrix inversion...")
         unfolder = r.RooUnfoldInvert("MI", "Matrix Inversion")
     elif type == "SVD":
-        RESULT("Unfolded with SVD Tikhonov method:")
+        print("- Unfolding with SVD Tikhonov method...")
         unfolder = r.RooUnfoldSvd("SVD", "SVD Tikhonov")
         unfolder.SetKterm(2)
     elif type == "IBU":
-        RESULT("Unfolded with Iterative Bayesian Unfolding method:")
+        print("- Unfolding with Iterative Bayesian Unfolding method...")
         unfolder = r.RooUnfoldBayes("IBU", "Iterative Bayesian")
         unfolder.SetIterations(4)
         unfolder.SetSmoothing(0)
     elif type == "B2B":
-        RESULT("Unfolded with Bin-by-Bin method:")
+        print("- Unfolding with Bin-by-Bin method...")
         unfolder = r.RooUnfoldBinByBin("B2B", "Bin-y-Bin")
 
     # Generic unfolding settings
@@ -72,20 +74,17 @@ def unfolder(type, m_response, h_meas):
     histo.SetName("unfolded_{}".format(type))
     histo_mi_bin_c = TH1_to_array(histo)
 
-    # Print other information
-    print("Bin contents: {}".format(histo_mi_bin_c))
-
     # Save the unfolded histogram
     bin_contents = TH1_to_array(histo)
     np.savetxt(
-        "output/RooUnfold/{}/unfolded_{}_bin_contents.txt".format(args.distr, type),
+        "output/RooUnfold/{}/unfolded_{}_bin_contents.txt".format(distr, type),
         bin_contents,
     )
 
     return histo
 
 
-def plot_unfolding(truth, meas, unfolded):
+def plot_unfolding(truth, meas, unfolded, distr):
     """
     Plots the unfolding results.
 
@@ -93,6 +92,7 @@ def plot_unfolding(truth, meas, unfolded):
         truth (ROOT.TH1): True distribution histogram.
         meas (ROOT.TH1): Measured distribution histogram.
         unfolded (ROOT.TH1): Unfolded distribution histogram.
+        distr (distr): the generated distribution.
     """
 
     # Basic properties
@@ -123,57 +123,55 @@ def plot_unfolding(truth, meas, unfolded):
 
     # Save canvas
     canvas.Draw()
-    canvas.SaveAs("../img/RooUnfold/{}/unfolded_{}.png".format(args.distr, ext))
+    canvas.SaveAs("../img/RooUnfold/{}/unfolded_{}.png".format(distr, ext))
 
 
 def main():
+    
+    # Iterate over distributions
+    print()
+    for distr in distributions:
+        INFO("Unfolding the {} distribution".format(distr))
 
-    # Create dirs
-    if not os.path.exists("../img/RooUnfold/{}".format(args.distr)):
-        os.makedirs("../img/RooUnfold/{}".format(args.distr))
-    if not os.path.exists("output/RooUnfold/{}".format(args.distr)):
-        os.makedirs("output/RooUnfold/{}".format(args.distr))
+        # Create dirs
+        if not os.path.exists("../img/RooUnfold/{}".format(distr)):
+            os.makedirs("../img/RooUnfold/{}".format(distr))
+        if not os.path.exists("output/RooUnfold/{}".format(distr)):
+            os.makedirs("output/RooUnfold/{}".format(distr))
 
-    # Load histograms and response from file
-    (
-        np_truth_bin_content,
-        np_meas_bin_content,
-        np_response,
-        np_binning,
-    ) = load_data(args.distr)
-    bins = int(np_binning[0])
-    min_bin = int(np_binning[1])
-    max_bin = int(np_binning[2])
+        # Load histograms and response from file
+        (
+            np_truth_bin_content,
+            np_meas_bin_content,
+            np_response,
+            np_binning,
+        ) = load_data(distr)
+        bins = int(np_binning[0])
+        min_bin = int(np_binning[1])
+        max_bin = int(np_binning[2])
 
-    # Convert to ROOT variables
-    h_truth = array_to_TH1(np_truth_bin_content, bins, min_bin, max_bin, "truth")
-    h_meas = array_to_TH1(np_meas_bin_content, bins, min_bin, max_bin, "meas")
-    h_response = array_to_TH2(
-        np_response, bins, min_bin, max_bin, bins, min_bin, max_bin, "response"
-    )
+        # Convert to ROOT variables
+        h_truth = array_to_TH1(np_truth_bin_content, bins, min_bin, max_bin, "truth")
+        h_meas = array_to_TH1(np_meas_bin_content, bins, min_bin, max_bin, "meas")
+        h_response = array_to_TH2(
+            np_response, bins, min_bin, max_bin, bins, min_bin, max_bin, "response"
+        )
 
-    # Initialize the RooUnfold response matrix from the input data
-    m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)
-    m_response.UseOverflow(False)  # disable the overflow bin which takes the outliers
+        # Initialize the RooUnfold response matrix from the input data
+        m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)
+        m_response.UseOverflow(False)  # disable the overflow bin which takes the outliers
 
-    # Performing the unfolding with different methods
-    for unf_type in ["MI", "IBU", "SVD", "B2B"]:
-        unfolded = unfolder(unf_type, m_response, h_meas)
-        plot_unfolding(h_truth, h_meas, unfolded)
+        # Performing the unfolding with different methods
+        for unf_type in ["MI", "IBU", "SVD", "B2B"]:
+            unfolded = unfolder(unf_type, m_response, h_meas, distr)
+            plot_unfolding(h_truth, h_meas, unfolded, distr)
+            
+        # Deleting histograms
+        del h_meas, h_truth, h_response
+        
+        print()
+    print("Done.")
 
 
 if __name__ == "__main__":
-
-    # Parser settings
-    parser = ap.ArgumentParser(description="Parsing unfolding input variables.")
-    parser.add_argument(
-        "-d",
-        "--distr",
-        default="breit-wigner",
-        type=str,
-        help="Input distribution used for unfolding (used to read data).",
-    )
-    args = parser.parse_args()
-
-    # Run main function
     main()
