@@ -33,19 +33,19 @@ load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 
-def smear(xt):
+def smear(xt, eff=1):
     """
     Applies a Gaussian smearing effect to a given input value, xt.
 
     Args:
         xt (float): The input value to apply the smearing to.
+        eff (float): smearing efficiency.
 
     Returns:
         float or None: The resulting value after applying the smearing. Returns None if the value is filtered based on efficiency.
     """
-    xeff = 0.3 + (1.0 - 0.3) / 20 * (xt + 10.0)  #  efficiency
     x = r.gRandom.Rndm()
-    if x > xeff:
+    if x > eff:
         return None
     xsmear = r.gRandom.Gaus(-2.5, 0.2)  #  bias and smear
     return xt + xsmear
