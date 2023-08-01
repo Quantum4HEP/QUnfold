@@ -19,9 +19,13 @@ from QUnfold.plot import QUnfoldPlotter
 def main():
 
     # Load normal distribution data
-    truth = np.loadtxt("data/normal/truth_bin_content.txt")
-    measured = np.loadtxt("data/normal/meas_bin_content.txt")
-    response = np.loadtxt("data/normal/response.txt")
+    truth = np.loadtxt("data/double-peaked/truth_bin_content.txt")
+    measured = np.loadtxt("data/double-peaked/meas_bin_content.txt")
+    response = np.loadtxt("data/double-peaked/response.txt")
+    binning = np.loadtxt("data/double-peaked/binning.txt")
+    bins = int(binning[0])
+    min_bin = int(binning[1])
+    max_bin = int(binning[2])
 
     # Unfold with simulated annealing
     unfolder = QUnfoldQUBO(
@@ -32,7 +36,7 @@ def main():
 
     # Plot information
     plotter = QUnfoldPlotter(
-        unfolder=unfolder, truth=truth, binning=np.linspace(-10, 10, 41)
+        unfolder=unfolder, truth=truth, binning=np.linspace(min_bin, max_bin, bins + 1)
     )
     plotter.saveResponse("img/examples/standard/response.png")
     plotter.savePlot(
