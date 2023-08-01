@@ -55,8 +55,8 @@ class QUnfoldPlotter:
 
         # Plot settings
         plt.colorbar(label="Response Value")
-        plt.xlabel("Column (measured)")
-        plt.ylabel("Row (truth)")
+        plt.xlabel("Truth")
+        plt.ylabel("Measured")
         plt.title("Response Matrix")
 
     def plotResponse(self):
@@ -92,7 +92,7 @@ class QUnfoldPlotter:
         sns.set()
 
         # Measured histogram
-        """plt.step(
+        plt.step(
             x=np.concatenate(
                 (
                     [self.binning[0] - (self.binning[1] - self.binning[0])],
@@ -115,7 +115,7 @@ class QUnfoldPlotter:
             y=np.concatenate(([self.truth[0]], self.truth)),
             label="Truth",
             color="red",
-        )"""
+        )
 
         # Unfolded histogram
         plt.step(

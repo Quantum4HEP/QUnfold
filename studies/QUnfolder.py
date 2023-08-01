@@ -90,6 +90,9 @@ def main():
             plotter.savePlot(
                 "../img/QUnfold/{}/unfolded_{}.png".format(distr, unf_type), title
             )
+            plotter.saveResponse(
+                "../img/QUnfold/{}/response.png".format(distr, unf_type)
+            )
             
         print()
     print("Done")
