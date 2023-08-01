@@ -27,7 +27,7 @@ from functions.custom_logger import INFO
 from functions.ROOT_converter import (
     TH1_to_array
 )
-from functions.generator import generate_standard, generate_double_peaked
+from functions.generator import generate_standard, generate_double_peaked, generate
 
 # ROOT settings
 r.gROOT.SetBatch(True)
@@ -157,18 +157,7 @@ def main():
             os.makedirs("output/RooUnfold/{}".format(distr))
             
         # Generating the distribution
-        truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
-        meas = r.TH1F("Measured", "", bins, min_bin, max_bin)
-        response = r.RooUnfoldResponse(bins, min_bin, max_bin)
-        
-        if any(d in distr for d in ["normal", "breit-wigner"]):
-            truth, meas = generate_standard(truth, meas, response, "data", distr)
-            response = generate_standard(truth, meas, response, "response", distr)
-        elif any(d in distr for d in ["double-peaked"]):
-            truth, meas = generate_double_peaked(truth, meas, response, "data")
-            response = generate_double_peaked(truth, meas, response, "response")
-        response.UseOverflow(False)
-            
+        truth, meas, response = generate(distr, bins, min_bin, max_bin, samples, overflow=False)
         plot_response(response, distr)
 
         # Performing the unfolding with different methods

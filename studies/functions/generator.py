@@ -10,14 +10,6 @@
 
 # Followed the guide at: https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/#Aproximating-Smearing
 
-# Input variables
-distributions=["breit-wigner", "normal", "double-peaked"]
-samples=10000
-max_bin=10
-min_bin=-10
-bins=40
-remove_empty_bins="no"
-
 # STD modules
 import os
 
@@ -51,16 +43,17 @@ def smear(xt, eff=1):
     return xt + xsmear
 
 
-def generate_standard(f0, g0, response, type, distr):
+def generate_standard(truth, meas, response, type, distr, samples):
     """
     Generate data for standard distributions.
 
     Args:
-        f0 (ROOT.TH1F): truth histogram.
-        g0 (ROOT.TH1F): measured histogram.
+        truth (ROOT.TH1F): truth histogram.
+        meas (ROOT.TH1F): measured histogram.
         response (ROOT.TH2F): response matrix.
         type (str): type of data generation (data or response).
         distr (distr): the distribution to be generated.
+        samples (int): number of samples to be generated.
 
     Returns:
         ROOT.TH1F: the filled truth histogram.
@@ -77,12 +70,12 @@ def generate_standard(f0, g0, response, type, distr):
                 xt = r.gRandom.BreitWigner(0.3, 2.5)
             elif distr == "normal":
                 xt = r.gRandom.Gaus(0.0, 2.0)
-            f0.Fill(xt)
+            truth.Fill(xt)
             x = smear(xt)
             if x != None:
-                g0.Fill(x)
+                meas.Fill(x)
 
-        return f0, g0
+        return truth, meas
 
     # Response generation
     elif type == "response":
@@ -102,15 +95,16 @@ def generate_standard(f0, g0, response, type, distr):
         return response
 
 
-def generate_double_peaked(f0, g0, response, type):
+def generate_double_peaked(truth, meas, response, type, samples):
     """
     Generate data for the double peaked distributions.
 
     Args:
-        f0 (ROOT.TH1F): truth histogram.
-        g0 (ROOT.TH1F): measured histogram.
+        truth (ROOT.TH1F): truth histogram.
+        meas (ROOT.TH1F): measured histogram.
         response (ROOT.TH2F): response matrix.
         type (str): type of data generation (data or response).
+        samples (int): number of samples to be generated.
 
     Returns:
         ROOT.TH1F: the filled truth histogram.
@@ -123,20 +117,20 @@ def generate_double_peaked(f0, g0, response, type):
         r.gRandom.SetSeed(12345)
         for i in range(samples):
             xt = r.gRandom.Gaus(2, 1.5)
-            f0.Fill(xt)
+            truth.Fill(xt)
             x = r.gRandom.Gaus(
                 xt,
             )
             if x != None:
-                g0.Fill(x)
+                meas.Fill(x)
         for i in range(samples):
             xt = r.gRandom.Gaus(-2, 1.5)
-            f0.Fill(xt)
+            truth.Fill(xt)
             x = r.gRandom.Gaus(xt, 1)
             if x != None:
-                g0.Fill(x)
+                meas.Fill(x)
 
-        return f0, g0
+        return truth, meas
 
     # Response generation
     elif type == "response":
@@ -158,7 +152,39 @@ def generate_double_peaked(f0, g0, response, type):
 
         return response
 
+def generate(distr, bins, min_bin, max_bin, samples, overflow=True):
+    """
+    Generate simulated data and response for a given distribution.
 
+    Args:
+        distr (str): The name of the distribution to generate data from.
+        bins (int): The number of bins in the histograms.
+        min_bin (float): The minimum value of the histogram range.
+        max_bin (float): The maximum value of the histogram range.
+        samples (int): The number of data samples to generate.
+        overflow (bool, optional): If True, allow the overflow bin for histograms. Defaults to True.
 
+    Returns:
+        ROOT.TH1F: The histogram representing the truth distribution.
+        ROOT.TH1F: The histogram representing the measured distribution.
+        ROOT.RooUnfoldResponse: The response object used for unfolding.
+    """
 
-
+    # Initialize variables
+    truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
+    meas = r.TH1F("Measured", "", bins, min_bin, max_bin)
+    response = r.RooUnfoldResponse(bins, min_bin, max_bin)
+    
+    # Fill histograms
+    if any(d in distr for d in ["normal", "breit-wigner"]):
+        truth, meas = generate_standard(truth, meas, response, "data", distr, samples)
+        response = generate_standard(truth, meas, response, "response", distr, samples)
+    elif any(d in distr for d in ["double-peaked"]):
+        truth, meas = generate_double_peaked(truth, meas, response, "data", samples)
+        response = generate_double_peaked(truth, meas, response, "response", samples)
+        
+    # Overflow check
+    if not overflow:
+        response.UseOverflow(False)
+    
+    return truth, meas, response
