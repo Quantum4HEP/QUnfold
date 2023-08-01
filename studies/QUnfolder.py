@@ -10,6 +10,10 @@
 
 # Input variables
 distributions=["double-peaked"]
+samples=10000
+max_bin=10
+min_bin=-10
+bins=40
 
 # Standard modules
 import os, sys
@@ -20,7 +24,11 @@ import numpy as np
 
 # Utils modules
 from utils.custom_logger import INFO
-from utils.helpers import load_data
+from functions.generator import generate_standard, generate_double_peaked
+from utils.ROOT_converter import (
+    TH1_to_array,
+    TH2_to_array
+)
 
 # QUnfold modules
 sys.path.append("../src")
@@ -39,23 +47,28 @@ def main():
         if not os.path.exists("output/QUnfold/{}".format(distr)):
             os.makedirs("output/QUnfold/{}".format(distr))
 
-        # Load histograms and response from file
-        (
-            truth,
-            measured,
-            response,
-            binning,
-        ) = load_data(distr)
-        bins = int(binning[0])
-        min_bin = int(binning[1])
-        max_bin = int(binning[2])
+        # Generating the distribution
+        truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
+        meas = r.TH1F("Measured", "", bins, min_bin, max_bin)
+        response = r.RooUnfoldResponse(bins, min_bin, max_bin)
+        
+        if any(d in distr for d in ["normal", "breit-wigner"]):
+            truth, meas = generate_standard(truth, meas, response, "data", distr)
+            response = generate_standard(truth, meas, response, "response", distr)
+        elif any(d in distr for d in ["double-peaked"]):
+            truth, meas = generate_double_peaked(truth, meas, response, "data")
+            response = generate_double_peaked(truth, meas, response, "response")
 
+        truth = TH1_to_array(truth, overflow=True)        
+        meas = TH1_to_array(meas, overflow=True)
+        response = TH2_to_array(response.Hresponse(), overflow=True)
+        
         # Performing the unfolding with different methods
         for unf_type in ["simulated"]:
 
             # Compute the unfolding result
             print("- Unfolding with {} annealing...".format(unf_type))
-            unfolder = QUnfoldQUBO(response, measured)
+            unfolder = QUnfoldQUBO(response, meas)
             unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
 
             # Save unfolded data

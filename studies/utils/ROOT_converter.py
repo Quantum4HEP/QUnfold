@@ -71,46 +71,47 @@ def array_to_TH2(
     return histo
 
 
-def TH1_to_array(histo):
+def TH1_to_array(histo, overflow=True):
     """
     Convert a ROOT.TH1F into a numpy.array.
 
     Args:
         histo (ROOT.TH1F): the input ROOT.TH1F to be converted.
+        overflow (bool): enable disable first and last bins overflow.
 
     Returns:
         numpy.array: a numpy.array of the histo bin contents.
     """
 
-    n_bins = histo.GetNbinsX()
-    bin_contents = np.array([histo.GetBinContent(i + 1) for i in range(n_bins)])
+    if overflow:
+        start, stop = 0, histo.GetNbinsX() + 2
+    else:
+        start, stop = 1, histo.GetNbinsX() + 1
+    return np.array([histo.GetBinContent(i) for i in range(start, stop)])
 
-    return bin_contents
 
-
-def TH2_to_array(histo):
+def TH2_to_array(histo, overflow=True):
     """
     Convert a ROOT.TH2F object into a numpy.array.
 
     Parameters:
         hist (ROOT.TH2F): The TH2F object to convert.
+        overflow (bool): enable disable first and last bins overflow.
 
     Returns:
         numpy_array (numpy.array): The numpy.array representing the contents of the TH2F.
 
     """
 
-    # Variables
-    num_bins_x = histo.GetNbinsX()
-    num_bins_y = histo.GetNbinsY()
-    numpy_array = np.zeros((num_bins_x, num_bins_y))
-
-    # Filling the array
-    for i in range(1, num_bins_x + 1):
-        for j in range(1, num_bins_y + 1):
-            numpy_array[i - 1, j - 1] = histo.GetBinContent(i, j)
-
-    return numpy_array
+    if overflow:
+        x_start, x_stop = 0, histo.GetNbinsX() + 2
+        y_start, y_stop = 0, histo.GetNbinsY() + 2
+    else:
+        x_start, x_stop = 1, histo.GetNbinsX() + 1
+        y_start, y_stop = 1, histo.GetNbinsY() + 1
+        
+    return np.array([[histo.GetBinContent(i, j) for j in range (y_start, y_stop)] 
+                     for i in range(x_start, x_stop)])
 
 
 def remove_zero_entries_bins(g0, f0, response):

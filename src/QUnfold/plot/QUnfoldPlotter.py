@@ -29,10 +29,10 @@ class QUnfoldPlotter:
             binning (np.array): the binning of the histograms.
         """
 
-        self.response = unfolder.response
-        self.measured = unfolder.measured
-        self.unfolded = unfolder.unfolded
-        self.truth = truth
+        self.response = unfolder.response[1:, :-1]
+        self.measured = unfolder.measured[1:-1]
+        self.unfolded = unfolder.unfolded[1:-1]
+        self.truth = truth[1:-1]
         self.binning = binning
 
     def __plotResponseSetup(self):
@@ -92,7 +92,7 @@ class QUnfoldPlotter:
         sns.set()
 
         # Measured histogram
-        plt.step(
+        """plt.step(
             x=np.concatenate(
                 (
                     [self.binning[0] - (self.binning[1] - self.binning[0])],
@@ -115,7 +115,7 @@ class QUnfoldPlotter:
             y=np.concatenate(([self.truth[0]], self.truth)),
             label="Truth",
             color="red",
-        )
+        )"""
 
         # Unfolded histogram
         plt.step(

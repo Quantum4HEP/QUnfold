@@ -62,11 +62,13 @@ To setup the environment for `QUnfold` development you need two dependencies:
 To setup the `conda` conda environment to work with the repository (only the first time):
 
 ```shell
-conda create --name qunfold-dev python==3.8
+conda create --name qunfold-dev python==3.10
 conda activate qunfold-dev
 pip install -r requirements.txt
 pip cache purge && pip check
 ```
+
+> :warning: you can also install developer requirements if you need: `pip install -r requirements.txt`.
 
 and every time you open a new shell:
 
@@ -120,14 +122,6 @@ Current distributions supported for generation:
 - [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
 - Double peaked
 
-After the pseudo-data generation, create a config file with all the generated distributions name, used for the next steps. From the root directory of the repository do:
-
-```shell
-./scripts/create_distr_config.sh
-```
-
-this will create a Json file into the `config` directory. Re-run this script every time you generate new distributions.
-
 <div align="center">
   <p><b>Example of generated pseudo-data for a double-peaked distribution</b></p>
   <div>
@@ -146,7 +140,7 @@ To run classical unfolding example with `RooUnfold:
 tox -e RooUnfold
 ```
 
-open the `RooUnfold/unfolding.sh` bash script to modify the unfolding parameters.
+open the `RooUnfold.py` bash script to modify the unfolding parameters.
 
 Data of the unfolded histogram will be saved into the `studies/output/RooUnfold` directory, while comparisons among measured, truth and unfolded (reco) histograms into the `img/RooUnfold` directory.
 
@@ -167,6 +161,8 @@ Comparisons among each unfolding method of the previous studies are performed as
 ```shell
 tox -e comparisons
 ```
+
+open the `comparisons.py` bash script to modify the parameters.
 
 The output plots and chi2 for each distribution will be saved into the `img/comparisons` directory.
 

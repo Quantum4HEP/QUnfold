@@ -4,5 +4,4 @@ pytest-benchmark
 hypothesis
 pygal
 cairosvg
-tqdm
 scipy

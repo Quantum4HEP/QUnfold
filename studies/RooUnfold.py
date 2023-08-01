@@ -10,6 +10,10 @@
 
 # Input variables
 distributions=["breit-wigner", "normal", "double-peaked"]
+samples=10000
+max_bin=10
+min_bin=-10
+bins=40
 
 # Standard modules
 import os
@@ -21,15 +25,33 @@ import numpy as np
 # Utils modules
 from utils.custom_logger import INFO
 from utils.ROOT_converter import (
-    array_to_TH1,
-    TH1_to_array,
-    array_to_TH2,
+    TH1_to_array
 )
-from utils.helpers import load_RooUnfold, load_data
+from functions.generator import generate_standard, generate_double_peaked
 
 # ROOT settings
-load_RooUnfold()
 r.gROOT.SetBatch(True)
+
+def plot_response(response, distr):
+    """
+    Plots the unfolding response matrix.
+
+    Args:
+        response (ROOT.RooUnfoldResponse): the response matrix to be plotted.
+        distr (distr): the distribution to be generated.
+    """
+
+    # Basic properties
+    m_response_save = response.HresponseNoOverflow()
+    m_response_canvas = r.TCanvas()
+    m_response_save.SetStats(0)  # delete statistics box
+    m_response_save.GetXaxis().SetTitle("Truth")
+    m_response_save.GetYaxis().SetTitle("Measured")
+    m_response_save.Draw("colz")  # to have heatmap
+
+    # Save canvas
+    m_response_canvas.Draw()
+    m_response_canvas.SaveAs("../img/RooUnfold/{}/response.png".format(distr))
 
 
 def unfolder(type, m_response, h_meas, distr):
@@ -51,19 +73,15 @@ def unfolder(type, m_response, h_meas, distr):
 
     # Unfolding type settings
     if type == "MI":
-        print("- Unfolding with matrix inversion...")
         unfolder = r.RooUnfoldInvert("MI", "Matrix Inversion")
     elif type == "SVD":
-        print("- Unfolding with SVD Tikhonov method...")
         unfolder = r.RooUnfoldSvd("SVD", "SVD Tikhonov")
         unfolder.SetKterm(2)
     elif type == "IBU":
-        print("- Unfolding with Iterative Bayesian Unfolding method...")
         unfolder = r.RooUnfoldBayes("IBU", "Iterative Bayesian")
         unfolder.SetIterations(4)
         unfolder.SetSmoothing(0)
     elif type == "B2B":
-        print("- Unfolding with Bin-by-Bin method...")
         unfolder = r.RooUnfoldBinByBin("B2B", "Bin-y-Bin")
 
     # Generic unfolding settings
@@ -72,7 +90,6 @@ def unfolder(type, m_response, h_meas, distr):
     unfolder.SetMeasured(h_meas)
     histo = unfolder.Hunfold()
     histo.SetName("unfolded_{}".format(type))
-    histo_mi_bin_c = TH1_to_array(histo)
 
     # Save the unfolded histogram
     bin_contents = TH1_to_array(histo)
@@ -138,36 +155,29 @@ def main():
             os.makedirs("../img/RooUnfold/{}".format(distr))
         if not os.path.exists("output/RooUnfold/{}".format(distr)):
             os.makedirs("output/RooUnfold/{}".format(distr))
-
-        # Load histograms and response from file
-        (
-            np_truth_bin_content,
-            np_meas_bin_content,
-            np_response,
-            np_binning,
-        ) = load_data(distr)
-        bins = int(np_binning[0])
-        min_bin = int(np_binning[1])
-        max_bin = int(np_binning[2])
-
-        # Convert to ROOT variables
-        h_truth = array_to_TH1(np_truth_bin_content, bins, min_bin, max_bin, "truth")
-        h_meas = array_to_TH1(np_meas_bin_content, bins, min_bin, max_bin, "meas")
-        h_response = array_to_TH2(
-            np_response, bins, min_bin, max_bin, bins, min_bin, max_bin, "response"
-        )
-
-        # Initialize the RooUnfold response matrix from the input data
-        m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)
-        m_response.UseOverflow(False)  # disable the overflow bin which takes the outliers
+            
+        # Generating the distribution
+        truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
+        meas = r.TH1F("Measured", "", bins, min_bin, max_bin)
+        response = r.RooUnfoldResponse(bins, min_bin, max_bin)
+        
+        if any(d in distr for d in ["normal", "breit-wigner"]):
+            truth, meas = generate_standard(truth, meas, response, "data", distr)
+            response = generate_standard(truth, meas, response, "response", distr)
+        elif any(d in distr for d in ["double-peaked"]):
+            truth, meas = generate_double_peaked(truth, meas, response, "data")
+            response = generate_double_peaked(truth, meas, response, "response")
+        response.UseOverflow(False)
+            
+        plot_response(response, distr)
 
         # Performing the unfolding with different methods
         for unf_type in ["MI", "IBU", "SVD", "B2B"]:
-            unfolded = unfolder(unf_type, m_response, h_meas, distr)
-            plot_unfolding(h_truth, h_meas, unfolded, distr)
+            unfolded = unfolder(unf_type, response, meas, distr)
+            plot_unfolding(truth, meas, unfolded, distr)
             
         # Deleting histograms
-        del h_meas, h_truth, h_response
+        del meas, truth, response
         
         print()
     print("Done.")

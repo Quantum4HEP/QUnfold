@@ -94,15 +94,22 @@ def test_TH1_to_array():
     """
 
     # Variables
-    histo = r.TH1F("Test", ";X;Entries", 5, 0.5, 5.5)
+    histo = r.TH1F("Test", ";X;Entries", 5, 0, 5)
     for i in range(histo.GetNbinsX()):
         histo.SetBinContent(i + 1, i)
-    bin_contents = TH1_to_array(histo)
-
-    # Tests
+    
+    # Test no overflow case
+    bin_contents = TH1_to_array(histo, overflow=False)
     assert bin_contents.shape[0] == 5  # array size
     nptest.assert_array_equal(
         bin_contents, np.array([0, 1, 2, 3, 4])
+    )  # bin contents equality
+    
+    # Test overflow case
+    bin_contents = TH1_to_array(histo, overflow=True)
+    assert bin_contents.shape[0] == 7  # array size
+    nptest.assert_array_equal(
+        bin_contents, np.array([0, 0, 1, 2, 3, 4, 0])
     )  # bin contents equality
 
 
@@ -118,7 +125,7 @@ def test_TH2_to_array():
             histo.SetBinContent(i + 1, j + 1, i * j)
 
     # Convert TH2F to NumPy array
-    numpy_array = TH2_to_array(histo)
+    numpy_array = TH2_to_array(histo, overflow=False)
 
     # Tests
     assert numpy_array.shape == (5, 3)  # array shape
