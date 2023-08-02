@@ -50,7 +50,7 @@ def QUnfold_unfolder_and_plot(
     # Unfold
     unfolder = QUnfoldQUBO(response, meas)
     if unf_type == "SA":
-        unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
+        unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=200)
         title = "Simulated Annealing Unfolding"
 
     # Plot results
