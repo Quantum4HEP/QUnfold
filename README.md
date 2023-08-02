@@ -126,7 +126,7 @@ Distributions will be unfolded using `RooUnfold` and the 4 classical common meth
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_MI.png" width="350" style="display:inline-block;">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_SVD.png" width="350" style="display:inline-block;">
   </div>
-</div>
+</div><br>
 
 Distributions will be unfolded using `QUnfold` with the following methods:
 
@@ -151,7 +151,7 @@ The output data will be saved into the `studies/output/benchmarks` directory, wh
   <div>
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="450" style="display:inline-block;">
   </div>
-</div>
+</div><br>
 
 ### Tests
 
