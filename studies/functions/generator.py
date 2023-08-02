@@ -10,12 +10,8 @@
 
 # Followed the guide at: https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/#Aproximating-Smearing
 
-# STD modules
-import os
-
 # Data science modules
 import ROOT as r
-import numpy as np
 
 # Utils modules
 from functions.helpers import load_RooUnfold
@@ -25,7 +21,7 @@ load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 
-def smear(xt, eff=1):
+def smear(xt, bias, smearing, eff=1):
     """
     Applies a Gaussian smearing effect to a given input value, xt.
 
@@ -39,11 +35,11 @@ def smear(xt, eff=1):
     x = r.gRandom.Rndm()
     if x > eff:
         return None
-    xsmear = r.gRandom.Gaus(2.5, 0.2)  #  bias and smear
+    xsmear = r.gRandom.Gaus(bias, smearing)
     return xt + xsmear
 
 
-def generate_standard(truth, meas, response, type, distr, samples):
+def generate_standard(truth, meas, response, type, distr, samples, bias, smearing):
     """
     Generate data for standard distributions.
 
@@ -54,6 +50,8 @@ def generate_standard(truth, meas, response, type, distr, samples):
         type (str): type of data generation (data or response).
         distr (distr): the distribution to be generated.
         samples (int): number of samples to be generated.
+        bias (float): bias of the distortion.
+        smearing (float): smearing of the distortion.
 
     Returns:
         ROOT.TH1F: the filled truth histogram.
@@ -73,7 +71,7 @@ def generate_standard(truth, meas, response, type, distr, samples):
             elif distr == "exponential":
                 xt = r.gRandom.Exp(1.0)
             truth.Fill(xt)
-            x = smear(xt)
+            x = smear(xt, bias, smearing)
             if x != None:
                 meas.Fill(x)
 
@@ -90,7 +88,7 @@ def generate_standard(truth, meas, response, type, distr, samples):
                 xt = r.gRandom.Gaus(0.0, 2.0)
             elif distr == "exponential":
                 xt = r.gRandom.Exp(1.0)
-            x = smear(xt)
+            x = smear(xt, bias, smearing)
             if x != None:
                 response.Fill(x, xt)
             else:
@@ -156,6 +154,7 @@ def generate_double_peaked(truth, meas, response, type, samples):
 
         return response
 
+
 def generate(distr, bins, min_bin, max_bin, samples):
     """
     Generate simulated data and response for a given distribution.
@@ -172,22 +171,30 @@ def generate(distr, bins, min_bin, max_bin, samples):
         ROOT.TH1F: The histogram representing the measured distribution.
         ROOT.RooUnfoldResponse: The response object used for unfolding.
     """
-    
+
     # Case for exponential
     if distr == "exponential":
-        min_bin = 0
+        bias = 0
+        smearing = 0.8
+    else:
+        bias = -2.5
+        smearing = 0.2
 
     # Initialize variables
     truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
     meas = r.TH1F("Measured", "", bins, min_bin, max_bin)
     response = r.RooUnfoldResponse(bins, min_bin, max_bin)
-    
+
     # Fill histograms
     if any(d in distr for d in ["normal", "breit-wigner", "exponential"]):
-        truth, meas = generate_standard(truth, meas, response, "data", distr, samples)
-        response = generate_standard(truth, meas, response, "response", distr, samples)
+        truth, meas = generate_standard(
+            truth, meas, response, "data", distr, samples, bias, smearing
+        )
+        response = generate_standard(
+            truth, meas, response, "response", distr, samples, bias, smearing
+        )
     elif any(d in distr for d in ["double-peaked"]):
         truth, meas = generate_double_peaked(truth, meas, response, "data", samples)
         response = generate_double_peaked(truth, meas, response, "response", samples)
-    
+
     return truth, meas, response

@@ -23,8 +23,7 @@ from hypothesis.extra.numpy import arrays
 import numpy.testing as nptest
 
 # Utils modules
-sys.path.append("..")
-from studies.functions.ROOT_converter import (
+from functions.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
     array_to_TH2,
@@ -97,14 +96,14 @@ def test_TH1_to_array():
     histo = r.TH1F("Test", ";X;Entries", 5, 0, 5)
     for i in range(histo.GetNbinsX()):
         histo.SetBinContent(i + 1, i)
-    
+
     # Test no overflow case
     bin_contents = TH1_to_array(histo, overflow=False)
     assert bin_contents.shape[0] == 5  # array size
     nptest.assert_array_equal(
         bin_contents, np.array([0, 1, 2, 3, 4])
     )  # bin contents equality
-    
+
     # Test overflow case
     bin_contents = TH1_to_array(histo, overflow=True)
     assert bin_contents.shape[0] == 7  # array size

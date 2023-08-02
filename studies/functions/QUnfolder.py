@@ -3,7 +3,7 @@
 
 # ---------------------- Metadata ----------------------
 #
-# File name:  unfolding.py
+# File name:  QUnfold.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
 # Date:       2023-07-27
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
@@ -19,7 +19,9 @@ sys.path.append("../src")
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
 
-def QUnfold_unfolder_and_plot(unf_type, response, meas, truth, distr, bins, min_bin, max_bin):
+def QUnfold_unfolder_and_plot(
+    unf_type, response, meas, truth, distr, bins, min_bin, max_bin
+):
     """
     Unfolds the measured data using QUnfold.
 
@@ -36,32 +38,28 @@ def QUnfold_unfolder_and_plot(unf_type, response, meas, truth, distr, bins, min_
     Returns:
         numpy.Array: The unfolded data obtained from the unfolding process.
     """
-    
+
     # Create dirs
     if not os.path.exists("../img/QUnfold/{}".format(distr)):
         os.makedirs("../img/QUnfold/{}".format(distr))
-    
+
     # Variables
     unfolded = None
     title = ""
-    
+
     # Unfold
     unfolder = QUnfoldQUBO(response, meas)
     if unf_type == "SA":
         unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
         title = "Simulated Annealing Unfolding"
-        
+
     # Plot results
     plotter = QUnfoldPlotter(
         unfolder=unfolder,
         truth=truth,
         binning=np.linspace(min_bin, max_bin, bins + 1),
     )
-    plotter.savePlot(
-        "../img/QUnfold/{}/unfolded_{}.png".format(distr, unf_type), title
-    )
-    plotter.saveResponse(
-        "../img/QUnfold/{}/response.png".format(distr, unf_type)
-    )
-            
+    plotter.savePlot("../img/QUnfold/{}/unfolded_{}.png".format(distr, unf_type), title)
+    plotter.saveResponse("../img/QUnfold/{}/response.png".format(distr))
+
     return unfolded

@@ -109,9 +109,13 @@ def TH2_to_array(histo, overflow=True):
     else:
         x_start, x_stop = 1, histo.GetNbinsX() + 1
         y_start, y_stop = 1, histo.GetNbinsY() + 1
-        
-    return np.array([[histo.GetBinContent(i, j) for j in range (y_start, y_stop)] 
-                     for i in range(x_start, x_stop)])
+
+    return np.array(
+        [
+            [histo.GetBinContent(i, j) for j in range(y_start, y_stop)]
+            for i in range(x_start, x_stop)
+        ]
+    )
 
 
 def remove_zero_entries_bins(g0, f0, response):

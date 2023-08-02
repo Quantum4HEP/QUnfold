@@ -18,9 +18,8 @@ import ROOT as r
 import pytest
 
 # Utils modules
-sys.path.append("..")
-from studies.functions.helpers import load_RooUnfold, load_data
-from studies.functions.ROOT_converter import array_to_TH1, array_to_TH2
+from functions.helpers import load_RooUnfold
+from functions.ROOT_converter import array_to_TH1, array_to_TH2
 
 # ROOT settings
 load_RooUnfold()

@@ -8,17 +8,11 @@
 # Date:       2023-06-26
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# STD modules
-import argparse as ap
-import os
-
 # Data science modules
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import chisquare
-
-# Utils modules
-from functions.custom_logger import INFO
+import seaborn as sns
 
 
 def plot_errorbar(bin_edges, bin_contents, color, marker, method, chi2):
@@ -77,8 +71,8 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         distr (distr): the generated distribution.
     """
 
-    # Get binning information
-    
+    # Use Seaborn style
+    sns.set()
 
     # Plot truth distribution
     bin_edges = np.linspace(min_bin, max_bin, bins + 1)
@@ -97,9 +91,7 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
     for method, unfolded in data.items():
 
         # Plot each unfolding method
-        truth = np.where(
-            truth == 0, 1e-6, truth
-        )  # Trick for chi2
+        truth = np.where(truth == 0, 1e-6, truth)  # Trick for chi2
         chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":
             plot_errorbar(
@@ -117,12 +109,10 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         # Plot settings
         plt.xlabel("Bins")
         plt.ylabel("Unfolded distribution")
+        plt.tight_layout()
         plt.legend()
 
         # Save plot
         plt.savefig("../img/comparisons/{}.png".format(distr))
 
     plt.close()
-
-
-

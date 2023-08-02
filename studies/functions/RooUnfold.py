@@ -3,7 +3,7 @@
 
 # ---------------------- Metadata ----------------------
 #
-# File name:  unfolding.py
+# File name:  RooUnfold.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
 # Date:       2023-06-13
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
@@ -17,6 +17,7 @@ import ROOT as r
 # ROOT settings
 r.gROOT.SetBatch(True)
 
+
 def RooUnfold_plot_response(response, distr):
     """
     Plots the unfolding response matrix.
@@ -25,7 +26,7 @@ def RooUnfold_plot_response(response, distr):
         response (ROOT.RooUnfoldResponse): the response matrix to be plotted.
         distr (distr): the distribution to be generated.
     """
-    
+
     # Creating the path
     if not os.path.exists("../img/RooUnfold/{}".format(distr)):
         os.makedirs("../img/RooUnfold/{}".format(distr))
