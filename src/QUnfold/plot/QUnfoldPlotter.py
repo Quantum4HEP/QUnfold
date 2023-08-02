@@ -146,8 +146,10 @@ class QUnfoldPlotter:
         )
 
         # Unfolded distribution
+        marker_offset = (self.binning[1] - self.binning[0]) / 2.0
+        markers = self.binning - marker_offset
         plt.errorbar(
-            x=self.binning[:-1],
+            x=markers[:-1],
             y=self.unfolded,
             yerr=np.sqrt(self.unfolded),
             color="green",
