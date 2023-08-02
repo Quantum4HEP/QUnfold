@@ -102,17 +102,16 @@ source HEP_deps/root/bin/thisroot.sh
 
 ### Run the analysis
 
-The whole analysis will generate pseudo-data following common distributions (double-peaked, normal, etc...).
+To run the whole analysis script:
 
-<div align="center">
-  <p><b>Example of generated pseudo-data for a double-peaked distribution</b></p>
-  <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/true-reco.png" width="350" style="display:inline-block;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/data/double-peaked/response.png" width="350" style="display:inline-block;">
-  </div>
-</div>
+```shell
+cd studies
+tox -e analysis
+```
 
-It will unfold the distributions using `RooUnfold` and the 4 classical common methods:
+Pseudo-data will be generated following common distributions (double-peaked, normal, etc...).
+
+Distributions will be unfolded using `RooUnfold` and the 4 classical common methods:
 
 - Matrix inversion
 - Iterative Bayesian unfolding (4 iterations)
@@ -129,11 +128,11 @@ It will unfold the distributions using `RooUnfold` and the 4 classical common me
   </div>
 </div>
 
-It will unfold the distributions using `QUnfold` with the following methods:
+Distributions will be unfolded using `QUnfold` with the following methods:
 
 - Simulated annealing (lambda=0.2, num_reads=100)
 
-Finally, comparisons among each unfolding method of the previous studies are performed
+Finally, comparisons among each unfolding method of the previous studies will be performed.
 
 The output plots and chi2 for each distribution will be saved into the `img` directory.
 
