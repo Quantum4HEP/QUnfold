@@ -19,10 +19,7 @@
 - [Studies](#studies)
   - [Setup the environment](#setup-the-environment)
   - [Install HEP dependencies](#install-hep-dependencies)
-  - [Generate pseudo-data](#generate-pseudo-data)
-  - [`RooUnfold`](#roounfold)
-  - [Benchmarks](#benchmarks)
-  - [Comparisons](#comparisons)
+  - [Run the analysis](#run-the-analysis)
   - [Tests](#tests)
 - [Credits](#credits)
   - [Main developers](#main-developers)
@@ -65,10 +62,9 @@ To setup the `conda` conda environment to work with the repository (only the fir
 conda create --name qunfold-dev python==3.10
 conda activate qunfold-dev
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pip cache purge && pip check
 ```
-
-> :warning: you can also install developer requirements if you need: `pip install -r requirements.txt`.
 
 and every time you open a new shell:
 
@@ -104,23 +100,9 @@ source HEP_deps/root/bin/thisroot.sh
 
 > :warning: If you want to avoid this, install `ROOT` in your computer.
 
-### Generate pseudo-data
+### Run the analysis
 
-To generate new pseudo-data:
-
-```shell
-tox -e generator
-```
-
-To modify the generator parameters (samples, distribution...) open the `generator/generator.sh` script and modify it.
-
-Pseudo-data used for testing the unfolding lie into the `data` directory. Each sub-directory contains truth data, measured data and response matrix for each generated distribution.
-
-Current distributions supported for generation:
-
-- [Breit-Wigner](https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution)
-- [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
-- Double peaked
+The whole analysis will generate pseudo-data following common distributions (double-peaked, normal, etc...).
 
 <div align="center">
   <p><b>Example of generated pseudo-data for a double-peaked distribution</b></p>
@@ -130,22 +112,15 @@ Current distributions supported for generation:
   </div>
 </div>
 
-### `RooUnfold`
+It will unfold the distributions using `RooUnfold` and the 4 classical common methods:
 
-This section is related to the `RooUnfold` studies. Be sure of being into the `studies` directory before proceeding.
-
-To run classical unfolding example with `RooUnfold:
-
-```shell
-tox -e RooUnfold
-```
-
-open the `RooUnfold.py` bash script to modify the unfolding parameters.
-
-Data of the unfolded histogram will be saved into the `studies/output/RooUnfold` directory, while comparisons among measured, truth and unfolded (reco) histograms into the `img/RooUnfold` directory.
+- Matrix inversion
+- Iterative Bayesian unfolding (4 iterations)
+- SVD (k=3)
+- Bin-to-Bin
 
 <div align="center">
-  <p><b>Example of unfolding with different standard methods for a double-peaked distribution</b></p>
+  <p><b>Example of `RooUnfold` unfolding for a double-peaked distribution</b></p>
   <div>
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_B2B.png" width="350" style="display:inline-block;">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_IBU.png" width="350" style="display:inline-block;">
@@ -154,24 +129,13 @@ Data of the unfolded histogram will be saved into the `studies/output/RooUnfold`
   </div>
 </div>
 
-### Comparisons
+It will unfold the distributions using `QUnfold` with the following methods:
 
-Comparisons among each unfolding method of the previous studies are performed as one of the latest steps. To run comparisons:
+- Simulated annealing (lambda=0.2, num_reads=100)
 
-```shell
-tox -e comparisons
-```
+Finally, comparisons among each unfolding method of the previous studies are performed
 
-open the `comparisons.py` bash script to modify the parameters.
-
-The output plots and chi2 for each distribution will be saved into the `img/comparisons` directory.
-
-<div align="center">
-  <p><b>Performance comparisons among different unfolding methods for a double-peaked distribution</b></p>
-  <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/comparisons/double-peaked.png" width="450" style="display:inline-block;">
-  </div>
-</div>
+The output plots and chi2 for each distribution will be saved into the `img` directory.
 
 ### Benchmarks
 
