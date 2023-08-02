@@ -13,11 +13,7 @@
 # Data science modules
 import ROOT as r
 
-# Utils modules
-from functions.helpers import load_RooUnfold
-
 # ROOT settings
-load_RooUnfold()
 r.gROOT.SetBatch(True)
 
 

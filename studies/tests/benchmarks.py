@@ -17,77 +17,49 @@ import ROOT as r
 # Testing modules
 import pytest
 
-# Utils modules
-from functions.helpers import load_RooUnfold
-from functions.ROOT_converter import array_to_TH1, array_to_TH2
+# My modules
+sys.path.append("..")
+sys.path.append("../src")
+from studies.functions.ROOT_converter import TH1_to_array, TH2_to_array
+from studies.functions.generator import generate
+from studies.functions.custom_logger import ERROR
+from src.QUnfold import QUnfoldQUBO
 
-# ROOT settings
-load_RooUnfold()
+# RooUnfold settings
+loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
+if not loaded_RooUnfold == 0:
+    ERROR("RooUnfold not found!")
+    sys.exit(0)
 
 
-def load_input(request):
+def load_input(request, software):
     """
     Load and prepare input data for the benchmarking.
 
     Args:
         request: The pytest request object.
+        software: Specific the unfolding library used.
 
     Returns:
         Tuple: A tuple containing the RooUnfold response matrix (m_response) and the measurement histogram (h_meas).
     """
 
-    # Read input data
+    # Variables
     distr = request.config.getoption("--distr")
-    (
-        np_truth_bin_content,
-        np_meas_bin_content,
-        np_response,
-        np_binning,
-    ) = load_data(distr)
-    bins = int(np_binning[0])
-    min_bin = int(np_binning[1])
-    max_bin = int(np_binning[2])
+    bins = 40
+    min_bin = -10
+    max_bin = 10
+    if distr == "exponential":
+        min_bin = 0
+    truth, meas, response = generate(distr, bins, min_bin, max_bin, 10000)
 
-    # Convert to ROOT variables
-    h_truth = array_to_TH1(np_truth_bin_content, bins, min_bin, max_bin, "truth")
-    h_meas = array_to_TH1(np_meas_bin_content, bins, min_bin, max_bin, "meas")
-    h_response = array_to_TH2(
-        np_response, bins, min_bin, max_bin, bins, min_bin, max_bin, "response"
-    )
+    # Extra settings for QUnfold
+    if software == "QUnfold":
+        truth = TH1_to_array(truth, overflow=True)
+        meas = TH1_to_array(meas, overflow=True)
+        response = TH2_to_array(response.Hresponse(), overflow=True)
 
-    # Initialize the RooUnfold response matrix from the input data
-    m_response = r.RooUnfoldResponse(h_meas, h_truth, h_response)
-    m_response.UseOverflow(False)
-
-    return m_response, h_meas
-
-
-def RooUnfoldInvert(m_response, h_meas):
-    """
-    Inverts the RooUnfold response matrix using the provided measurement histogram.
-
-    Args:
-        m_response (ROOT.RooUnfoldResponse): The RooUnfold response matrix.
-        h_meas (ROOT.TH1): The measurement histogram.
-    """
-
-    r.RooUnfoldInvert(m_response, h_meas)
-
-
-def test_RooUnfoldInvert(request, benchmark):
-    """
-    Perform benchmarking of the RooUnfoldInvert function using the provided input data.
-
-    Args:
-        request: The pytest request object.
-        benchmark: The benchmark fixture.
-    """
-
-    # Read input data
-    m_response, h_meas = load_input(request)
-
-    # Perform benchmarking
-    result = benchmark(RooUnfoldInvert, m_response, h_meas)
+    return response, meas
 
 
 def RooUnfoldSvd(m_response, h_meas):
@@ -99,6 +71,7 @@ def RooUnfoldSvd(m_response, h_meas):
         h_meas (ROOT.TH1): The measurement histogram.
     """
 
+    m_response.UseOverflow(False)
     r.RooUnfoldSvd(m_response, h_meas, 3)
 
 
@@ -111,10 +84,7 @@ def test_RooUnfoldSvd(request, benchmark):
         benchmark: The benchmark fixture.
     """
 
-    # Read input data
-    m_response, h_meas = load_input(request)
-
-    # Perform benchmarking
+    m_response, h_meas = load_input(request, "RooUnfold")
     result = benchmark(RooUnfoldSvd, m_response, h_meas)
 
 
@@ -127,6 +97,7 @@ def RooUnfoldBayes(m_response, h_meas):
         h_meas (ROOT.TH1): The measurement histogram.
     """
 
+    m_response.UseOverflow(False)
     r.RooUnfoldBayes(m_response, h_meas, 4, 0)
 
 
@@ -139,10 +110,7 @@ def test_RooUnfoldBayes(request, benchmark):
         benchmark: The benchmark fixture.
     """
 
-    # Read input data
-    m_response, h_meas = load_input(request)
-
-    # Perform benchmarking
+    m_response, h_meas = load_input(request, "RooUnfold")
     result = benchmark(RooUnfoldBayes, m_response, h_meas)
 
 
@@ -155,6 +123,7 @@ def RooUnfoldBinByBin(m_response, h_meas):
         h_meas (ROOT.TH1): The measurement histogram.
     """
 
+    m_response.UseOverflow(False)
     r.RooUnfoldBinByBin(m_response, h_meas)
 
 
@@ -167,11 +136,34 @@ def test_RooUnfoldBinByBin(request, benchmark):
         benchmark: The benchmark fixture.
     """
 
-    # Read input data
-    m_response, h_meas = load_input(request)
-
-    # Perform benchmarking
+    m_response, h_meas = load_input(request, "RooUnfold")
     result = benchmark(RooUnfoldBinByBin, m_response, h_meas)
+
+
+def QUnfoldSimulated(m_response, h_meas):
+    """
+    Applies the simulated annealing unfolding method to the provided measurement histogram.
+
+    Args:
+        m_response (ROOT.RooUnfoldResponse): The RooUnfold response matrix.
+        h_meas (ROOT.TH1): The measurement histogram.
+    """
+
+    unfolder = QUnfoldQUBO(m_response, h_meas)
+    result = unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
+
+
+def test_QUnfoldSimulated(request, benchmark):
+    """
+    Perform benchmarking of the QUnfoldSimulated function using the provided input data.
+
+    Args:
+        request: The pytest request object.
+        benchmark: The benchmark fixture.
+    """
+
+    m_response, h_meas = load_input(request, "QUnfold")
+    result = benchmark(QUnfoldSimulated, m_response, h_meas)
 
 
 # Pytest main

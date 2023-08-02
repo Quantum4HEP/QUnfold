@@ -23,7 +23,8 @@ from hypothesis.extra.numpy import arrays
 import numpy.testing as nptest
 
 # Utils modules
-from functions.ROOT_converter import (
+sys.path.append("..")
+from studies.functions.ROOT_converter import (
     array_to_TH1,
     TH1_to_array,
     array_to_TH2,

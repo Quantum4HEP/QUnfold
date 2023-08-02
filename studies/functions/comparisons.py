@@ -91,7 +91,7 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
     for method, unfolded in data.items():
 
         # Plot each unfolding method
-        truth = np.where(truth == 0, 1e-6, truth)  # Trick for chi2
+        truth = np.where(truth == 0, 1, truth)  # Trick for chi2
         chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":
             plot_errorbar(
@@ -104,6 +104,10 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         elif method == "SVD":
             plot_errorbar(
                 bin_edges - marker_offset, unfolded, "green", "o", method, chi2_dof
+            )
+        elif method == "SA":
+            plot_errorbar(
+                bin_edges - marker_offset, unfolded, "purple", "o", method, chi2_dof
             )
 
         # Plot settings

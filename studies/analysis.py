@@ -9,17 +9,21 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Input variables
-distributions = [
-    "double-peaked"
-]  # "breit-wigner", "normal", "double-peaked", "exponential"
+distributions = ["breit-wigner", "normal", "double-peaked", "exponential"]
 samples = 10000
 max_bin = 10
 min_bin = -10
 bins = 40
 
+# STD modules
+import sys
+
+# Data science modules
+import ROOT as r
+
 # My modules
 from functions.ROOT_converter import TH1_to_array, TH2_to_array
-from functions.custom_logger import INFO
+from functions.custom_logger import INFO, ERROR
 from functions.generator import generate
 from functions.RooUnfold import (
     RooUnfold_unfolder,
@@ -28,6 +32,12 @@ from functions.RooUnfold import (
 )
 from functions.QUnfolder import QUnfold_unfolder_and_plot
 from functions.comparisons import plot_comparisons
+
+# RooUnfold settings
+loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
+if not loaded_RooUnfold == 0:
+    ERROR("RooUnfold not found!")
+    sys.exit(0)
 
 
 def main():
