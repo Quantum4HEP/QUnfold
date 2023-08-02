@@ -52,7 +52,13 @@ def compute_chi2_dof(bin_contents, truth_bin_contents):
         float: The chi-squared per degree of freedom.
     """
 
-    chi2, pvalue = chisquare(
+    # Trick for chi2 convergence
+    null_indices = truth_bin_contents == 0
+    truth_bin_contents[null_indices] += 1
+    bin_contents[null_indices] += 1
+
+    # Compute chi2
+    chi2, _ = chisquare(
         bin_contents,
         np.sum(bin_contents) / np.sum(truth_bin_contents) * truth_bin_contents,
     )
@@ -91,7 +97,6 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
     for method, unfolded in data.items():
 
         # Plot each unfolding method
-        truth = np.where(truth == 0, 1, truth)  # Trick for chi2
         chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":
             plot_errorbar(

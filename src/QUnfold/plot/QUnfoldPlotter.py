@@ -12,6 +12,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from scipy.stats import chisquare
 
 
 class QUnfoldPlotter:
@@ -80,6 +81,33 @@ class QUnfoldPlotter:
         plt.savefig(path)
         plt.close()
 
+    def _compute_chi2_dof(self, unfolded, truth):
+        """
+        Compute the chi-squared per degree of freedom (chi2/dof) between two distributions.
+
+        Args:
+            unfolded (numpy.array): The unfolded distribution bin contents.
+            truth (numpy.array): The truth distribution bin contents.
+
+        Returns:
+            float: The chi-squared per degree of freedom.
+        """
+
+        # Trick for chi2 convergence
+        null_indices = truth == 0
+        truth[null_indices] += 1
+        unfolded[null_indices] += 1
+
+        # Compute chi2
+        chi2, _ = chisquare(
+            unfolded,
+            np.sum(unfolded) / np.sum(truth) * truth,
+        )
+        dof = len(unfolded) - 1
+        chi2_dof = chi2 / dof
+
+        return chi2_dof
+
     def __plotSetup(self, method):
         """
         Create an histogram comparison among measured, truth and unfolded distributions, with the chi2 among unfolded and truth distribution.
@@ -117,17 +145,18 @@ class QUnfoldPlotter:
             color="red",
         )
 
-        # Unfolded histogram
-        plt.step(
-            x=np.concatenate(
-                (
-                    [self.binning[0] - (self.binning[1] - self.binning[0])],
-                    self.binning[:-1],
-                )
-            ),
-            y=np.concatenate(([self.unfolded[0]], self.unfolded)),
-            label="Unfolded",
+        # Unfolded distribution
+        plt.errorbar(
+            x=self.binning[:-1],
+            y=self.unfolded,
+            yerr=np.sqrt(self.unfolded),
             color="green",
+            marker="o",
+            ms=5,
+            label=r"{} ($\chi^2 = {:.2f}$)".format(
+                method, self._compute_chi2_dof(self.unfolded, self.truth)
+            ),
+            linestyle="None",
         )
 
         # Plot settings
