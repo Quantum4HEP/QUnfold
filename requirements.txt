@@ -2,3 +2,5 @@ dwave-ocean-sdk
 pyqubo
 matplotlib
 seaborn
+numpy
+scipy

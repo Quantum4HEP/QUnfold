@@ -1,110 +1,86 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# ---------------------- Metadata ----------------------
-#
-# File name:  analysis.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-08-02
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
+import ROOT
+import numpy as np
 
-# Input variables
-distributions = ["breit-wigner", "normal", "double-peaked", "exponential"]
+from generator import *
+from roounfold import *
+from qunfold import *
+from root_converter import *
+
+
+# Load RooUnfold library from local installation
+ROOT.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
+
+# Get ROOT random generator and set random seed
+gRandom = ROOT.gRandom
+gRandom.SetSeed(42)
+
+############################## CONFIG INPUT VARIABLES ############################
+##################################################################################
+distributions = {
+    "normal": {
+        "generator": gRandom.Gaus,
+        "parameters": (5.0, 1.4),  # (mu, sigma)
+    },
+    "breit-wigner": {
+        "generator": gRandom.BreitWigner,
+        "parameters": (5.3, 2.1),  # (mu, gamma)
+    },
+    "exponential": {
+        "generator": gRandom.Exp,
+        "parameters": (2.5,),  # (tau,)
+    },
+    "double-peaked": {
+        "generator": gRandom.Gaus,
+        "parameters": ((3.4, 1.1), (6.7, 0.8)),  # ((mu1, sigma1), (mu2, sigma2))
+    },
+}
 samples = 10000
-max_bin = 10
-min_bin = -10
 bins = 40
-
-# STD modules
-import sys
-
-# Data science modules
-import ROOT as r
-
-# My modules
-from functions.ROOT_converter import TH1_to_array, TH2_to_array
-from functions.custom_logger import INFO, ERROR
-from functions.generator import generate
-from functions.RooUnfold import (
-    RooUnfold_unfolder,
-    RooUnfold_plot,
-    RooUnfold_plot_response,
-)
-from functions.QUnfolder import QUnfold_unfolder_and_plot
-from functions.comparisons import plot_comparisons
-
-# RooUnfold settings
-loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
-if not loaded_RooUnfold == 0:
-    ERROR("RooUnfold not found!")
-    sys.exit(0)
+min_bin = 0.0
+max_bin = 10.0
+bias = -0.8
+smear = 0.4
+eff = 1.0
+##################################################################################
+##################################################################################
 
 
 def main():
-
-    # Global variables
-    global min_bin
-
-    # Iterate over distributions
     for distr in distributions:
-
-        # Exponential distribution settings
-        if distr == "exponential":
-            min_bin = 0
-
-        # Generate data
-        INFO("Unfolding the {} distribution".format(distr))
-        truth, meas, response = generate(distr, bins, min_bin, max_bin, samples)
-
-        ########################## Classic ###########################
-
-        # RooUnfold settings
-        r_response = response
-        RooUnfold_plot_response(r_response, distr)
-        r_response.UseOverflow(False)
-
-        # Matrix inversion (MI)
-        unfolded_MI = RooUnfold_unfolder("MI", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_MI, distr)
-
-        # Iterative Bayesian unfolding (IBU)
-        unfolded_IBU = RooUnfold_unfolder("IBU", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_IBU, distr)
-
-        # Tikhonov unfolding (SVD)
-        unfolded_SVD = RooUnfold_unfolder("SVD", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_SVD, distr)
-
-        # Bin-to-Bin unfolding (B2B)
-        unfolded_B2B = RooUnfold_unfolder("B2B", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_B2B, distr)
-
-        ########################## Quantum ###########################
-
-        # QUnfold settings
-        truth = TH1_to_array(truth, overflow=True)
-        meas = TH1_to_array(meas, overflow=True)
-        response = TH2_to_array(response.Hresponse(), overflow=True)
-
-        # Simulated annealing (SA)
-        unfolded_SA = QUnfold_unfolder_and_plot(
-            "SA", response, meas, truth, distr, bins, min_bin, max_bin
+        true, meas, response = generate_data(
+            distr, samples, bins, min_bin, max_bin, bias, smear, eff
         )
+        roounfold_plot_response(response, distr)
 
-        ########################## Compare ###########################
+        ########################## Classical ##########################
+        # Response Matrix Inversion (RMI)
+        unfolded_RMI = roounfold_unfolder(response, meas, method="RMI")
+        roounfold_plot_results(true, meas, unfolded_RMI, distr)
 
-        # Comparison settings
-        data = {
-            "IBU4": TH1_to_array(unfolded_IBU, overflow=False),
-            "B2B": TH1_to_array(unfolded_B2B, overflow=False),
-            "MI": TH1_to_array(unfolded_MI, overflow=False),
-            "SVD": TH1_to_array(unfolded_SVD, overflow=False),
-            "SA": unfolded_SA[1:-1],
-        }
+        # Iterative Bayesian Unfolding (IBU)
+        unfolded_IBU = roounfold_unfolder(response, meas, method="IBU")
+        roounfold_plot_results(true, meas, unfolded_IBU, distr)
 
-        # Plot comparisons
-        plot_comparisons(data, distr, truth[1:-1], bins, min_bin, max_bin)
-        print("Done", end="\n\n")
+        # SVD Tikhonov unfolding (SVD)
+        unfolded_SVD = roounfold_unfolder(response, meas, method="SVD")
+        roounfold_plot_results(true, meas, unfolded_SVD, distr)
+
+        # Bin-by-Bin unfolding (B2B)
+        unfolded_B2B = roounfold_unfolder(response, meas, method="B2B")
+        roounfold_plot_results(true, meas, unfolded_B2B, distr)
+
+        ########################### Quantum ###########################
+        response = TMatrix_to_array(response.Mresponse())
+        meas = TH1_to_array(meas, overflow=False)
+        true = TH1_to_array(true, overflow=False)
+
+        # Simulated Annealing unfolding (SA)
+        unfolded_SA = qunfold_unfolder(response, meas, true)
+        binning = np.linspace(min_bin, max_bin, bins + 1)
+        qunfold_plot_results(true, meas, unfolded_SA, distr, binning)
 
 
 if __name__ == "__main__":
