@@ -20,19 +20,21 @@ class QUnfoldPlotter:
     Class used to plot QUnfold data and results.
     """
 
-    def __init__(self, unfolder, truth, binning):
+    def __init__(self, response, measured, truth, unfolded, binning):
         """
-        Construct a QUnfoldPlotter class from the unfolder type of QUnfold.
+        Constructs a QUnfoldPlotter class for visualizing unfolding results.
 
         Args:
-            unfolder (QUnfoldQUBO): the used unfolder.
-            truth (np.array): the true distribution.
-            binning (np.array): the binning of the histograms.
+            response (np.array): The response matrix used in the unfolding process.
+            measured (np.array): The measured (observed) data distribution.
+            truth (np.array): The true distribution.
+            unfolded (np.array): The unfolded distribution.
+            binning (np.array): The binning information for the histograms.
         """
 
-        self.response = unfolder.response[1:, :-1]
-        self.measured = unfolder.measured[1:-1]
-        self.unfolded = unfolder.unfolded[1:-1]
+        self.response = response[1:, :-1]
+        self.measured = measured[1:-1]
+        self.unfolded = unfolded[1:-1]
         self.truth = truth[1:-1]
         self.binning = binning
 
@@ -162,7 +164,6 @@ class QUnfoldPlotter:
         )
 
         # Plot settings
-        plt.title(method)
         plt.xlabel("Bins")
         plt.ylabel("Events")
         plt.tight_layout()

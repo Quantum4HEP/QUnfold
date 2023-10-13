@@ -43,18 +43,19 @@ def main():
     response = TH2_to_array(response.Hresponse(), overflow=True)
 
     # Unfold with simulated annealing
-    unfolder = QUnfoldQUBO(
-        response,
-        meas,
-    )
-    unfolder.solve_simulated_annealing(lam=0.1, num_reads=200)
+    unfolder = QUnfoldQUBO(response, meas, lam=0.1)
+    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
 
     # Plot information
     plotter = QUnfoldPlotter(
-        unfolder=unfolder, truth=truth, binning=np.linspace(min_bin, max_bin, bins + 1)
+        response=response,
+        measured=meas,
+        truth=truth,
+        unfolded=unfolded_SA,
+        binning=np.linspace(min_bin, max_bin, bins + 1),
     )
     plotter.saveResponse("img/examples/standard/response.png")
-    plotter.savePlot("img/examples/standard/comparison.png", "Sim. Annealing")
+    plotter.savePlot("img/examples/standard/comparison.png", "SA")
 
 
 if __name__ == "__main__":

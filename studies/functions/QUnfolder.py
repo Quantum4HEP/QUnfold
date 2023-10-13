@@ -48,15 +48,17 @@ def QUnfold_unfolder_and_plot(
     title = ""
 
     # Unfold
-    unfolder = QUnfoldQUBO(response, meas)
+    unfolder = QUnfoldQUBO(response, meas, lam=0.1)
     if unf_type == "SA":
-        unfolded = unfolder.solve_simulated_annealing(lam=0.1, num_reads=200)
-        title = "Simulated Annealing Unfolding"
+        unfolded = unfolder.solve_simulated_annealing(num_reads=200)
+        title = "SA"
 
     # Plot results
     plotter = QUnfoldPlotter(
-        unfolder=unfolder,
+        response=response,
+        measured=meas,
         truth=truth,
+        unfolded=unfolded,
         binning=np.linspace(min_bin, max_bin, bins + 1),
     )
     plotter.savePlot("../img/QUnfold/{}/unfolded_{}.png".format(distr, unf_type), title)

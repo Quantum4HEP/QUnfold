@@ -4,23 +4,24 @@
 # ---------------------- Metadata ----------------------
 #
 # File name:  QUnfoldQUBO.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com) & Simone Gasperini (simone.gasperini4@unibo.it)
 # Date:       2023-06-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 import numpy as np
 from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
+from dwave.system import LeapHybridSampler
 
 
 class QUnfoldQUBO:
-    def __init__(self, response, measured):
-        _response = np.array(response).astype(float)
-        _measured = np.array(measured).astype(int)
-        if not self._is_normalized(_response):
-            _response = self._normalize(_response)
-        self.response = _response
-        self.measured = _measured
+    def __init__(self, response, meas, lam=0.0):
+        self.R = response
+        self.d = meas
+        self.lam = lam
+        # Normalize the response
+        if not self._is_normalized(self.R):
+            self.R = self._normalize(self.R)
 
     @staticmethod
     def _is_normalized(matrix):
@@ -36,47 +37,52 @@ class QUnfoldQUBO:
 
     @staticmethod
     def _get_laplacian(dim):
-        diag = np.ones(dim, dtype=int) * -2
-        ones = np.ones(dim - 1, dtype=int)
+        diag = np.ones(dim) * -2
+        ones = np.ones(dim - 1)
         D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
         return D
 
-    def _compute_linear(self):
-        a = -2.0 * (self.response.T @ self.measured)
-        return a
+    def _define_variables(self):
+        # Get largest power of 2 integer below the total number of entries
+        n = int(2 ** np.floor(np.log2(sum(self.d)))) - 1
+        # Encode integer variables using logarithmic binary encoding
+        vars = [LogEncInteger(f"x{i}", value_range=(0, n)) for i in range(len(self.d))]
+        return vars
 
-    def _compute_quadratic(self, G, lam):
-        B = (self.response.T @ self.response) + lam * (G.T @ G)
-        return B
-
-    def _get_pyqubo_model(self, lam):
-        num_bins = len(self.measured)
-        num_entries = int(sum(self.measured))
-        labels = [f"x{i}" for i in range(num_bins)]
-        # variables binary encoding
-        x = [
-            LogEncInteger(label=label, value_range=(0, num_entries)) for label in labels
-        ]
+    def _define_hamiltonian(self, x):
         hamiltonian = 0
-        # linear terms
-        a = self._compute_linear()
-        for i in range(len(x)):
+        dim = len(x)
+        # Add linear terms
+        a = -2 * (self.R.T @ self.d)
+        for i in range(dim):
             hamiltonian += a[i] * x[i]
-        # quadratic terms
-        G = self._get_laplacian(dim=num_bins)
-        B = self._compute_quadratic(G, lam)
-        for i in range(len(x)):
-            for j in range(len(x)):
+        # Add quadratic terms
+        G = self._get_laplacian(dim)
+        B = (self.R.T @ self.R) + self.lam * (G.T @ G)
+        for i in range(dim):
+            for j in range(dim):
                 hamiltonian += B[i, j] * x[i] * x[j]
-        model = hamiltonian.compile()
+        return hamiltonian
+
+    def _define_pyqubo_model(self):
+        x = self._define_variables()
+        h = self._define_hamiltonian(x)
+        labels = [x[i].label for i in range(len(x))]
+        model = h.compile()
         return labels, model
 
-    def solve_simulated_annealing(self, lam=0.1, num_reads=100):
-        labels, model = self._get_pyqubo_model(lam)
+    def solve_simulated_annealing(self, num_reads=100, seed=None):
+        labels, model = self._define_pyqubo_model()
         sampler = SimulatedAnnealingSampler()
-        sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads)
+        sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads, seed=seed)
         decoded_sampleset = model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
-        solution = np.array([best_sample.subh[label] for label in labels])
-        self.unfolded = solution.astype(int)
-        return self.unfolded
+        return np.array([best_sample.subh[label] for label in labels])
+
+    def solve_hybrid_sampler(self):
+        labels, model = self._define_pyqubo_model()
+        sampler = LeapHybridSampler()
+        sampleset = sampler.sample(model.to_bqm())
+        decoded_sampleset = model.decode_sampleset(sampleset)
+        best_sample = min(decoded_sampleset, key=lambda s: s.energy)
+        return np.array([best_sample.subh[label] for label in labels])
