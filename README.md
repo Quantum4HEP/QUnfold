@@ -76,7 +76,7 @@ plotter.saveResponse("response.png")
 plotter.savePlot("comparison.png", "SA")
 ```
 
-# ROOT case
+### ROOT case
 
 To use `ROOT` data add the following steps at the beginning of the code:
 
