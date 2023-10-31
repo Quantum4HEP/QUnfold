@@ -15,7 +15,20 @@ from dwave.system import LeapHybridSampler
 
 
 class QUnfoldQUBO:
+    """
+    Class used to perform the unfolding using QUBO problems solution.
+    """
+    
     def __init__(self, response, meas, lam=0.0):
+        """
+        Initialize the QUnfoldQUBO object.
+
+        Parameters:
+            response (numpy.ndarray): The response matrix.
+            meas (numpy.ndarray): The measured distribution.
+            lam (float, optional): The regularization parameter (default is 0.0).
+        """
+        
         self.R = response
         self.d = meas
         self.lam = lam
@@ -25,10 +38,30 @@ class QUnfoldQUBO:
 
     @staticmethod
     def _is_normalized(matrix):
+        """
+        Check if the matrix is normalized.
+
+        Parameters:
+            matrix (numpy.ndarray): The matrix to check.
+
+        Returns:
+            bool: True if the matrix is normalized, False otherwise.
+        """
+        
         return np.allclose(np.sum(matrix, axis=1), 1)
 
     @staticmethod
     def _normalize(matrix):
+        """
+        Normalize the matrix.
+
+        Parameters:
+            matrix (numpy.ndarray): The matrix to normalize.
+
+        Returns:
+            numpy.ndarray: The normalized matrix.
+        """
+        
         row_sums = np.sum(matrix, axis=1)
         mask = np.nonzero(row_sums)
         norm_matrix = np.copy(matrix)
@@ -37,12 +70,29 @@ class QUnfoldQUBO:
 
     @staticmethod
     def _get_laplacian(dim):
+        """
+        Calculate the Laplacian matrix.
+
+        Parameters:
+            dim (int): The dimension of the matrix.
+
+        Returns:
+            numpy.ndarray: The Laplacian matrix.
+        """
+        
         diag = np.ones(dim) * -2
         ones = np.ones(dim - 1)
         D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
         return D
 
     def _define_variables(self):
+        """
+        Define the variables for the QUBO problem.
+
+        Returns:
+            list: List of encoded integer variables.
+        """
+        
         # Get largest power of 2 integer below the total number of entries
         n = int(2 ** np.floor(np.log2(sum(self.d)))) - 1
         # Encode integer variables using logarithmic binary encoding
@@ -50,6 +100,16 @@ class QUnfoldQUBO:
         return vars
 
     def _define_hamiltonian(self, x):
+        """
+        Define the Hamiltonian for the QUBO problem.
+
+        Parameters:
+            x (list): List of encoded integer variables.
+
+        Returns:
+            pyqubo.Expression: The Hamiltonian expression.
+        """
+        
         hamiltonian = 0
         dim = len(x)
         # Add linear terms
@@ -65,6 +125,13 @@ class QUnfoldQUBO:
         return hamiltonian
 
     def _define_pyqubo_model(self):
+        """
+        Define the PyQUBO model for the QUBO problem.
+
+        Returns:
+            tuple: Labels for the variables and the PyQUBO model.
+        """
+        
         x = self._define_variables()
         h = self._define_hamiltonian(x)
         labels = [x[i].label for i in range(len(x))]
@@ -72,6 +139,17 @@ class QUnfoldQUBO:
         return labels, model
 
     def solve_simulated_annealing(self, num_reads=100, seed=None):
+        """
+        Solve the QUBO problem using the Simulated Annealing sampler.
+
+        Parameters:
+            num_reads (int, optional): Number of reads for the sampler (default is 100).
+            seed (int, optional): Seed for random number generation (default is None).
+
+        Returns:
+            numpy.ndarray: Array of solutions.
+        """
+        
         labels, model = self._define_pyqubo_model()
         sampler = SimulatedAnnealingSampler()
         sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads, seed=seed)
@@ -80,6 +158,13 @@ class QUnfoldQUBO:
         return np.array([best_sample.subh[label] for label in labels])
 
     def solve_hybrid_sampler(self):
+        """
+        Solve the QUBO problem using the Leap Hybrid sampler.
+
+        Returns:
+            numpy.ndarray: Array of solutions.
+        """
+        
         labels, model = self._define_pyqubo_model()
         sampler = LeapHybridSampler()
         sampleset = sampler.sample(model.to_bqm())
