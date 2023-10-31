@@ -1,4 +1,6 @@
-![Logo](https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png)
+<p align="center">
+  <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png" alt="Logo">
+</p>
 
 <h3 align="center">Unfolding statistical distributions using quantum machine learning</h3>
 <p align="center">
