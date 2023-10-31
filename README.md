@@ -3,9 +3,9 @@
 <h3 align="center">Unfolding statistical distributions using quantum machine learning</h3>
 <p align="center">
 	<img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br>
-  <img title="v0.0" alt="v0.0" src="https://img.shields.io/badge/version-v0.0-informational?style=flat-square&color=red">
+  <img title="v0.1" alt="v0.1" src="https://img.shields.io/badge/version-v0.1-informational?style=flat-square&color=red">
   <img title="MIT License" alt="license" src="https://img.shields.io/badge/license-MIT-informational?style=flat-square&color=red">
-	<img title="Python" alt="Python" src="https://img.shields.io/badge/Python-3.8 / 3.9 / 3.10 / 3.11-informational?style=flat-square&color=red"></br>
+	<img title="Python" alt="Python" src="https://img.shields.io/badge/Python-≥3.8-informational?style=flat-square&color=red"></br>
   <img title="codeq" alt="codeq" src="https://github.com/JustWhit3/QUnfold/actions/workflows/codeql-analysis.yml/badge.svg">
   <img title="doc" alt="doc" src="https://github.com/JustWhit3/QUnfold/actions/workflows/DocGenerator.yml/badge.svg">
 </p>
@@ -16,6 +16,9 @@
 
 - [Introduction](#introduction)
 - [Documentation](#documentation)
+- [How to use](#how-to-use)
+  - [NumPy case](#numpy-case)
+  - [ROOT case](#root-case)
 - [Studies](#studies)
   - [Setup the environment](#setup-the-environment)
   - [Install HEP dependencies](#install-hep-dependencies)
@@ -28,11 +31,65 @@
 
 ## Introduction
 
-Idea was born by me and Simone during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) which can be found [here](https://github.com/rdisipio/quantum_unfolding).
+This is an implementation of the [unfolding](https://indico.cern.ch/event/735431/contributions/3275244/attachments/1784103/2904689/PhystatNu_2019.pdf) statistical approach using quantum computation and in particular a [quadratic unconstrain binary optimization](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) approach. To find a detailed implementation of the model you can look at [this](https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0) poster. This software is based on [`NumPy`](https://numpy.org/), but you can easily run it also using [`ROOT`](https://root.cern/) framework data (see [below](#root-case)).
 
-The project is currently at its beginning stages.
+Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) et al. which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
-Work in progress...
+:warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software.
+
+## How to use
+
+### NumPy case
+
+To run QUnfold on a dataset you can do the following steps:
+
+```python
+# Import QUnfold base class and plotter
+from QUnfold import QUnfoldQUBO
+from QUnfold import QUnfoldPlotter
+
+# Read data from a file or sample them
+# NB: data should be in NumPy or list format
+truth = ... # truth distribution
+meas = ... # measured distribution
+response = ... # response matrix
+binning = ... # binning of the distributions
+
+# Unfold!
+unfolder = QUnfoldQUBO(response, meas, lam=0.1)
+unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
+
+# Plot results
+plotter = QUnfoldPlotter(
+    response=response,
+    measured=meas,
+    truth=truth,
+    unfolded=unfolded_SA,
+    binning=binning,
+)
+plotter.saveResponse("response.png")
+plotter.savePlot("comparison.png", "SA")
+```
+
+# ROOT case
+
+To use `ROOT` data add the following steps at the beginning of the code:
+
+```python
+# Import ROOT converters
+# NB: this will be improved soon...
+from studies.functions.ROOT_converter import TH1_to_array, TH2_to_array
+
+# Read data as before...
+# Convert data
+truth = TH1_to_array(truth)
+meas = TH1_to_array(meas)
+response = TH2_to_array(response.Hresponse()) # Supposing response was a RooUnfold response
+
+# Perform the analysis as before...
+```
+
+Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more how-to examples.
 
 ## Documentation
 
@@ -109,30 +166,16 @@ cd studies
 tox -e analysis
 ```
 
-Pseudo-data will be generated following common distributions (double-peaked, normal, etc...).
-
-Distributions will be unfolded using `RooUnfold` and the 4 classical common methods:
+Pseudo-data will be generated following common distributions (double-peaked, normal, etc...) which will be unfolded using `RooUnfold` and the 4 classical common methods:
 
 - Matrix inversion
 - Iterative Bayesian unfolding (4 iterations)
 - SVD (k=3)
 - Bin-to-Bin
 
-<div align="center">
-  <p><b>Example of `RooUnfold` unfolding for a double-peaked distribution</b></p>
-  <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_B2B.png" width="350" style="display:inline-block;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_IBU.png" width="350" style="display:inline-block;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_MI.png" width="350" style="display:inline-block;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/RooUnfold/double-peaked/unfolded_SVD.png" width="350" style="display:inline-block;">
-  </div>
-</div><br>
-
-Distributions will be unfolded using `QUnfold` with the following methods:
+Comparisons are performed with `QUnfold` and with the following methods:
 
 - Simulated annealing (lambda=0.2, num_reads=100)
-
-Finally, comparisons among each unfolding method of the previous studies will be performed.
 
 The output plots and chi2 for each distribution will be saved into the `img` directory.
 
@@ -145,13 +188,6 @@ tox -e tests
 ```
 
 The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.
-
-<div align="center">
-  <p><b>Example of benchmarks for different unfolding methods for a double-peaked distribution</b></p>
-  <div>
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/benchmarks/double-peaked.png" width="450" style="display:inline-block;">
-  </div>
-</div><br>
 
 ### Tests
 

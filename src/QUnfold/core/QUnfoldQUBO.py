@@ -18,7 +18,7 @@ class QUnfoldQUBO:
     """
     Class used to perform the unfolding using QUBO problems solution.
     """
-    
+
     def __init__(self, response, meas, lam=0.0):
         """
         Initialize the QUnfoldQUBO object.
@@ -28,7 +28,7 @@ class QUnfoldQUBO:
             meas (numpy.ndarray): The measured distribution.
             lam (float, optional): The regularization parameter (default is 0.0).
         """
-        
+
         self.R = response
         self.d = meas
         self.lam = lam
@@ -47,7 +47,7 @@ class QUnfoldQUBO:
         Returns:
             bool: True if the matrix is normalized, False otherwise.
         """
-        
+
         return np.allclose(np.sum(matrix, axis=1), 1)
 
     @staticmethod
@@ -61,7 +61,7 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: The normalized matrix.
         """
-        
+
         row_sums = np.sum(matrix, axis=1)
         mask = np.nonzero(row_sums)
         norm_matrix = np.copy(matrix)
@@ -79,7 +79,7 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: The Laplacian matrix.
         """
-        
+
         diag = np.ones(dim) * -2
         ones = np.ones(dim - 1)
         D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
@@ -92,7 +92,7 @@ class QUnfoldQUBO:
         Returns:
             list: List of encoded integer variables.
         """
-        
+
         # Get largest power of 2 integer below the total number of entries
         n = int(2 ** np.floor(np.log2(sum(self.d)))) - 1
         # Encode integer variables using logarithmic binary encoding
@@ -109,7 +109,7 @@ class QUnfoldQUBO:
         Returns:
             pyqubo.Expression: The Hamiltonian expression.
         """
-        
+
         hamiltonian = 0
         dim = len(x)
         # Add linear terms
@@ -131,7 +131,7 @@ class QUnfoldQUBO:
         Returns:
             tuple: Labels for the variables and the PyQUBO model.
         """
-        
+
         x = self._define_variables()
         h = self._define_hamiltonian(x)
         labels = [x[i].label for i in range(len(x))]
@@ -149,7 +149,7 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: Array of solutions.
         """
-        
+
         labels, model = self._define_pyqubo_model()
         sampler = SimulatedAnnealingSampler()
         sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads, seed=seed)
@@ -164,7 +164,7 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: Array of solutions.
         """
-        
+
         labels, model = self._define_pyqubo_model()
         sampler = LeapHybridSampler()
         sampleset = sampler.sample(model.to_bqm())

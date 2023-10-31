@@ -38,9 +38,9 @@ def main():
     min_bin = -10
     max_bin = 10
     truth, meas, response = generate("normal", bins, min_bin, max_bin, 10000)
-    truth = TH1_to_array(truth, overflow=True)
-    meas = TH1_to_array(meas, overflow=True)
-    response = TH2_to_array(response.Hresponse(), overflow=True)
+    truth = TH1_to_array(truth, overflow=False)
+    meas = TH1_to_array(meas, overflow=False)
+    response = TH2_to_array(response.Hresponse(), overflow=False)
 
     # Unfold with simulated annealing
     unfolder = QUnfoldQUBO(response, meas, lam=0.1)

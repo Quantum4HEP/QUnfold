@@ -55,10 +55,10 @@ def QUnfold_unfolder_and_plot(
 
     # Plot results
     plotter = QUnfoldPlotter(
-        response=response,
-        measured=meas,
-        truth=truth,
-        unfolded=unfolded,
+        response=response[1:, :-1],
+        measured=meas[1:-1],
+        truth=truth[1:-1],
+        unfolded=unfolded[1:-1],
         binning=np.linspace(min_bin, max_bin, bins + 1),
     )
     plotter.savePlot("../img/QUnfold/{}/unfolded_{}.png".format(distr, unf_type), title)

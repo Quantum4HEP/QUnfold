@@ -71,7 +71,7 @@ def array_to_TH2(
     return histo
 
 
-def TH1_to_array(histo, overflow=True):
+def TH1_to_array(histo, overflow=False):
     """
     Convert a ROOT.TH1F into a numpy.array.
 
@@ -90,7 +90,7 @@ def TH1_to_array(histo, overflow=True):
     return np.array([histo.GetBinContent(i) for i in range(start, stop)])
 
 
-def TH2_to_array(histo, overflow=True):
+def TH2_to_array(histo, overflow=False):
     """
     Convert a ROOT.TH2F object into a numpy.array.
 

@@ -32,10 +32,10 @@ class QUnfoldPlotter:
             binning (np.array): The binning information for the histograms.
         """
 
-        self.response = response[1:, :-1]
-        self.measured = measured[1:-1]
-        self.unfolded = unfolded[1:-1]
-        self.truth = truth[1:-1]
+        self.response = response
+        self.measured = measured
+        self.unfolded = unfolded
+        self.truth = truth
         self.binning = binning
 
     def __plotResponseSetup(self):
