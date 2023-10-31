@@ -12,6 +12,7 @@
 
 # Data science modules
 import ROOT as r
+import numpy as np
 
 # ROOT settings
 r.gROOT.SetBatch(True)
@@ -66,6 +67,8 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
                 xt = r.gRandom.Gaus(0.0, 2.0)
             elif distr == "exponential":
                 xt = r.gRandom.Exp(1.0)
+            elif distr == "gamma":
+                xt = np.random.gamma(5, 1)
             truth.Fill(xt)
             x = smear(xt, bias, smearing)
             if x != None:
@@ -84,6 +87,8 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
                 xt = r.gRandom.Gaus(0.0, 2.0)
             elif distr == "exponential":
                 xt = r.gRandom.Exp(1.0)
+            elif distr == "gamma":
+                xt = np.random.gamma(5, 1)
             x = smear(xt, bias, smearing)
             if x != None:
                 response.Fill(x, xt)
@@ -182,7 +187,7 @@ def generate(distr, bins, min_bin, max_bin, samples):
     response = r.RooUnfoldResponse(bins, min_bin, max_bin)
 
     # Fill histograms
-    if any(d in distr for d in ["normal", "breit-wigner", "exponential"]):
+    if any(d in distr for d in ["normal", "breit-wigner", "exponential", "gamma"]):
         truth, meas = generate_standard(
             truth, meas, response, "data", distr, samples, bias, smearing
         )
