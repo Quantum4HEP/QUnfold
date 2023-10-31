@@ -33,6 +33,11 @@
 
 This is an implementation of the [unfolding](https://indico.cern.ch/event/735431/contributions/3275244/attachments/1784103/2904689/PhystatNu_2019.pdf) statistical approach using quantum computation and in particular a [quadratic unconstrain binary optimization](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) approach. To find a detailed implementation of the model you can look at [this](https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0) poster. This software is based on [`NumPy`](https://numpy.org/), but you can easily run it also using [`ROOT`](https://root.cern/) framework data (see [below](#root-case)).
 
+For the moment you can use it in two modes:
+
+- Simulated annealing (`solve_simulated_annealing`): which uses simulated quantum computer to compute the result.
+- Hybrid solver (`solve_hybrid_sampler`): which uses [D-Wave](https://www.dwavesys.com/) resources to perform hybrid quantum annealing (classical + quantum hardware) to compute the result.
+
 Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) et al. which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
 :warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software.
@@ -57,7 +62,7 @@ binning = ... # binning of the distributions
 
 # Unfold!
 unfolder = QUnfoldQUBO(response, meas, lam=0.1)
-unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
+unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200) # use solve_hybrid_sampler method to use real quantum computer hardware
 
 # Plot results
 plotter = QUnfoldPlotter(
