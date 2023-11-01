@@ -155,7 +155,7 @@ conda activate qunfold-dev
 
 To run all the studies you will need to install some HEP dependencies:
 
-- [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/04**. Soon more instructions to install this.
+- [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/04**.
 
 - [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold).
 
