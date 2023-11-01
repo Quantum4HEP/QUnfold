@@ -21,6 +21,7 @@
 - [How to use](#how-to-use)
   - [NumPy case](#numpy-case)
   - [ROOT case](#root-case)
+  - [How-to guides](#howto-guides)
 - [Studies](#studies)
   - [Setup the environment](#setup-the-environment)
   - [Install HEP dependencies](#install-hep-dependencies)
@@ -33,7 +34,7 @@
 
 ## Introduction
 
-This is an implementation of the [unfolding](https://indico.cern.ch/event/735431/contributions/3275244/attachments/1784103/2904689/PhystatNu_2019.pdf) statistical approach using quantum computation and in particular a [quadratic unconstrain binary optimization](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) approach. To find a detailed implementation of the model you can look at [this](https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0) poster. This software is based on [`NumPy`](https://numpy.org/), but you can easily run it also using [`ROOT`](https://root.cern/) framework data (see [below](#root-case)).
+This module consists of an implementation of the [unfolding](https://indico.cern.ch/event/735431/contributions/3275244/attachments/1784103/2904689/PhystatNu_2019.pdf) statistical approach using quantum computation and in particular a [quadratic unconstrain binary optimization](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) approach. To find a detailed implementation of the model you can look at [this](https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0) poster. This software is based on [`NumPy`](https://numpy.org/), but you can easily run it also using [`ROOT`](https://root.cern/) framework data (see [below](#root-case)).
 
 For the moment you can use it in two modes:
 
@@ -44,7 +45,7 @@ Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a qu
 
 :warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
 
-:warning: The module is not available on [PyPi](https://pypi.org/project/pip/) for the moment, but it will be very soon.
+:warning: The module is not yet available on [PyPi](https://pypi.org/project/pip/), but it will be very soon.
 
 ## How to use
 
@@ -61,7 +62,7 @@ from QUnfold import QUnfoldPlotter
 # NB: data should be in NumPy or list format
 truth = ... # truth distribution
 meas = ... # measured distribution
-response = ... # response matrix
+response = ... # response matrix (supposed to be normalized)
 binning = ... # binning of the distributions
 
 # Unfold!
@@ -80,7 +81,7 @@ plotter.saveResponse("response.png")
 plotter.savePlot("comparison.png", "SA")
 ```
 
-which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency):
+which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency have been applied to simulated data):
 
 <div style="text-align: center;">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/comparison.png" style="width: 45%;">
@@ -105,6 +106,12 @@ response = TH2_to_array(response.Hresponse()) # Supposing response was a RooUnfo
 # Perform the analysis as before...
 ```
 
+A more elegant way to preprocess data and convert them is work-in-progress (see [here](https://github.com/JustWhit3/QUnfold/issues/11)).
+
+### How-to guides
+
+Detailed explanations about each feature will be described into the [wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
+
 Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more how-to examples.
 
 ## Documentation
@@ -126,8 +133,8 @@ All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [
 
 To setup the environment for `QUnfold` development you need two dependencies:
 
-- [`tox`](https://tox.wiki/en/latest/): at least v4.
-- [`conda`](https://docs.conda.io/en/latest/).
+- [`tox`](https://tox.wiki/en/latest/): at least v4
+- [`conda`](https://docs.conda.io/en/latest/)
 
 To setup the `conda` conda environment to work with the repository (only the first time):
 
