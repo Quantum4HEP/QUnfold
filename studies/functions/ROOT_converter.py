@@ -117,3 +117,33 @@ def TH2_to_array(histo, overflow=False):
         ]
     )
 
+
+def TVector_to_array(vector):
+    """
+    Convert a ROOT.TVectorD object into a numpy.array.
+
+    Parameters:
+        vector (ROOT.TVectorD): input TVectorD object to be converted.
+
+    Returns:
+        numpy.array: array representing the content of the TVectorD.
+    """
+    return np.array([vector[i] for i in range(vector.GetNoElements())])
+
+
+def TMatrix_to_array(matrix):
+    """
+    Convert a ROOT.TMatrixD object into a numpy.array.
+
+    Parameters:
+        matrix (ROOT.TMatrixD): input TMatrixD object to be converted.
+
+    Returns:
+        numpy.array: array representing the content of the TMatrixD.
+    """
+    return np.array(
+        [
+            [matrix[i][j] for j in range(matrix.GetNcols())]
+            for i in range(matrix.GetNrows())
+        ]
+    )

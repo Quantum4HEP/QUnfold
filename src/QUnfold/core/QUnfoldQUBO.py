@@ -35,42 +35,6 @@ class QUnfoldQUBO:
         self.lam = lam
         self.reg = reg
 
-        # Normalize the response
-        if not self._is_normalized(self.R):
-            self.R = self._normalize(self.R)
-
-    @staticmethod
-    def _is_normalized(matrix):
-        """
-        Check if the matrix is normalized.
-
-        Parameters:
-            matrix (numpy.ndarray): The matrix to check.
-
-        Returns:
-            bool: True if the matrix is normalized, False otherwise.
-        """
-
-        return np.allclose(np.sum(matrix, axis=1), 1)
-
-    @staticmethod
-    def _normalize(matrix):
-        """
-        Normalize the matrix.
-
-        Parameters:
-            matrix (numpy.ndarray): The matrix to normalize.
-
-        Returns:
-            numpy.ndarray: The normalized matrix.
-        """
-
-        row_sums = np.sum(matrix, axis=1)
-        mask = np.nonzero(row_sums)
-        norm_matrix = np.copy(matrix)
-        norm_matrix[mask] /= row_sums[mask][:, np.newaxis]
-        return norm_matrix
-
     @staticmethod
     def _get_laplacian(dim):
         """
@@ -205,3 +169,4 @@ class QUnfoldQUBO:
         decoded_sampleset = model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
         return np.array([best_sample.subh[label] for label in labels])
+

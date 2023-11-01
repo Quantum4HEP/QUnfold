@@ -19,7 +19,7 @@ import ROOT as r
 
 sys.path.append(".")
 from studies.functions.generator import generate
-from studies.functions.ROOT_converter import TH1_to_array, TH2_to_array
+from studies.functions.ROOT_converter import TH1_to_array, TMatrix_to_array
 
 # QUnfold modules
 from QUnfold import QUnfoldQUBO
@@ -39,14 +39,14 @@ def main():
     min_bin = 0
     bins = 40
     bias = 0.0
-    smearing = 0.5
-    eff = 1.0
+    smearing = 0.0
+    eff = 0.7
     truth, meas, response = generate(
         "breit-wigner", bins, min_bin, max_bin, samples, bias, smearing, eff
     )
     truth = TH1_to_array(truth, overflow=False)
     meas = TH1_to_array(meas, overflow=False)
-    response = TH2_to_array(response.HresponseNoOverflow(), overflow=False)
+    response = TMatrix_to_array(response.Mresponse(norm=True))
 
     # Unfold with simulated annealing
     unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.1)
