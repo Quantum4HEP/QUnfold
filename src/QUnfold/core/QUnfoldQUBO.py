@@ -19,7 +19,7 @@ class QUnfoldQUBO:
     Class used to perform the unfolding using QUBO problems solution.
     """
 
-    def __init__(self, response, meas, lam=0.0):
+    def __init__(self, response, meas, lam=0.0, reg="laplace"):
         """
         Initialize the QUnfoldQUBO object.
 
@@ -27,11 +27,14 @@ class QUnfoldQUBO:
             response (numpy.ndarray): The response matrix.
             meas (numpy.ndarray): The measured distribution.
             lam (float, optional): The regularization parameter (default is 0.0).
+            reg (string, optional): The regularization operator (default is "laplace"). Possible choices: "laplace", "cowan".
         """
 
         self.R = response
         self.d = meas
         self.lam = lam
+        self.reg = reg
+
         # Normalize the response
         if not self._is_normalized(self.R):
             self.R = self._normalize(self.R)
@@ -116,6 +119,7 @@ class QUnfoldQUBO:
 
         # Get largest power of 2 integer below the total number of entries
         n = int(2 ** np.floor(np.log2(sum(self.d)))) - 1
+
         # Encode integer variables using logarithmic binary encoding
         vars = [LogEncInteger(f"x{i}", value_range=(0, n)) for i in range(len(self.d))]
         return vars
@@ -133,12 +137,21 @@ class QUnfoldQUBO:
 
         hamiltonian = 0
         dim = len(x)
+
         # Add linear terms
         a = -2 * (self.R.T @ self.d)
         for i in range(dim):
             hamiltonian += a[i] * x[i]
+
         # Add quadratic terms
-        G = self._get_laplacian(dim)
+        if self.reg == "laplace":
+            G = self._get_laplacian(dim)
+        elif self.reg == "cowan":
+            G = self._get_cowan_matrix(dim)
+        else:
+            raise ValueError(
+                'The inserted regularization matrix "{}" is not valid!'.format(self.reg)
+            )
         B = (self.R.T @ self.R) + self.lam * (G.T @ G)
         for i in range(dim):
             for j in range(dim):

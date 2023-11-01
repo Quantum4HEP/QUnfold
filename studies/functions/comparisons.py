@@ -8,6 +8,9 @@
 # Date:       2023-06-26
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
+# STD modules
+import os
+
 # Data science modules
 import matplotlib.pyplot as plt
 import numpy as np
@@ -122,6 +125,8 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         plt.legend()
 
         # Save plot
+        if not os.path.exists("../img/comparisons"):
+            os.makedirs("../img/comparisons")
         plt.savefig("../img/comparisons/{}.png".format(distr))
 
     plt.close()
