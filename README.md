@@ -82,7 +82,7 @@ plotter.savePlot("comparison.png", "SA")
 
 which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency):
 
-<div style="display: flex; justify-content: center;">
+<div style="text-align: center;">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/comparison.png" style="width: 45%;">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/response.png" style="width: 45%;">
 </div>
