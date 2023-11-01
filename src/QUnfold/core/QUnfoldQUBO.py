@@ -84,6 +84,27 @@ class QUnfoldQUBO:
         ones = np.ones(dim - 1)
         D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
         return D
+    
+    @staticmethod
+    def _get_cowan_matrix(dim):
+        """
+        Generates the Cowan matrix used in statistical data analysis. The Cowan matrix is constructed according to formula (11.48) in Glen Cowan's
+        book "Statistical Data Analysis".
+
+        Parameters:
+            dim (int): The dimension of the matrix.
+
+        Returns:
+            numpy.ndarray: A 2-dimensional array representing the Cowan matrix.
+        """
+
+        diag = np.array([1, 5] + [6] * (dim - 4) + [5, 1])
+        G = np.diag(diag).astype(float)
+        diag1 = np.array([-2] + [-4] * (dim - 3) + [-2])
+        G += np.diag(diag1, k=1) + np.diag(diag1, k=-1)
+        diag2 = np.ones(dim - 2)
+        G += np.diag(diag2, k=2) + np.diag(diag2, k=-2)
+        return G
 
     def _define_variables(self):
         """
