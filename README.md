@@ -44,6 +44,8 @@ Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a qu
 
 :warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
 
+:warning: The module is not available on [PyPi](https://pypi.org/project/pip/) for the moment, but it will be very soon.
+
 ## How to use
 
 ### NumPy case
@@ -77,6 +79,13 @@ plotter = QUnfoldPlotter(
 plotter.saveResponse("response.png")
 plotter.savePlot("comparison.png", "SA")
 ```
+
+which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency):
+
+<div style="display: flex; justify-content: center;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/comparison.png" style="width: 45%;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/response.png" style="width: 45%;">
+</div>
 
 ### ROOT case
 
