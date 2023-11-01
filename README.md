@@ -83,10 +83,10 @@ plotter.savePlot("comparison.png", "SA")
 
 which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency have been applied to simulated data):
 
-<div style="text-align: center;">
+<p align="center">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/comparison.png" style="width: 45%;">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/response.png" style="width: 45%;">
-</div>
+</p>
 
 ### ROOT case
 
