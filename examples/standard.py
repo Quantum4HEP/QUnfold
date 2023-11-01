@@ -34,17 +34,23 @@ if not loaded_RooUnfold == 0:
 def main():
 
     # Generate data
-    bins = 40
-    min_bin = -10
+    samples = 10000
     max_bin = 10
-    truth, meas, response = generate("normal", bins, min_bin, max_bin, 10000)
+    min_bin = 0
+    bins = 40
+    bias = 0.0
+    smearing = 0.0
+    eff = 0.7
+    truth, meas, response = generate(
+        "normal", bins, min_bin, max_bin, samples, bias, smearing, eff
+    )
     truth = TH1_to_array(truth, overflow=False)
     meas = TH1_to_array(meas, overflow=False)
-    response = TH2_to_array(response.Hresponse(), overflow=False)
+    response = TH2_to_array(response.HresponseNoOverflow(), overflow=False)
 
     # Unfold with simulated annealing
-    unfolder = QUnfoldQUBO(response, meas, lam=0.1)
-    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
+    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=1.0)
+    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
     # Plot information
     plotter = QUnfoldPlotter(

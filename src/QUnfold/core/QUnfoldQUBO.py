@@ -84,7 +84,7 @@ class QUnfoldQUBO:
         ones = np.ones(dim - 1)
         D = np.diag(diag) + np.diag(ones, k=1) + np.diag(ones, k=-1)
         return D
-    
+
     @staticmethod
     def _get_cowan_matrix(dim):
         """

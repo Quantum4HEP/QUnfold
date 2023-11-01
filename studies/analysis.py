@@ -8,13 +8,6 @@
 # Date:       2023-08-02
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Input variables
-distributions = ["breit-wigner", "normal", "double-peaked", "exponential"]
-samples = 10000
-max_bin = 10
-min_bin = -10
-bins = 40
-
 # STD modules
 import sys
 
@@ -40,21 +33,27 @@ if not loaded_RooUnfold == 0:
     sys.exit(0)
 
 
-def main():
+# Input variables
+distributions = ["breit-wigner", "normal", "double-peaked", "exponential"]
+samples = 10000
+max_bin = 10
+min_bin = 0
+bins = 40
+bias = 0.0
+smearing = 0.0
+eff = 0.7
 
-    # Global variables
-    global min_bin
+
+def main():
 
     # Iterate over distributions
     for distr in distributions:
 
-        # Exponential distribution settings
-        if distr == "exponential":
-            min_bin = 0
-
         # Generate data
         INFO("Unfolding the {} distribution".format(distr))
-        truth, meas, response = generate(distr, bins, min_bin, max_bin, samples)
+        truth, meas, response = generate(
+            distr, bins, min_bin, max_bin, samples, bias, smearing, eff
+        )
 
         ########################## Classic ###########################
 
@@ -82,9 +81,9 @@ def main():
         ########################## Quantum ###########################
 
         # QUnfold settings
-        truth = TH1_to_array(truth, overflow=True)
-        meas = TH1_to_array(meas, overflow=True)
-        response = TH2_to_array(response.Hresponse(), overflow=True)
+        truth = TH1_to_array(truth, overflow=False)
+        meas = TH1_to_array(meas, overflow=False)
+        response = TH2_to_array(response.HresponseNoOverflow(), overflow=False)
 
         # Simulated annealing (SA)
         unfolded_SA = QUnfold_unfolder_and_plot(
@@ -99,11 +98,11 @@ def main():
             "B2B": TH1_to_array(unfolded_B2B, overflow=False),
             "MI": TH1_to_array(unfolded_MI, overflow=False),
             "SVD": TH1_to_array(unfolded_SVD, overflow=False),
-            "SA": unfolded_SA[1:-1],
+            "SA": unfolded_SA,
         }
 
         # Plot comparisons
-        plot_comparisons(data, distr, truth[1:-1], bins, min_bin, max_bin)
+        plot_comparisons(data, distr, truth, bins, min_bin, max_bin)
         print("Done", end="\n\n")
 
 

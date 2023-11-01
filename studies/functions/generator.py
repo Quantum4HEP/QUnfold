@@ -8,8 +8,6 @@
 # Date:       2023-06-14
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Followed the guide at: https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/#Aproximating-Smearing
-
 # Data science modules
 import ROOT as r
 import numpy as np
@@ -36,7 +34,7 @@ def smear(xt, bias, smearing, eff=1):
     return xt + xsmear
 
 
-def generate_standard(truth, meas, response, type, distr, samples, bias, smearing):
+def generate_standard(truth, meas, response, type, distr, samples, bias, smearing, eff):
     """
     Generate data for standard distributions.
 
@@ -49,6 +47,7 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
         samples (int): number of samples to be generated.
         bias (float): bias of the distortion.
         smearing (float): smearing of the distortion.
+        eff (float): reconstruction efficiency.
 
     Returns:
         ROOT.TH1F: the filled truth histogram.
@@ -62,15 +61,15 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
         for i in range(samples):
             xt = 0
             if distr == "breit-wigner":
-                xt = r.gRandom.BreitWigner(0.3, 2.5)
+                xt = r.gRandom.BreitWigner(5.3, 2.1)
             elif distr == "normal":
-                xt = r.gRandom.Gaus(0.0, 2.0)
+                xt = r.gRandom.Gaus(5.3, 1.4)
             elif distr == "exponential":
-                xt = r.gRandom.Exp(1.0)
+                xt = r.gRandom.Exp(2.5)
             elif distr == "gamma":
                 xt = np.random.gamma(5, 1)
             truth.Fill(xt)
-            x = smear(xt, bias, smearing)
+            x = smear(xt, bias, smearing, eff)
             if x != None:
                 meas.Fill(x)
 
@@ -82,14 +81,14 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
         for i in range(samples):
             xt = 0
             if distr == "breit-wigner":
-                xt = r.gRandom.BreitWigner(0.3, 2.5)
+                xt = r.gRandom.BreitWigner(5.3, 2.1)
             elif distr == "normal":
-                xt = r.gRandom.Gaus(0.0, 2.0)
+                xt = r.gRandom.Gaus(5.3, 1.4)
             elif distr == "exponential":
-                xt = r.gRandom.Exp(1.0)
+                xt = r.gRandom.Exp(2.5)
             elif distr == "gamma":
                 xt = np.random.gamma(5, 1)
-            x = smear(xt, bias, smearing)
+            x = smear(xt, bias, smearing, eff)
             if x != None:
                 response.Fill(x, xt)
             else:
@@ -98,7 +97,7 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
         return response
 
 
-def generate_double_peaked(truth, meas, response, type, samples):
+def generate_double_peaked(truth, meas, response, type, samples, bias, smearing, eff):
     """
     Generate data for the double peaked distributions.
 
@@ -108,6 +107,9 @@ def generate_double_peaked(truth, meas, response, type, samples):
         response (ROOT.TH2F): response matrix.
         type (str): type of data generation (data or response).
         samples (int): number of samples to be generated.
+        bias (float): bias of the distortion.
+        smearing (float): smearing of the distortion.
+        eff (float): reconstruction efficiency.
 
     Returns:
         ROOT.TH1F: the filled truth histogram.
@@ -119,17 +121,15 @@ def generate_double_peaked(truth, meas, response, type, samples):
     if type == "data":
         r.gRandom.SetSeed(12345)
         for i in range(samples):
-            xt = r.gRandom.Gaus(2, 1.5)
+            xt = r.gRandom.Gaus(3.3, 0.9)
             truth.Fill(xt)
-            x = r.gRandom.Gaus(
-                xt,
-            )
+            x = smear(xt, bias, smearing, eff)
             if x != None:
                 meas.Fill(x)
         for i in range(samples):
-            xt = r.gRandom.Gaus(-2, 1.5)
+            xt = r.gRandom.Gaus(6.4, 1.2)
             truth.Fill(xt)
-            x = r.gRandom.Gaus(xt, 1)
+            x = smear(xt, bias, smearing, eff)
             if x != None:
                 meas.Fill(x)
 
@@ -139,15 +139,15 @@ def generate_double_peaked(truth, meas, response, type, samples):
     elif type == "response":
         r.gRandom.SetSeed(556)
         for i in range(samples):
-            xt = r.gRandom.Gaus(2, 1.5)
-            x = r.gRandom.Gaus(xt, 1)
+            xt = r.gRandom.Gaus(3.3, 0.9)
+            x = smear(xt, bias, smearing, eff)
             if x != None:
                 response.Fill(x, xt)
             else:
                 response.Miss(xt)
         for i in range(samples):
-            xt = r.gRandom.Gaus(-2, 1.5)
-            x = r.gRandom.Gaus(xt, 1)
+            xt = r.gRandom.Gaus(6.4, 1.2)
+            x = smear(xt, bias, smearing, eff)
             if x != None:
                 response.Fill(x, xt)
             else:
@@ -156,7 +156,7 @@ def generate_double_peaked(truth, meas, response, type, samples):
         return response
 
 
-def generate(distr, bins, min_bin, max_bin, samples):
+def generate(distr, bins, min_bin, max_bin, samples, bias, smearing, eff):
     """
     Generate simulated data and response for a given distribution.
 
@@ -166,20 +166,15 @@ def generate(distr, bins, min_bin, max_bin, samples):
         min_bin (float): The minimum value of the histogram range.
         max_bin (float): The maximum value of the histogram range.
         samples (int): The number of data samples to generate.
+        bias (float): Bias introduced in the measured distribution.
+        smearing (float): Smearing introduced in the measured distribution.
+        eff (float): Reconstruction efficiency for the measured distribution.
 
     Returns:
         ROOT.TH1F: The histogram representing the truth distribution.
         ROOT.TH1F: The histogram representing the measured distribution.
         ROOT.RooUnfoldResponse: The response object used for unfolding.
     """
-
-    # Case for exponential
-    if distr == "exponential":
-        bias = 0
-        smearing = 0.8
-    else:
-        bias = -2.5
-        smearing = 0.2
 
     # Initialize variables
     truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
@@ -189,13 +184,17 @@ def generate(distr, bins, min_bin, max_bin, samples):
     # Fill histograms
     if any(d in distr for d in ["normal", "breit-wigner", "exponential", "gamma"]):
         truth, meas = generate_standard(
-            truth, meas, response, "data", distr, samples, bias, smearing
+            truth, meas, response, "data", distr, samples, bias, smearing, eff
         )
         response = generate_standard(
-            truth, meas, response, "response", distr, samples, bias, smearing
+            truth, meas, response, "response", distr, samples, bias, smearing, eff
         )
     elif any(d in distr for d in ["double-peaked"]):
-        truth, meas = generate_double_peaked(truth, meas, response, "data", samples)
-        response = generate_double_peaked(truth, meas, response, "response", samples)
+        truth, meas = generate_double_peaked(
+            truth, meas, response, "data", samples, bias, smearing, eff
+        )
+        response = generate_double_peaked(
+            truth, meas, response, "response", samples, bias, smearing, eff
+        )
 
     return truth, meas, response
