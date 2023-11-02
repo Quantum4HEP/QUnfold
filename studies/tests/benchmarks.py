@@ -20,7 +20,7 @@ import pytest
 # My modules
 sys.path.append("..")
 sys.path.append("../src")
-from studies.functions.ROOT_converter import TH1_to_array, TH2_to_array
+from studies.functions.extra_ROOT_converter import TH1_to_array, TH2_to_array
 from studies.functions.generator import generate
 from studies.functions.custom_logger import ERROR
 from src.QUnfold import QUnfoldQUBO

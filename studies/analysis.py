@@ -15,7 +15,6 @@ import sys
 import ROOT as r
 
 # My modules
-from functions.ROOT_converter import TH1_to_array, TMatrix_to_array
 from functions.custom_logger import INFO, ERROR
 from functions.generator import generate
 from functions.RooUnfold import (
@@ -25,6 +24,9 @@ from functions.RooUnfold import (
 )
 from functions.QUnfolder import QUnfold_unfolder_and_plot
 from functions.comparisons import plot_comparisons
+
+# QUnfold modules
+from QUnfold.utility import TH1_to_array, TMatrix_to_array
 
 # RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")

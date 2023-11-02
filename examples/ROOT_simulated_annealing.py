@@ -3,27 +3,26 @@
 
 # ---------------------- Metadata ----------------------
 #
-# File name:  standard.py
+# File name:  ROOT_simulated_annealing.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
 # Date:       2023-06-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
+# STD modules
+import sys, os
+
 # Data science modules
 import numpy as np
-
-# My modules
-import sys
-
-# Data generation modules
 import ROOT as r
 
+# My modules
 sys.path.append(".")
 from studies.functions.generator import generate
-from studies.functions.ROOT_converter import TH1_to_array, TMatrix_to_array
 
 # QUnfold modules
 from QUnfold import QUnfoldQUBO
 from QUnfold import QUnfoldPlotter
+from QUnfold.utility import TH1_to_array, TMatrix_to_array
 
 # RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
@@ -33,7 +32,7 @@ if not loaded_RooUnfold == 0:
 
 def main():
 
-    # Generate data
+    # Data variables
     samples = 10000
     max_bin = 10
     min_bin = 0
@@ -41,6 +40,8 @@ def main():
     bias = 0.0
     smearing = 0.0
     eff = 0.7
+
+    # Generate data in ROOT format and convert
     truth, meas, response = generate(
         "breit-wigner", bins, min_bin, max_bin, samples, bias, smearing, eff
     )
@@ -52,6 +53,10 @@ def main():
     unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.1)
     unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
 
+    # Create results dir
+    if not os.path.exists("img/examples/ROOT_simulated_annealing"):
+        os.makedirs("img/examples/ROOT_simulated_annealing")
+
     # Plot information
     plotter = QUnfoldPlotter(
         response=response,
@@ -60,8 +65,8 @@ def main():
         unfolded=unfolded_SA,
         binning=np.linspace(min_bin, max_bin, bins + 1),
     )
-    plotter.saveResponse("img/examples/standard/response.png")
-    plotter.savePlot("img/examples/standard/comparison.png", "SA")
+    plotter.saveResponse("img/examples/ROOT_simulated_annealing/response.png")
+    plotter.savePlot("img/examples/ROOT_simulated_annealing/comparison.png", "SA")
 
 
 if __name__ == "__main__":
