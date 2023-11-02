@@ -24,7 +24,6 @@
   - [ROOT case](#root-case)
   - [How-to guides](#howto-guides)
 - [Run tests](#run-tests)
-- [Documentation](#documentation)
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Run the analysis](#run-the-analysis)
@@ -48,6 +47,17 @@ Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a qu
 :warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
 
 :warning: The module is not yet available on [PyPi](https://pypi.org/project/pip/), but it will be very soon.
+
+
+## Documentation
+
+Documentation resources are listed here:
+
+- [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
+- [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
+- [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
+
+> :warning: An input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
 
 ## Developer environment
 
@@ -142,16 +152,6 @@ Tests are performed using [`pytest`](https://docs.pytest.org/en/7.4.x/). To run 
 ```shell
 tox -e tests
 ```
-
-## Documentation
-
-Further documentation resources are listed here:
-
-- [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
-- [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
-- [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
-
-> :warning: An input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
 
 ## Studies
 
