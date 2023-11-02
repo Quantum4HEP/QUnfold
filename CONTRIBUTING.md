@@ -43,7 +43,6 @@ Follow these conventions when writing code:
 ```
 
 - Class names: every word must begin with uppercase (ex: `ThisClass`, `ThisExampleClass`).
-- Class methods: first word must begin with lowercase, while from the second work it must begin with uppercase (ex: `thisClassMethod`, `thisMethod`).
 - Functions: must use only lowercase letters and each word must be separated by underscore (ex: `my_function`, `function`).
 - Variables: must use only lowercase letters and each word must be separated by underscore (ex: `my_var`, `var`).
 - Add docstrings in every function or class you create.
