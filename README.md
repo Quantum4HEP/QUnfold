@@ -18,15 +18,17 @@
 
 - [Introduction](#introduction)
 - [Documentation](#documentation)
+- [Developer environment](#developer-environment)
 - [How to use](#how-to-use)
   - [NumPy case](#numpy-case)
   - [ROOT case](#root-case)
   - [How-to guides](#howto-guides)
+- [Run tests](#run-tests)
+- [Documentation](#documentation)
 - [Studies](#studies)
-  - [Setup the environment](#setup-the-environment)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Run the analysis](#run-the-analysis)
-  - [Tests](#tests)
+  - [Benchmarks and optional tests](#benchmarks-and-optional-tests)
 - [Credits](#credits)
   - [Main developers](#main-developers)
   - [Other contributors](#other-contributors)
@@ -46,6 +48,28 @@ Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a qu
 :warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
 
 :warning: The module is not yet available on [PyPi](https://pypi.org/project/pip/), but it will be very soon.
+
+## Developer environment
+
+To setup the environment for `QUnfold` development you need two dependencies:
+
+- [`tox`](https://tox.wiki/en/latest/): at least v4
+- [`conda`](https://docs.conda.io/en/latest/)
+
+To setup the `conda` conda environment to work with the repository (only the first time):
+
+```shell
+conda create --name qunfold-dev python==3.10
+conda activate qunfold-dev
+pip install -r requirements.txt
+pip cache purge && pip check
+```
+
+and every time you open a new shell:
+
+```shell
+conda activate qunfold-dev
+```
 
 ## How to use
 
@@ -84,8 +108,8 @@ plotter.savePlot("comparison.png", "SA")
 which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency have been applied to simulated data):
 
 <p align="center">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/comparison.png" style="width: 45%;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/standard/response.png" style="width: 45%;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/ROOT_simulated_annealing/comparison.png" style="width: 45%;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/ROOT_simulated_annealing/response.png" style="width: 45%;">
 </p>
 
 ### ROOT case
@@ -94,8 +118,7 @@ To use `ROOT` data add the following steps at the beginning of the code:
 
 ```python
 # Import ROOT converters
-# NB: this will be improved soon...
-from studies.functions.ROOT_converter import TH1_to_array, TH2_to_array
+from QUnfold.utility import TH1_to_array, TH2_to_array
 
 # Read data as before...
 # Convert data
@@ -106,18 +129,25 @@ response = TH2_to_array(response.Hresponse()) # Supposing response was a RooUnfo
 # Perform the analysis as before...
 ```
 
-A more elegant way to preprocess data and convert them is work-in-progress (see [here](https://github.com/JustWhit3/QUnfold/issues/11)).
-
 ### How-to guides
 
-Detailed explanations about each feature will be described into the [wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
+Detailed explanations about each feature are described into the [wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
 
 Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more how-to examples.
+
+## Run tests
+
+Tests are performed using [`pytest`](https://docs.pytest.org/en/7.4.x/). To run them:
+
+```shell
+tox -e tests
+```
 
 ## Documentation
 
 Further documentation resources are listed here:
 
+- [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
 - [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
 
@@ -128,28 +158,6 @@ Further documentation resources are listed here:
 This section contains instructions to run unfolding with other packages in order to do comparisons with `QUnfold`. All the code lies under the `studies` directory.
 
 All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [the ones related to HEP](#install-hep-dependencies).
-
-### Setup the environment
-
-To setup the environment for `QUnfold` development you need two dependencies:
-
-- [`tox`](https://tox.wiki/en/latest/): at least v4
-- [`conda`](https://docs.conda.io/en/latest/)
-
-To setup the `conda` conda environment to work with the repository (only the first time):
-
-```shell
-conda create --name qunfold-dev python==3.10
-conda activate qunfold-dev
-pip install -r requirements.txt
-pip cache purge && pip check
-```
-
-and every time you open a new shell:
-
-```shell
-conda activate qunfold-dev
-```
 
 ### Install HEP dependencies
 
@@ -201,23 +209,15 @@ Comparisons are performed with `QUnfold` and with the following methods:
 
 The output plots and chi2 for each distribution will be saved into the `img` directory.
 
-### Benchmarks
+### Benchmarks and optional tests
 
-Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them:
+Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them and the unit tests related to the functions developed for the studies:
 
 ```shell
 tox -e tests
 ```
 
 The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.
-
-### Tests
-
-Tu run unit tests related to the functions developed for the studies run (optional):
-
-```shell
-tox -e tests
-```
 
 ## Credits
 
