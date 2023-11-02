@@ -169,4 +169,3 @@ class QUnfoldQUBO:
         decoded_sampleset = model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
         return np.array([best_sample.subh[label] for label in labels])
-

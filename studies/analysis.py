@@ -15,7 +15,7 @@ import sys
 import ROOT as r
 
 # My modules
-from functions.ROOT_converter import TH1_to_array, TH2_to_array
+from functions.ROOT_converter import TH1_to_array, TMatrix_to_array
 from functions.custom_logger import INFO, ERROR
 from functions.generator import generate
 from functions.RooUnfold import (
@@ -83,7 +83,7 @@ def main():
         # QUnfold settings
         truth = TH1_to_array(truth, overflow=False)
         meas = TH1_to_array(meas, overflow=False)
-        response = TH2_to_array(response.HresponseNoOverflow(), overflow=False)
+        response = TMatrix_to_array(response.Mresponse(norm=True))
 
         # Simulated annealing (SA)
         unfolded_SA = QUnfold_unfolder_and_plot(
