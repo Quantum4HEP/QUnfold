@@ -48,7 +48,7 @@ def QUnfold_unfolder_and_plot(
     title = ""
 
     # Unfold
-    unfolder = QUnfoldQUBO(response, meas, lam=0.1)
+    unfolder = QUnfoldQUBO(response, meas, lam=0.05)
     if unf_type == "SA":
         unfolded = unfolder.solve_simulated_annealing(num_reads=100)
         title = "SA"

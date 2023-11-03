@@ -36,10 +36,10 @@ def main():
     samples = 10000
     max_bin = 10
     min_bin = 0
-    bins = 40
-    bias = 0.0
-    smearing = 0.0
-    eff = 0.7
+    bins = 20
+    bias = -0.13
+    smearing = 0.21
+    eff = 0.92
 
     # Generate data in ROOT format and convert
     truth, meas, response = generate(
@@ -50,8 +50,8 @@ def main():
     response = TMatrix_to_array(response.Mresponse(norm=True))
 
     # Unfold with simulated annealing
-    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.1)
-    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
+    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.05)
+    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
     # Create results dir
     if not os.path.exists("img/examples/ROOT_simulated_annealing"):

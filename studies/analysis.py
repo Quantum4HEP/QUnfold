@@ -36,14 +36,14 @@ if not loaded_RooUnfold == 0:
 
 
 # Input variables
-distributions = ["breit-wigner", "normal", "double-peaked", "exponential"]
+distributions = ["normal", "breit-wigner", "exponential", "double-peaked"]
 samples = 10000
 max_bin = 10
 min_bin = 0
-bins = 40
-bias = 0.0
-smearing = 0.0
-eff = 0.7
+bins = 20
+bias = -0.13
+smearing = 0.21
+eff = 0.92
 
 
 def main():
