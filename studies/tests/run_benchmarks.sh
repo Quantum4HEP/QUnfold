@@ -7,11 +7,6 @@
 # Date:       2023-06-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-
-# Run unit tests
-find tests -name '*.py' ! -name 'benchmarks.py' -exec pytest {} +
-echo ""
-
 # Variables
 distributions="breit-wigner normal double-peaked exponential"
 output="../img/benchmarks"

@@ -27,7 +27,7 @@
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Run the analysis](#run-the-analysis)
-  - [Benchmarks and optional tests](#benchmarks-and-optional-tests)
+  - [Benchmarks](#benchmarks)
 - [Credits](#credits)
   - [Main developers](#main-developers)
   - [Other contributors](#other-contributors)
@@ -221,12 +221,12 @@ Comparisons are performed with `QUnfold` and with the following methods:
 
 The output plots and chi2 for each distribution will be saved into the `img` directory.
 
-### Benchmarks and optional tests
+### Benchmarks
 
-Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them and the unit tests related to the functions developed for the studies:
+Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them:
 
 ```shell
-tox -e tests
+tox -e benchmarks
 ```
 
 The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.

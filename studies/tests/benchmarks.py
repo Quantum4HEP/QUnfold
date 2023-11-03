@@ -9,7 +9,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # STD modules
-import sys
+import sys, os
 
 # Data science modules
 import ROOT as r
@@ -20,10 +20,10 @@ import pytest
 # My modules
 sys.path.append("..")
 sys.path.append("../src")
-from studies.functions.extra_ROOT_converter import TH1_to_array, TH2_to_array
 from studies.functions.generator import generate
 from studies.functions.custom_logger import ERROR
 from src.QUnfold import QUnfoldQUBO
+from src.QUnfold.utility import TH1_to_array, TMatrix_to_array
 
 # RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
@@ -44,20 +44,28 @@ def load_input(request, software):
         Tuple: A tuple containing the RooUnfold response matrix (m_response) and the measurement histogram (h_meas).
     """
 
+    # Create dirs if necessary
+    if not os.path.exists("img/benchmarks"):
+        os.makedirs("img/benchmarks")
+
     # Variables
     distr = request.config.getoption("--distr")
-    bins = 40
-    min_bin = -10
+    samples = 10000
     max_bin = 10
-    if distr == "exponential":
-        min_bin = 0
-    truth, meas, response = generate(distr, bins, min_bin, max_bin, 10000)
+    min_bin = 0
+    bins = 20
+    bias = -0.13
+    smearing = 0.21
+    eff = 0.92
+    truth, meas, response = generate(
+        distr, bins, min_bin, max_bin, samples, bias, smearing, eff
+    )
 
     # Extra settings for QUnfold
     if software == "QUnfold":
-        truth = TH1_to_array(truth, overflow=True)
-        meas = TH1_to_array(meas, overflow=True)
-        response = TH2_to_array(response.Hresponse(), overflow=True)
+        truth = TH1_to_array(truth, overflow=False)
+        meas = TH1_to_array(meas, overflow=False)
+        response = TMatrix_to_array(response.Mresponse(norm=True))
 
     return response, meas
 
@@ -149,8 +157,8 @@ def QUnfoldSimulated(m_response, h_meas):
         h_meas (ROOT.TH1): The measurement histogram.
     """
 
-    unfolder = QUnfoldQUBO(m_response, h_meas)
-    result = unfolder.solve_simulated_annealing(lam=0.1, num_reads=100)
+    unfolder = QUnfoldQUBO(m_response, h_meas, lam=0.1)
+    result = unfolder.solve_simulated_annealing(num_reads=100)
 
 
 def test_QUnfoldSimulated(request, benchmark):
@@ -164,6 +172,32 @@ def test_QUnfoldSimulated(request, benchmark):
 
     m_response, h_meas = load_input(request, "QUnfold")
     result = benchmark(QUnfoldSimulated, m_response, h_meas)
+
+
+def QUnfoldHybrid(m_response, h_meas):
+    """
+    Applies the hybrid solver annealing unfolding method to the provided measurement histogram.
+
+    Args:
+        m_response (ROOT.RooUnfoldResponse): The RooUnfold response matrix.
+        h_meas (ROOT.TH1): The measurement histogram.
+    """
+
+    unfolder = QUnfoldQUBO(m_response, h_meas, lam=0.1)
+    result = unfolder.solve_hybrid_sampler()
+
+
+def test_QUnfoldHybrid(request, benchmark):
+    """
+    Perform benchmarking of the QUnfoldHybrid function using the provided input data.
+
+    Args:
+        request: The pytest request object.
+        benchmark: The benchmark fixture.
+    """
+
+    m_response, h_meas = load_input(request, "QUnfold")
+    result = benchmark(QUnfoldHybrid, m_response, h_meas)
 
 
 # Pytest main
