@@ -22,7 +22,7 @@
 - [How to use](#how-to-use)
   - [NumPy case](#numpy-case)
   - [ROOT case](#root-case)
-  - [How-to guides](#howto-guides)
+- [Examples](#examples)
 - [Run tests](#run-tests)
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
@@ -53,7 +53,7 @@ Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a qu
 
 Documentation resources are listed here:
 
-- [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
+- [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki): contain detailed description of each feature and examples.
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
 - [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
 
@@ -139,11 +139,23 @@ response = TH2_to_array(response.Hresponse()) # Supposing response was a RooUnfo
 # Perform the analysis as before...
 ```
 
-### How-to guides
-
-Detailed explanations about each feature are described into the [wiki pages](https://github.com/JustWhit3/QUnfold/wiki).
+## Examples
 
 Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more how-to examples.
+
+To run `numpy` example:
+
+```bash
+tox -e example_numpy_sim
+```
+
+TO run `root` examples:
+
+```bash
+tox -e example_ROOT_sim
+```
+
+results are saved into the `img/examples` directory.
 
 ## Run tests
 
