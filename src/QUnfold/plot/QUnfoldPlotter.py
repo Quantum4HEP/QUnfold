@@ -165,7 +165,7 @@ class QUnfoldPlotter:
 
         # Plot settings
         plt.xlabel("Bins")
-        plt.ylabel("Events")
+        plt.ylabel("Frequency")
         plt.tight_layout()
         plt.legend()
 
