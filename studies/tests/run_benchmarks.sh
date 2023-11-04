@@ -8,7 +8,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-distributions="breit-wigner normal double-peaked exponential"
+distributions="breit-wigner normal double-peaked exponential gamma"
 output="../img/benchmarks"
 
 # Run benchmarks for each distribution

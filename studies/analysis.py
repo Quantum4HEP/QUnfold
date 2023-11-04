@@ -36,7 +36,7 @@ if not loaded_RooUnfold == 0:
 
 
 # Input variables
-distributions = ["normal", "breit-wigner", "exponential", "double-peaked"]
+distributions = ["normal", "breit-wigner", "exponential", "double-peaked", "gamma"]
 samples = 10000
 max_bin = 10
 min_bin = 0
