@@ -117,6 +117,10 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
             plot_errorbar(
                 bin_edges - marker_offset, unfolded, "purple", "*", method, chi2_dof
             )
+        elif method == "HYB":
+            plot_errorbar(
+                bin_edges - marker_offset, unfolded, "orange", "*", method, chi2_dof
+            )
 
         # Plot settings
         plt.xlabel("Bins")

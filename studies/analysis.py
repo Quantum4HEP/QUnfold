@@ -92,6 +92,11 @@ def main():
             "SA", response, meas, truth, distr, bins, min_bin, max_bin
         )
 
+        # Hybrid solver (HYB)
+        unfolded_HYB = QUnfold_unfolder_and_plot(
+            "HYB", response, meas, truth, distr, bins, min_bin, max_bin
+        )
+
         ########################## Compare ###########################
 
         # Comparison settings
@@ -101,6 +106,7 @@ def main():
             "MI": TH1_to_array(unfolded_MI, overflow=False),
             "SVD": TH1_to_array(unfolded_SVD, overflow=False),
             "SA": unfolded_SA,
+            "HYB": unfolded_HYB,
         }
 
         # Plot comparisons
