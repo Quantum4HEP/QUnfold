@@ -107,20 +107,20 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
             )
         elif method == "B2B":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "blue", "o", method, chi2_dof
+                bin_edges - marker_offset, unfolded, "blue", "v", method, chi2_dof
             )
         elif method == "SVD":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "green", "o", method, chi2_dof
+                bin_edges - marker_offset, unfolded, "green", "s", method, chi2_dof
             )
         elif method == "SA":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "purple", "o", method, chi2_dof
+                bin_edges - marker_offset, unfolded, "purple", "*", method, chi2_dof
             )
 
         # Plot settings
         plt.xlabel("Bins")
-        plt.ylabel("Unfolded distribution")
+        plt.ylabel("Frequency")
         plt.tight_layout()
         plt.legend()
 
