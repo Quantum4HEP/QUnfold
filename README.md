@@ -2,7 +2,6 @@
   <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png" alt="Logo">
 </p>
 
-<h3 align="center">Unfolding statistical distributions using quantum machine learning</h3>
 <p align="center">
 	<img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br>
   <img title="v0.1" alt="v0.1" src="https://img.shields.io/badge/version-v0.1-informational?style=flat-square&color=red">
