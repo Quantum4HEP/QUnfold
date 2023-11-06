@@ -1,7 +1,6 @@
 dwave-ocean-sdk
 pyqubo
 matplotlib
-seaborn
 pytest
 pytest-sugar
 pytest-benchmark

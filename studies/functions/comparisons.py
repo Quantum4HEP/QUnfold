@@ -15,7 +15,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import chisquare
-import seaborn as sns
 
 
 def plot_errorbar(bin_edges, bin_contents, color, marker, method, chi2):
@@ -80,9 +79,6 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         distr (distr): the generated distribution.
     """
 
-    # Use Seaborn style
-    sns.set()
-
     # Plot truth distribution
     bin_edges = np.linspace(min_bin, max_bin, bins + 1)
     marker_offset = (bin_edges[1] - bin_edges[0]) / 2.0
@@ -98,7 +94,6 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
 
     # Iterate over the unfolding methodsunfolded
     for method, unfolded in data.items():
-
         # Plot each unfolding method
         chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":

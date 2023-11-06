@@ -11,7 +11,6 @@
 # Data science modules
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 from scipy.stats import chisquare
 
 
@@ -116,9 +115,6 @@ class QUnfoldPlotter:
         Args:
             method (str): Unfolding method type.
         """
-
-        # Initial settings
-        sns.set()
 
         # Plot truth and measured histogram
         for histo, label in [(self.truth, "Truth"), (self.measured, "Measured")]:
