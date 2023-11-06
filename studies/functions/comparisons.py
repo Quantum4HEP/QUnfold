@@ -96,7 +96,7 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         linestyle="dashed",
     )
 
-    # Iterate over the unfolding methods
+    # Iterate over the unfolding methodsunfolded
     for method, unfolded in data.items():
 
         # Plot each unfolding method
@@ -124,7 +124,7 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
 
         # Plot settings
         plt.xlabel("Bins")
-        plt.ylabel("Frequency")
+        plt.ylabel("Entries")
         plt.tight_layout()
         plt.legend()
 
