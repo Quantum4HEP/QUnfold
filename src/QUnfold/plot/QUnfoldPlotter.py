@@ -57,10 +57,9 @@ class QUnfoldPlotter:
         )
 
         # Plot settings
-        plt.colorbar(label="Response Value")
+        plt.colorbar()
         plt.xlabel("Truth")
         plt.ylabel("Measured")
-        plt.title("Response Matrix")
 
     def plotResponse(self):
         """
@@ -121,53 +120,31 @@ class QUnfoldPlotter:
         # Initial settings
         sns.set()
 
-        # Measured histogram
-        plt.step(
-            x=np.concatenate(
-                (
-                    [self.binning[0] - (self.binning[1] - self.binning[0])],
-                    self.binning[:-1],
-                )
-            ),
-            y=np.concatenate(([self.measured[0]], self.measured)),
-            label="Measured",
-            color="blue",
-        )
+        # Plot truth and measured histogram
+        for histo, label in [(self.truth, "Truth"), (self.measured, "Measured")]:
+            steps = np.append(histo, [histo[-1]])
+            plt.step(self.binning, steps, label=label, where="post")
 
-        # Truth histogram
-        plt.step(
-            x=np.concatenate(
-                (
-                    [self.binning[0] - (self.binning[1] - self.binning[0])],
-                    self.binning[:-1],
-                )
-            ),
-            y=np.concatenate(([self.truth[0]], self.truth)),
-            label="Truth",
-            color="red",
-        )
-
-        # Unfolded distribution
-        marker_offset = (self.binning[1] - self.binning[0]) / 2.0
-        markers = self.binning - marker_offset
+        # Plot unfolded histogram with chi2 test
+        binwidth = self.binning[2] - self.binning[1]
+        x = self.binning[:-1] + (binwidth / 2)
+        chi2 = round(self._compute_chi2_dof(self.unfolded, self.truth), 2)
+        label = rf"Unfolded {method} $\chi^2 = {chi2}$"
         plt.errorbar(
-            x=markers[:-1],
+            x,
             y=self.unfolded,
             yerr=np.sqrt(self.unfolded),
-            color="green",
+            label=label,
             marker="o",
             ms=5,
-            label=r"{} ($\chi^2 = {:.2f}$)".format(
-                method, self._compute_chi2_dof(self.unfolded, self.truth)
-            ),
+            c="green",
             linestyle="None",
         )
 
         # Plot settings
         plt.xlabel("Bins")
         plt.ylabel("Entries")
-        plt.tight_layout()
-        plt.legend()
+        plt.legend(loc="upper right")
 
     def plot(self, method=""):
         """
