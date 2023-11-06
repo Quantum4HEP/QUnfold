@@ -2,7 +2,6 @@
   <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png" alt="Logo">
 </p>
 
-<h3 align="center">Unfolding statistical distributions using quantum machine learning</h3>
 <p align="center">
 	<img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br>
   <img title="v0.1" alt="v0.1" src="https://img.shields.io/badge/version-v0.1-informational?style=flat-square&color=red">
@@ -115,7 +114,7 @@ plotter.saveResponse("response.png")
 plotter.savePlot("comparison.png", "SA")
 ```
 
-which will produce a similar result to this one (0 bias and smearing, but 70% of efficiency have been applied to simulated data):
+which will produce a similar result to this unfolded Breit-Wigner distribution (0 bias and smearing, but 70% of efficiency have been applied to simulated data):
 
 <p align="center">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/ROOT_simulated_annealing/comparison.png" style="width: 45%;">
