@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "Bianco"
-  given-names: "Gianluca"
-- family-names: "Gasperini"
-  given-names: "Simone"
+  - family-names: "Bianco"
+    given-names: "Gianluca"
+  - family-names: "Gasperini"
+    given-names: "Simone"
 title: "QUnfold"
-version: 0.1.1
+version: 0.0.2
 doi: https://zenodo.org/badge/latestdoi/652649177
-date-released: 2023-06-12
+date-released: 2023-11-08
 url: "https://github.com/JustWhit3/QUnfold"
