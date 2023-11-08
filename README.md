@@ -18,6 +18,7 @@
 - [Introduction](#introduction)
 - [Documentation](#documentation)
 - [Developer environment](#developer-environment)
+- [Install from pip](#install-from-pip)
 - [How to use](#how-to-use)
   - [NumPy case](#numpy-case)
   - [ROOT case](#root-case)
@@ -44,9 +45,6 @@ For the moment you can use it in two modes:
 Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) et al. which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
 :warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
-
-:warning: The module is not yet available on [PyPi](https://pypi.org/project/pip/), but it will be very soon.
-
 
 ## Documentation
 
@@ -78,6 +76,14 @@ and every time you open a new shell:
 
 ```shell
 conda activate qunfold-dev
+```
+
+## Install from pip
+
+To install the module from [PyPi](https://pypi.org/project/QUnfold/) you can use `pip`:
+
+```shell
+pip install QUnfold
 ```
 
 ## How to use
