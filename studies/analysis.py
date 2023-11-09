@@ -36,7 +36,7 @@ if not loaded_RooUnfold == 0:
 
 
 # Input variables
-distributions = ["normal", "breit-wigner", "exponential", "double-peaked", "gamma"]
+distributions = ["normal", "gamma", "exponential", "breit-wigner", "double-peaked"]
 samples = 10000
 max_bin = 10
 min_bin = 0
@@ -76,10 +76,6 @@ def main():
         unfolded_SVD = RooUnfold_unfolder("SVD", r_response, meas)
         RooUnfold_plot(truth, meas, unfolded_SVD, distr)
 
-        # Bin-to-Bin unfolding (B2B)
-        unfolded_B2B = RooUnfold_unfolder("B2B", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_B2B, distr)
-
         ########################## Quantum ###########################
 
         # QUnfold settings
@@ -102,7 +98,6 @@ def main():
         # Comparison settings
         data = {
             "IBU4": TH1_to_array(unfolded_IBU, overflow=False),
-            "B2B": TH1_to_array(unfolded_B2B, overflow=False),
             "MI": TH1_to_array(unfolded_MI, overflow=False),
             "SVD": TH1_to_array(unfolded_SVD, overflow=False),
             "SA": unfolded_SA,

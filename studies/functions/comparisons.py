@@ -100,10 +100,6 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
             plot_errorbar(
                 bin_edges - marker_offset, unfolded, "red", "o", method, chi2_dof
             )
-        elif method == "B2B":
-            plot_errorbar(
-                bin_edges - marker_offset, unfolded, "blue", "v", method, chi2_dof
-            )
         elif method == "SVD":
             plot_errorbar(
                 bin_edges - marker_offset, unfolded, "green", "s", method, chi2_dof
