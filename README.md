@@ -31,6 +31,7 @@
 - [Credits](#credits)
   - [Main developers](#main-developers)
   - [Other contributors](#other-contributors)
+- [Projects which use QUnfold](#projects-which-use-qunfold)
 - [Stargazers over time](#stargazers-over-time)
 
 ## Introduction
@@ -235,6 +236,14 @@ tox -e benchmarks
 ```
 
 The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.
+
+## Projects which use QUnfold
+
+List of projects which use `QUnfold`:
+
+- [PyXSec](https://github.com/JustWhit3/PyXSec): Python framework to measure differential cross-section of particle physics processes using classical- and quantum-computing based techniques.
+
+If you plan to use `QUnfold` let us now so we can add your work in this section.
 
 ## Credits
 
