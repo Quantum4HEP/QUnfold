@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 if __name__ == "__main__":
     setup(
         name="QUnfold",
-        packages=find_packages(include=["QUnfold"]),
+        packages=find_packages(),
         version="0.0.2",
         author="Gianluca Bianco, Simone Gasperini",
         author_email="biancogianluca9@gmail.com, simone.gasperini4@unibo.it",
