@@ -53,7 +53,7 @@ Research documentation:
 
 - [Poster](https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0) at the 2023 Julich Summer School.
 
-Documentation resources are listed here:
+Further documentation:
 
 - [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki): contain detailed description of each feature and examples.
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
