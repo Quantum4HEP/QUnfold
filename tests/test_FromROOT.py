@@ -3,9 +3,9 @@
 
 # ---------------------- Metadata ----------------------
 #
-# File name:  tests_ROOT_converter.py
+# File name:  test_ROOT_converter.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-13
+# Date:       2023-11-10
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Data science modules
