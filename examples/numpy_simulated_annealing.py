@@ -22,26 +22,30 @@ from QUnfold import QUnfoldPlotter
 def main():
 
     # Data variables
-    max_bin = 5
-    min_bin = 0
-    bins = 5
+    num_entries = 4000
+    num_bins = 16
+    min_bin = -8.0
+    max_bin = 8.0
 
-    # Generic data
-    truth = np.array([5, 8, 12, 6, 2])
-    meas = np.array([6, 9, 13, 5, 3])
-    response = np.array(
-        [
-            [1, 1, 0, 0, 0],
-            [1, 2, 1, 0, 0],
-            [0, 1, 3, 1, 0],
-            [0, 0, 1, 3, 1],
-            [0, 0, 0, 1, 2],
-        ]
-    )
+    # Generate random true data
+    true_data = np.random.normal(loc=0.0, scale=1.8, size=num_entries)
+
+    # Apply gaussian smearing to get measured data
+    smearing = np.random.normal(loc=-0.3, scale=0.5, size=num_entries)
+    meas_data = true_data + smearing
+
+    # Generate truth and measured histograms
+    bins = np.linspace(min_bin, max_bin, num_bins + 1)
+    truth, _ = np.histogram(true_data, bins=bins)
+    meas, _ = np.histogram(meas_data, bins=bins)
+
+    # Generate and normalize response matrix
+    response, _, _ = np.histogram2d(meas_data, true_data, bins=bins)
+    response /= truth + 1e-6
 
     # Unfold with simulated annealing
-    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.1)
-    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200)
+    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.01)
+    unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
     # Create results dir
     if not os.path.exists("img/examples/numpy_simulated_annealing"):
@@ -53,7 +57,7 @@ def main():
         measured=meas,
         truth=truth,
         unfolded=unfolded_SA,
-        binning=np.linspace(min_bin, max_bin, bins + 1),
+        binning=bins,
     )
     plotter.saveResponse("img/examples/numpy_simulated_annealing/response.png")
     plotter.savePlot("img/examples/numpy_simulated_annealing/comparison.png", "SA")
