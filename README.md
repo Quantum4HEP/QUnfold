@@ -51,7 +51,7 @@ Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a qu
 
 Research documentation:
 
-- [Poster]((https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0)) at the 2023 Julich Summer School.
+- [Poster](https://www.dropbox.com/scl/fi/umam07m5xiwm3ui335vgr/poster_QUnfold.pdf?rlkey=k5ru4kqkb7ea7g9exvxycbzm3&dl=0) at the 2023 Julich Summer School.
 
 Documentation resources are listed here:
 
