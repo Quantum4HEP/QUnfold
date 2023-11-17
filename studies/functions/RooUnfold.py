@@ -44,14 +44,14 @@ def RooUnfold_plot_response(response, distr):
     m_response_canvas.SaveAs("../img/RooUnfold/{}/response.png".format(distr))
 
 
-def RooUnfold_unfolder(type, m_response, h_meas):
+def RooUnfold_unfolder(type, m_response, h_measured):
     """
     Unfold a distribution based on a certain type of unfolding.
 
     Args:
         type (str): the unfolding type (MI, SVD, IBU).
         m_response (ROOT.TH2F): the response matrix.
-        h_meas (ROOT.TH1F): the measured pseudo-data.
+        h_measured (ROOT.TH1F): the measured pseudo-data.
 
     Returns:
         ROOT.TH1F: the unfolded histogram.
@@ -76,20 +76,20 @@ def RooUnfold_unfolder(type, m_response, h_meas):
     # Generic unfolding settings
     unfolder.SetVerbose(0)
     unfolder.SetResponse(m_response)
-    unfolder.SetMeasured(h_meas)
+    unfolder.SetMeasured(h_measured)
     histo = unfolder.Hunfold()
     histo.SetName("unfolded_{}".format(type))
 
     return histo
 
 
-def RooUnfold_plot(truth, meas, unfolded, distr):
+def RooUnfold_plot(truth, measured, unfolded, distr):
     """
     Plots the unfolding results.
 
     Args:
         truth (ROOT.TH1): True distribution histogram.
-        meas (ROOT.TH1): Measured distribution histogram.
+        measured (ROOT.TH1): Measured distribution histogram.
         unfolded (ROOT.TH1): Unfolded distribution histogram.
         distr (distr): the generated distribution.
     """
@@ -102,13 +102,13 @@ def RooUnfold_plot(truth, meas, unfolded, distr):
     truth.GetXaxis().SetTitle("Bins")
     truth.GetYaxis().SetTitle("")
     truth.Draw()
-    meas.Draw("same")
+    measured.Draw("same")
     unfolded.Draw("same")
 
     # Legend settings
     leg = r.TLegend(0.7, 0.7, 0.9, 0.9)
     leg.AddEntry(truth, "True", "pl")
-    leg.AddEntry(meas, "Measured", "pl")
+    leg.AddEntry(measured, "Measured", "pl")
     ext = unfolded.GetName().split("_")[-1]
     if ext == "MI":
         leg.AddEntry(unfolded, "Unfolded (MI)")

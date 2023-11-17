@@ -46,15 +46,15 @@ def main():
     eff = 0.92
 
     # Generate data in ROOT format and convert
-    truth, meas, response = generate(
+    truth, measured, response = generate(
         "breit-wigner", bins, min_bin, max_bin, samples, bias, smearing, eff
     )
     truth = TH1_to_array(truth, overflow=False)
-    meas = TH1_to_array(meas, overflow=False)
+    measured = TH1_to_array(measured, overflow=False)
     response = TMatrix_to_array(response.Mresponse(norm=True))
 
     # Unfold with simulated annealing
-    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.05)
+    unfolder = QUnfoldQUBO(response=response, measured=measured, lam=0.05)
     unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
     # Create results dir
@@ -64,7 +64,7 @@ def main():
     # Plot information
     plotter = QUnfoldPlotter(
         response=response,
-        measured=meas,
+        measured=measured,
         truth=truth,
         unfolded=unfolded_SA,
         binning=np.linspace(min_bin, max_bin, bins + 1),

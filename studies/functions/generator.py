@@ -34,13 +34,15 @@ def smear(xt, bias, smearing, eff=1):
     return xt + xsmear
 
 
-def generate_standard(truth, meas, response, type, distr, samples, bias, smearing, eff):
+def generate_standard(
+    truth, measured, response, type, distr, samples, bias, smearing, eff
+):
     """
     Generate data for standard distributions.
 
     Args:
         truth (ROOT.TH1F): truth histogram.
-        meas (ROOT.TH1F): measured histogram.
+        measured (ROOT.TH1F): measured histogram.
         response (ROOT.TH2F): response matrix.
         type (str): type of data generation (data or response).
         distr (distr): the distribution to be generated.
@@ -71,9 +73,9 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
             truth.Fill(xt)
             x = smear(xt, bias, smearing, eff)
             if x != None:
-                meas.Fill(x)
+                measured.Fill(x)
 
-        return truth, meas
+        return truth, measured
 
     # Response generation
     elif type == "response":
@@ -97,13 +99,15 @@ def generate_standard(truth, meas, response, type, distr, samples, bias, smearin
         return response
 
 
-def generate_double_peaked(truth, meas, response, type, samples, bias, smearing, eff):
+def generate_double_peaked(
+    truth, measured, response, type, samples, bias, smearing, eff
+):
     """
     Generate data for the double peaked distributions.
 
     Args:
         truth (ROOT.TH1F): truth histogram.
-        meas (ROOT.TH1F): measured histogram.
+        measured (ROOT.TH1F): measured histogram.
         response (ROOT.TH2F): response matrix.
         type (str): type of data generation (data or response).
         samples (int): number of samples to be generated.
@@ -125,15 +129,15 @@ def generate_double_peaked(truth, meas, response, type, samples, bias, smearing,
             truth.Fill(xt)
             x = smear(xt, bias, smearing, eff)
             if x != None:
-                meas.Fill(x)
+                measured.Fill(x)
         for i in range(samples):
             xt = r.gRandom.Gaus(6.4, 1.2)
             truth.Fill(xt)
             x = smear(xt, bias, smearing, eff)
             if x != None:
-                meas.Fill(x)
+                measured.Fill(x)
 
-        return truth, meas
+        return truth, measured
 
     # Response generation
     elif type == "response":
@@ -178,23 +182,23 @@ def generate(distr, bins, min_bin, max_bin, samples, bias, smearing, eff):
 
     # Initialize variables
     truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
-    meas = r.TH1F("Measured", "", bins, min_bin, max_bin)
+    measured = r.TH1F("Measured", "", bins, min_bin, max_bin)
     response = r.RooUnfoldResponse(bins, min_bin, max_bin)
 
     # Fill histograms
     if any(d in distr for d in ["normal", "breit-wigner", "exponential", "gamma"]):
-        truth, meas = generate_standard(
-            truth, meas, response, "data", distr, samples, bias, smearing, eff
+        truth, measured = generate_standard(
+            truth, measured, response, "data", distr, samples, bias, smearing, eff
         )
         response = generate_standard(
-            truth, meas, response, "response", distr, samples, bias, smearing, eff
+            truth, measured, response, "response", distr, samples, bias, smearing, eff
         )
     elif any(d in distr for d in ["double-peaked"]):
-        truth, meas = generate_double_peaked(
-            truth, meas, response, "data", samples, bias, smearing, eff
+        truth, measured = generate_double_peaked(
+            truth, measured, response, "data", samples, bias, smearing, eff
         )
         response = generate_double_peaked(
-            truth, meas, response, "response", samples, bias, smearing, eff
+            truth, measured, response, "response", samples, bias, smearing, eff
         )
 
-    return truth, meas, response
+    return truth, measured, response

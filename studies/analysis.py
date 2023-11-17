@@ -54,7 +54,7 @@ def main():
     for distr in distributions:
         # Generate data
         log.info("Unfolding the {} distribution".format(distr))
-        truth, meas, response = generate(
+        truth, measured, response = generate(
             distr, bins, min_bin, max_bin, samples, bias, smearing, eff
         )
 
@@ -66,32 +66,32 @@ def main():
         r_response.UseOverflow(False)
 
         # Matrix inversion (MI)
-        unfolded_MI = RooUnfold_unfolder("MI", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_MI, distr)
+        unfolded_MI = RooUnfold_unfolder("MI", r_response, measured)
+        RooUnfold_plot(truth, measured, unfolded_MI, distr)
 
         # Iterative Bayesian unfolding (IBU)
-        unfolded_IBU = RooUnfold_unfolder("IBU", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_IBU, distr)
+        unfolded_IBU = RooUnfold_unfolder("IBU", r_response, measured)
+        RooUnfold_plot(truth, measured, unfolded_IBU, distr)
 
         # Tikhonov unfolding (SVD)
-        unfolded_SVD = RooUnfold_unfolder("SVD", r_response, meas)
-        RooUnfold_plot(truth, meas, unfolded_SVD, distr)
+        unfolded_SVD = RooUnfold_unfolder("SVD", r_response, measured)
+        RooUnfold_plot(truth, measured, unfolded_SVD, distr)
 
         ########################## Quantum ###########################
 
         # QUnfold settings
         truth = TH1_to_array(truth, overflow=False)
-        meas = TH1_to_array(meas, overflow=False)
+        measured = TH1_to_array(measured, overflow=False)
         response = TMatrix_to_array(response.Mresponse(norm=True))
 
         # Simulated annealing (SA)
         unfolded_SA = QUnfold_unfolder_and_plot(
-            "SA", response, meas, truth, distr, bins, min_bin, max_bin
+            "SA", response, measured, truth, distr, bins, min_bin, max_bin
         )
 
         # Hybrid solver (HYB)
         unfolded_HYB = QUnfold_unfolder_and_plot(
-            "HYB", response, meas, truth, distr, bins, min_bin, max_bin
+            "HYB", response, measured, truth, distr, bins, min_bin, max_bin
         )
 
         ########################## Compare ###########################

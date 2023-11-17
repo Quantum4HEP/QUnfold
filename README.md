@@ -104,18 +104,18 @@ from QUnfold import QUnfoldPlotter
 # Read data from a file or sample them
 # NB: data should be in NumPy or list format
 truth = ... # truth distribution
-meas = ... # measured distribution
+measured = ... # measured distribution
 response = ... # response matrix (supposed to be normalized)
 binning = ... # binning of the distributions
 
 # Unfold!
-unfolder = QUnfoldQUBO(response, meas, lam=0.1)
+unfolder = QUnfoldQUBO(response, measured, lam=0.1)
 unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200) # use solve_hybrid_sampler method to use real quantum computer hardware
 
 # Plot results
 plotter = QUnfoldPlotter(
     response=response,
-    measured=meas,
+    measured=measured,
     truth=truth,
     unfolded=unfolded_SA,
     binning=binning,
@@ -142,7 +142,7 @@ from QUnfold.utility import TH1_to_array, TH2_to_array
 # Read data as before...
 # Convert data
 truth = TH1_to_array(truth)
-meas = TH1_to_array(meas)
+measured = TH1_to_array(measured)
 response = TH2_to_array(response.Hresponse()) # Supposing response was a RooUnfold response
 
 # Perform the analysis as before...

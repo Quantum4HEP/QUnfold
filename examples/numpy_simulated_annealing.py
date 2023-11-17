@@ -36,14 +36,14 @@ def main():
     # Generate truth and measured histograms
     bins = np.linspace(min_bin, max_bin, num_bins + 1)
     truth, _ = np.histogram(true_data, bins=bins)
-    meas, _ = np.histogram(meas_data, bins=bins)
+    measured, _ = np.histogram(meas_data, bins=bins)
 
     # Generate and normalize response matrix
     response, _, _ = np.histogram2d(meas_data, true_data, bins=bins)
     response /= truth + 1e-6
 
     # Unfold with simulated annealing
-    unfolder = QUnfoldQUBO(response=response, meas=meas, lam=0.01)
+    unfolder = QUnfoldQUBO(response=response, measured=measured, lam=0.01)
     unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
     # Create results dir
@@ -53,7 +53,7 @@ def main():
     # Plot information
     plotter = QUnfoldPlotter(
         response=response,
-        measured=meas,
+        measured=measured,
         truth=truth,
         unfolded=unfolded_SA,
         binning=bins,
