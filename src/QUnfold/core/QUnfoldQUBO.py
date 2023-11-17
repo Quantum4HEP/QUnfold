@@ -19,17 +19,44 @@ class QUnfoldQUBO:
     Class used to perform the unfolding formulated as a QUBO problem.
     """
 
-    def __init__(self, response, measured, lam=0.0):
+    def __init__(self, response=None, measured=None, lam=0.0):
         """
         Initialize the QUnfoldQUBO object.
 
         Parameters:
-            response (numpy.ndarray): input response matrix.
-            measured (numpy.ndarray): input measured distribution.
+            response (numpy.ndarray, optional): input response matrix (default is None).
+            measured (numpy.ndarray, optinoal): input measured histogram (default is None).
             lam (float, optional): regularization parameter (default is 0.0).
         """
         self.R = response
         self.d = measured
+        self.lam = lam
+
+    def set_response(self, response):
+        """
+        Set the input response matrix.
+
+        Parameters:
+            response (numpy.ndarray): input response matrix.
+        """
+        self.response = response
+
+    def set_measured(self, measured):
+        """
+        Set the input measured histogram.
+
+        Parameters:
+            measured (numpy.ndarray): input measured histogram.
+        """
+        self.measured = measured
+
+    def set_lam_parameter(self, lam):
+        """
+        Set the lambda regularization parameter.
+
+        Parameters:
+            lam (float): regularization parameter.
+        """
         self.lam = lam
 
     @staticmethod
