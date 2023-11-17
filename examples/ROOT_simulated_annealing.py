@@ -17,7 +17,7 @@ import ROOT as r
 
 # My modules
 sys.path.append(".")
-from studies.functions.custom_logger import ERROR
+from studies.functions.custom_logger import get_custom_logger
 from studies.functions.generator import generate
 
 # QUnfold modules
@@ -25,10 +25,13 @@ from QUnfold import QUnfoldQUBO
 from QUnfold import QUnfoldPlotter
 from QUnfold.utility import TH1_to_array, TMatrix_to_array
 
+# Logger settings
+log = get_custom_logger(__name__)
+
 # RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
-    ERROR("RooUnfold not found!")
+    log.error("RooUnfold not found!")
     sys.exit(0)
 
 

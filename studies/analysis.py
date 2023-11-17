@@ -15,7 +15,7 @@ import sys
 import ROOT as r
 
 # My modules
-from functions.custom_logger import INFO, ERROR
+from functions.custom_logger import get_custom_logger
 from functions.generator import generate
 from functions.RooUnfold import (
     RooUnfold_unfolder,
@@ -28,10 +28,13 @@ from functions.comparisons import plot_comparisons
 # QUnfold modules
 from QUnfold.utility import TH1_to_array, TMatrix_to_array
 
+# Logger settings
+log = get_custom_logger(__name__)
+
 # RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
-    ERROR("RooUnfold not found!")
+    log.error("RooUnfold not found!")
     sys.exit(0)
 
 
@@ -50,7 +53,7 @@ def main():
     # Iterate over distributions
     for distr in distributions:
         # Generate data
-        INFO("Unfolding the {} distribution".format(distr))
+        log.info("Unfolding the {} distribution".format(distr))
         truth, meas, response = generate(
             distr, bins, min_bin, max_bin, samples, bias, smearing, eff
         )
@@ -104,7 +107,7 @@ def main():
 
         # Plot comparisons
         plot_comparisons(data, distr, truth, bins, min_bin, max_bin)
-        print("Done", end="\n\n")
+        log.info("Done\n")
 
 
 if __name__ == "__main__":

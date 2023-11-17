@@ -9,7 +9,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Standard modules
-import sys, os
+import os
 
 # Data science modules
 import numpy as np
@@ -58,6 +58,11 @@ def QUnfold_unfolder_and_plot(
         )
         plotter.savePlot("../img/QUnfold/{}/unfolded_SA.png".format(distr), "SA")
         plotter.saveResponse("../img/QUnfold/{}/response.png".format(distr))
+        print(
+            "The png file ../img/QUnfold/{}/unfolded_SA.png has been created".format(
+                distr
+            )
+        )
 
     # Unfold with hybrid solver
     elif unf_type == "HYB":
@@ -70,5 +75,11 @@ def QUnfold_unfolder_and_plot(
             binning=np.linspace(min_bin, max_bin, bins + 1),
         )
         plotter.savePlot("../img/QUnfold/{}/unfolded_HYB.png".format(distr), "HYB")
+        plotter.saveResponse("../img/QUnfold/{}/response.png".format(distr))
+        print(
+            "The png file ../img/QUnfold/{}/unfolded_HYB.png has been created".format(
+                distr
+            )
+        )
 
     return unfolded
