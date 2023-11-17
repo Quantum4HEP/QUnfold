@@ -47,10 +47,8 @@ eff = 0.92
 
 
 def main():
-
     # Iterate over distributions
     for distr in distributions:
-
         # Generate data
         INFO("Unfolding the {} distribution".format(distr))
         truth, meas, response = generate(
