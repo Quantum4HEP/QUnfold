@@ -76,19 +76,29 @@ class QUnfoldQUBO:
         D += np.diag(diag1, k=1) + np.diag(diag1, k=-1)
         return D
 
-    def _define_variables(self):
+    def _define_variables(self, opt):
         """
         Define the list of variables for the QUBO problem.
+
+        Parameters:
+            opt (bool): enables optimal range for the integer variables.
 
         Returns:
             list: encoded integer variables.
         """
-        # Get largest power of 2 integer below the total number of entries
-        n = int(2 ** np.floor(np.log2(sum(self.d)))) - 1
-
-        # Encode integer variables using logarithmic binary encoding
-        vars = [LogEncInteger(f"x{i}", value_range=(0, n)) for i in range(len(self.d))]
-        return vars
+        variables = []
+        if opt:
+            for i, mean in enumerate(self.d):
+                error = 5 * mean**0.5
+                lower = 0 if mean - error < 0 else int(np.floor(mean - error))
+                upper = 1 if mean == 0 else int(np.ceil(mean + error))
+                variables.append(LogEncInteger(f"x{i}", value_range=(lower, upper)))
+        else:
+            variables = [
+                LogEncInteger(f"x{i}", value_range=(0, int(sum(self.d))))
+                for i in range(len(self.d))
+            ]
+        return variables
 
     def _define_hamiltonian(self, x):
         """
@@ -116,11 +126,14 @@ class QUnfoldQUBO:
                 hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
-    def initialize_qubo_model(self):
+    def initialize_qubo_model(self, optimize_vars_range=True):
         """
-        Initialize the QUBO model and BQM instance for the unfolding problem.
+        Initialize QUBO model and BQM instance for the unfolding problem.
+
+        Parameters:
+            optimize_vars_range (bool, optional): enables optimal range for the integer variables (default is True).
         """
-        x = self._define_variables()
+        x = self._define_variables(opt=optimize_vars_range)
         h = self._define_hamiltonian(x)
         self.labels = [x[i].label for i in range(len(x))]
         self.model = h.compile()
