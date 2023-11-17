@@ -179,6 +179,7 @@ class QUnfoldQUBO:
         Returns:
             float: energy for the given input.
         """
+        # TODO: fix for the case 'optimize_vars_range=True'
         num_bits = int(np.floor(np.log2(sum(self.d))))
         x_binary = {}
         for i, entry in enumerate(x):

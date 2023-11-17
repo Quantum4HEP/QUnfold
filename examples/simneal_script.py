@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# ---------------------- Metadata ----------------------
+#
+# File name:  simneal_example.py
+# Author:     Gianluca Bianco (biancogianluca9@gmail.com) & Simone Gasperini (simone.gasperini4@unibo.it)
+# Date:       2023-11-02
+# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
+
 import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
@@ -7,9 +17,11 @@ num_entries = 4000
 num_bins = 16
 min_bin = -8.0
 max_bin = 8.0
+seed = 42
 
 
 # Generate random true data
+np.random.seed(seed)
 true_data = np.random.normal(loc=0.0, scale=1.8, size=num_entries)
 
 
@@ -32,7 +44,7 @@ response /= true + 1e-6
 # Run simulated annealing to solve QUBO problem
 unfolder = QUnfoldQUBO(response, measured, lam=0.01)
 unfolder.initialize_qubo_model()
-unfolded = unfolder.solve_simulated_annealing(num_reads=100)
+unfolded = unfolder.solve_simulated_annealing(num_reads=100, seed=seed)
 
 
 # Plot unfolding result
@@ -41,3 +53,6 @@ plotter = QUnfoldPlotter(
 )
 plotter.plotResponse()
 plotter.plot()
+
+plotter.saveResponse("examples/simneal_response.png")
+plotter.savePlot("examples/simneal_result.png", method="SA")
