@@ -110,7 +110,8 @@ binning = ... # binning of the distributions
 
 # Unfold!
 unfolder = QUnfoldQUBO(response, measured, lam=0.1)
-unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200) # use solve_hybrid_sampler method to use real quantum computer hardware
+unfolder.initialize_qubo_model()
+unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
 # Plot results
 plotter = QUnfoldPlotter(

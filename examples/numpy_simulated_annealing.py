@@ -44,6 +44,7 @@ def main():
 
     # Unfold with simulated annealing
     unfolder = QUnfoldQUBO(response=response, measured=measured, lam=0.01)
+    unfolder.initialize_qubo_model()
     unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
     # Create results dir

@@ -30,8 +30,9 @@ response /= true + 1e-6
 
 
 # Run simulated annealing to solve QUBO problem
-qubo = QUnfoldQUBO(response=response, measured=measured, lam=0.01)
-unfolded = qubo.solve_simulated_annealing(num_reads=100)
+unfolder = QUnfoldQUBO(response, measured, lam=0.01)
+unfolder.initialize_qubo_model()
+unfolded = unfolder.solve_simulated_annealing(num_reads=100)
 
 
 # Plot unfolding result

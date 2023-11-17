@@ -116,18 +116,15 @@ class QUnfoldQUBO:
                 hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
-    def _define_pyqubo_model(self):
+    def initialize_qubo_model(self):
         """
-        Define the PyQUBO model instance for the QUBO problem.
-
-        Returns:
-            tuple: labels for the variables and PyQUBO model instance.
+        Initialize the QUBO model and BQM instance for the unfolding problem.
         """
         x = self._define_variables()
         h = self._define_hamiltonian(x)
-        labels = [x[i].label for i in range(len(x))]
-        model = h.compile()
-        return labels, model
+        self.labels = [x[i].label for i in range(len(x))]
+        self.model = h.compile()
+        self.bqm = self.model.to_bqm()
 
     def solve_simulated_annealing(self, num_reads=100, seed=None):
         """
@@ -140,12 +137,11 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: unfolded histogram.
         """
-        labels, model = self._define_pyqubo_model()
         sampler = SimulatedAnnealingSampler()
-        sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads, seed=seed)
-        decoded_sampleset = model.decode_sampleset(sampleset)
+        sampleset = sampler.sample(self.bqm, num_reads=num_reads, seed=seed)
+        decoded_sampleset = self.model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
-        return np.array([best_sample.subh[label] for label in labels])
+        return np.array([best_sample.subh[label] for label in self.labels])
 
     def solve_hybrid_sampler(self):
         """
@@ -154,12 +150,11 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: unfolded histogram.
         """
-        labels, model = self._define_pyqubo_model()
         sampler = LeapHybridSampler()
-        sampleset = sampler.sample(model.to_bqm())
-        decoded_sampleset = model.decode_sampleset(sampleset)
+        sampleset = sampler.sample(self.bqm)
+        decoded_sampleset = self.model.decode_sampleset(sampleset)
         best_sample = min(decoded_sampleset, key=lambda s: s.energy)
-        return np.array([best_sample.subh[label] for label in labels])
+        return np.array([best_sample.subh[label] for label in self.labels])
 
     def compute_energy(self, x):
         """
@@ -177,5 +172,4 @@ class QUnfoldQUBO:
             bitstr = np.binary_repr(int(entry), width=num_bits)
             for j, bit in enumerate(bitstr[::-1]):
                 x_binary[f"x{i}[{j}]"] = int(bit)
-        _, model = self._define_pyqubo_model()
-        return model.to_bqm().energy(x_binary)
+        return self.bqm.energy(x_binary)

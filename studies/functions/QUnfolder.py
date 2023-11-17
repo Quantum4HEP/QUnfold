@@ -44,6 +44,7 @@ def QUnfold_unfolder_and_plot(
 
     # Unfolder
     unfolder = QUnfoldQUBO(response, measured, lam=0.05)
+    unfolder.initialize_qubo_model()
     unfolded = None
 
     # Unfold with simulated annealing
