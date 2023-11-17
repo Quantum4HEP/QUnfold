@@ -17,6 +17,7 @@ import ROOT as r
 
 # My modules
 sys.path.append(".")
+from studies.functions.custom_logger import ERROR
 from studies.functions.generator import generate
 
 # QUnfold modules
@@ -27,11 +28,11 @@ from QUnfold.utility import TH1_to_array, TMatrix_to_array
 # RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
+    ERROR("RooUnfold not found!")
     sys.exit(0)
 
 
 def main():
-
     # Data variables
     samples = 10000
     max_bin = 10

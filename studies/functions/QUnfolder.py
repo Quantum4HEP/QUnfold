@@ -15,7 +15,6 @@ import sys, os
 import numpy as np
 
 # QUnfold modules
-sys.path.append("../src")
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
 

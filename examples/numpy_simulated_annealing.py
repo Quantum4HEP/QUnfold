@@ -20,7 +20,6 @@ from QUnfold import QUnfoldPlotter
 
 
 def main():
-
     # Data variables
     num_entries = 4000
     num_bins = 16

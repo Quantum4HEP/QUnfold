@@ -12,7 +12,6 @@ HEP_deps
 **/output
 data
 ATLAS
-img/benchmarks
 img/comparisons
 img/QUnfold
 img/RooUnfold

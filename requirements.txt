@@ -2,9 +2,6 @@ dwave-ocean-sdk
 pyqubo
 matplotlib
 pytest
-pytest-sugar
-pytest-benchmark
 hypothesis
-pygal
-cairosvg
 scipy
+black

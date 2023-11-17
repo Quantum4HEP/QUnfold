@@ -27,7 +27,6 @@
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Run the analysis](#run-the-analysis)
-  - [Benchmarks](#benchmarks)
 - [Credits](#credits)
   - [Main developers](#main-developers)
   - [Other contributors](#other-contributors)
@@ -214,7 +213,6 @@ source HEP_deps/root/bin/thisroot.sh
 To run the whole analysis script:
 
 ```shell
-cd studies
 tox -e analysis
 ```
 
@@ -231,15 +229,6 @@ Comparisons are performed with `QUnfold` and with the following methods:
 
 The output plots and chi2 for each distribution will be saved into the `img` directory.
 
-### Benchmarks
-
-Benchmarks are performed in order to compare the performances of the various unfolding algorithms. To run them:
-
-```shell
-tox -e benchmarks
-```
-
-The output data will be saved into the `studies/output/benchmarks` directory, while performance histograms into the `img/benchmarks` directory.
 
 ## Projects which use QUnfold
 
