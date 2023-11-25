@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/repository/logo.png" alt="Logo">
+  <img src="https://github.com/JustWhit3/QUnfold/blob/main/logo.png" alt="Logo">
 </p>
 
 <p align="center">
@@ -18,20 +18,18 @@
 - [Introduction](#introduction)
 - [Documentation](#documentation)
 - [Developer environment](#developer-environment)
-- [Install from pip](#install-from-pip)
+- [Pip installation](#pip-installation)
 - [How to use](#how-to-use)
   - [NumPy case](#numpy-case)
   - [ROOT case](#root-case)
+- [Tests](#tests)
 - [Examples](#examples)
-- [Run tests](#run-tests)
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Run the analysis](#run-the-analysis)
+- [Projects using QUnfold](#projects-using-qunfold)
 - [Credits](#credits)
   - [Main developers](#main-developers)
-  - [Other contributors](#other-contributors)
-- [Projects which use QUnfold](#projects-which-use-qunfold)
-- [Stargazers over time](#stargazers-over-time)
 
 ## Introduction
 
@@ -58,22 +56,20 @@ Further documentation:
 - [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
 - [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
 
-> :warning: An input filter is applied to the Doxygen generator, in order to convert Python docstrings into Doxygen format. This filter lies in `scripts/py_filter.sh`.
-
 ## Developer environment
 
 To setup the environment for `QUnfold` development you need two dependencies:
 
-- [`tox`](https://tox.wiki/en/latest/): at least v4
+- [`tox>=4`](https://tox.wiki/en/latest/)
 - [`conda`](https://docs.conda.io/en/latest/)
 
-To setup the `conda` conda environment to work with the repository (only the first time):
+To setup the `conda` conda environment and install the `QUnfold` library (only the first time):
 
 ```shell
 conda create --name qunfold-dev python==3.10
 conda activate qunfold-dev
 pip install -r requirements.txt
-pip cache purge && pip check
+pip install -e src/
 ```
 
 and every time you open a new shell:
@@ -82,9 +78,9 @@ and every time you open a new shell:
 conda activate qunfold-dev
 ```
 
-## Install from pip
+## Pip installation
 
-To install the module from [PyPi](https://pypi.org/project/QUnfold/) you can use `pip`:
+To install the latest released version of `QUnfold` from [PyPI](https://pypi.org/project/QUnfold/) you can do:
 
 ```shell
 pip install QUnfold
@@ -101,34 +97,34 @@ To run QUnfold on a dataset you can do the following steps:
 from QUnfold import QUnfoldQUBO
 from QUnfold import QUnfoldPlotter
 
-# Read data from a file or sample them
-# NB: data should be in NumPy or list format
+# Read numpy data from a file or sample them
 truth = ... # truth distribution
-meas = ... # measured distribution
+measured = ... # measured distribution
 response = ... # response matrix (supposed to be normalized)
 binning = ... # binning of the distributions
 
-# Unfold!
-unfolder = QUnfoldQUBO(response, meas, lam=0.1)
-unfolded_SA = unfolder.solve_simulated_annealing(num_reads=200) # use solve_hybrid_sampler method to use real quantum computer hardware
+# Run unfolding
+unfolder = QUnfoldQUBO(response, measured, lam=0.1)
+unfolder.initialize_qubo_model()
+unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
 
 # Plot results
 plotter = QUnfoldPlotter(
     response=response,
-    measured=meas,
+    measured=measured,
     truth=truth,
     unfolded=unfolded_SA,
     binning=binning,
 )
-plotter.saveResponse("response.png")
-plotter.savePlot("comparison.png", "SA")
+plotter.plotResponse()
+plotter.plot()
 ```
 
-which will produce a similar result to this unfolded Breit-Wigner distribution:
+which will produce a similar result to this unfolded normal distribution:
 
 <p align="center">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/ROOT_simulated_annealing/comparison.png" style="width: 45%;">
-    <img src="https://github.com/JustWhit3/QUnfold/blob/main/img/examples/ROOT_simulated_annealing/response.png" style="width: 45%;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/examples/simneal_response.png" style="width: 45%;">
+    <img src="https://github.com/JustWhit3/QUnfold/blob/main/examples/simneal_result.png" style="width: 45%;">
 </p>
 
 ### ROOT case
@@ -140,39 +136,31 @@ To use `ROOT` data add the following steps at the beginning of the code:
 from QUnfold.utility import TH1_to_array, TH2_to_array
 
 # Read data as before...
-# Convert data
+# Convert data from ROOT to numpy
 truth = TH1_to_array(truth)
-meas = TH1_to_array(meas)
-response = TH2_to_array(response.Hresponse()) # Supposing response was a RooUnfold response
+measured = TH1_to_array(measured)
+response = TH2_to_array(response.Hresponse())
 
-# Perform the analysis as before...
+# Run analysis as before...
 ```
 
-## Examples
+## Tests
 
-Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more how-to examples.
-
-To run `numpy` example:
-
-```bash
-tox -e example_numpy_sim
-```
-
-TO run `root` examples:
-
-```bash
-tox -e example_ROOT_sim
-```
-
-results are saved into the `img/examples` directory.
-
-## Run tests
-
-Tests are performed using [`pytest`](https://docs.pytest.org/en/7.4.x/). To run them:
+Tests are performed using [`pytest`](https://docs.pytest.org/en/7.4.x/) in verbose mode. To run them:
 
 ```shell
 tox -e tests
 ```
+
+## Examples
+
+Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more details. To run the example:
+
+```bash
+tox -e example
+```
+
+Results are saved into the `/examples` directory.
 
 ## Studies
 
@@ -196,8 +184,6 @@ source HEP_deps/root/bin/thisroot.sh
 ./scripts/fetchRooUnfold.sh
 ```
 
-> :warning: These installers work only for Ubuntu.
-
 They will be installed into the `HEP_deps` directory of the repository.
 
 If you want to use the `ROOT` version of the repo you must do this command every time you plan to run a code which contains the `ROOT` package:
@@ -205,8 +191,6 @@ If you want to use the `ROOT` version of the repo you must do this command every
 ```shell
 source HEP_deps/root/bin/thisroot.sh
 ```
-
-> :warning: If you want to avoid this, install `ROOT` in your computer.
 
 ### Run the analysis
 
@@ -216,27 +200,23 @@ To run the whole analysis script:
 tox -e analysis
 ```
 
-Pseudo-data will be generated following common distributions (double-peaked, normal, etc...) which will be unfolded using `RooUnfold` and the 4 classical common methods:
+Pseudo-data will be generated following common distributions (normal, exponential, etc...) which will be unfolded using `RooUnfold` and the following common classical methods:
 
-- Matrix inversion
-- Iterative Bayesian unfolding (4 iterations)
-- SVD (k=3)
-- Bin-to-Bin
+- Iterative Bayesian unfolding (4 iters)
+- Tikhonov regularized SVD unfolding (K=2)
 
-Comparisons are performed with `QUnfold` and with the following methods:
+Comparisons are performed with the following `QUnfold` methods:
 
-- Simulated annealing (lambda=0.2, num_reads=100)
+- Simulated Annealing - QUBO unfolding
+- D-Wave Hybrid solver - QUBO unfolding
 
-The output plots and chi2 for each distribution will be saved into the `img` directory.
+The output plots and chi2 for each distribution will be saved into an external `img` directory.
 
+## Projects using QUnfold
 
-## Projects which use QUnfold
-
-List of projects which use `QUnfold`:
+List of projects which import and use `QUnfold`:
 
 - [PyXSec](https://github.com/JustWhit3/PyXSec): Python framework to measure differential cross-section of particle physics processes using classical- and quantum-computing based techniques.
-
-If you plan to use `QUnfold` let us now so we can add your work in this section.
 
 ## Credits
 
@@ -248,20 +228,3 @@ If you plan to use `QUnfold` let us now so we can add your work in this section.
     <td align="center"><a href="https://github.com/SimoneGasperini"><img src="https://avatars2.githubusercontent.com/u/71086758?s=400&v=4" width="100px;" alt=""/><br /><sub><b>Simone Gasperini</b></sub></a></td>
   </tr>
 </table>
-
-### Other contributors
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-Empty for the moment.
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/JustWhit3/QUnfold.svg)](https://starchart.cc/JustWhit3/QUnfold)

@@ -19,7 +19,7 @@ from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
 
 def QUnfold_unfolder_and_plot(
-    unf_type, response, meas, truth, distr, bins, min_bin, max_bin
+    unf_type, response, measured, truth, distr, bins, min_bin, max_bin
 ):
     """
     Unfolds the measured data using QUnfold.
@@ -27,7 +27,7 @@ def QUnfold_unfolder_and_plot(
     Args:
         unf_type (str): The type of unfolding method to use (e.g., "SA" for Simulated Annealing).
         response (numpy.Array): The response matrix describing the detector response.
-        meas (numpy.Array): The measured data to be unfolded.
+        measured (numpy.Array): The measured data to be unfolded.
         truth (numpy.Array): The true underlying data (for comparison purposes).
         distr (str): The distribution or category name for organizing the output plots.
         bins (int): The number of bins to use in the unfolding process.
@@ -43,7 +43,8 @@ def QUnfold_unfolder_and_plot(
         os.makedirs("../img/QUnfold/{}".format(distr))
 
     # Unfolder
-    unfolder = QUnfoldQUBO(response, meas, lam=0.05)
+    unfolder = QUnfoldQUBO(response, measured, lam=0.05)
+    unfolder.initialize_qubo_model()
     unfolded = None
 
     # Unfold with simulated annealing
@@ -51,7 +52,7 @@ def QUnfold_unfolder_and_plot(
         unfolded = unfolder.solve_simulated_annealing(num_reads=100)
         plotter = QUnfoldPlotter(
             response=response,
-            measured=meas,
+            measured=measured,
             truth=truth,
             unfolded=unfolded,
             binning=np.linspace(min_bin, max_bin, bins + 1),
@@ -69,7 +70,7 @@ def QUnfold_unfolder_and_plot(
         unfolded = unfolder.solve_hybrid_sampler()
         plotter = QUnfoldPlotter(
             response=response,
-            measured=meas,
+            measured=measured,
             truth=truth,
             unfolded=unfolded,
             binning=np.linspace(min_bin, max_bin, bins + 1),

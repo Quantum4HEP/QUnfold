@@ -16,35 +16,59 @@ from dwave.system import LeapHybridSampler
 
 class QUnfoldQUBO:
     """
-    Class used to perform the unfolding using QUBO problems solution.
+    Class used to perform the unfolding formulated as a QUBO problem.
     """
 
-    def __init__(self, response, meas, lam=0.0):
+    def __init__(self, response=None, measured=None, lam=0.0):
         """
         Initialize the QUnfoldQUBO object.
 
         Parameters:
-            response (numpy.ndarray): The response matrix.
-            meas (numpy.ndarray): The measured distribution.
-            lam (float or list/array, optional): The regularization parameter(s).
-                If float, it represents a single regularization parameter (default is 0.0).
-                If list/array, it represents a set of regularization parameters to be optimized.
+            response (numpy.ndarray, optional): input response matrix (default is None).
+            measured (numpy.ndarray, optinoal): input measured histogram (default is None).
+            lam (float, optional): regularization parameter (default is 0.0).
         """
-
         self.R = response
-        self.d = meas
+        self.d = measured
+        self.lam = lam
+
+    def set_response(self, response):
+        """
+        Set the input response matrix.
+
+        Parameters:
+            response (numpy.ndarray): input response matrix.
+        """
+        self.response = response
+
+    def set_measured(self, measured):
+        """
+        Set the input measured histogram.
+
+        Parameters:
+            measured (numpy.ndarray): input measured histogram.
+        """
+        self.measured = measured
+
+    def set_lam_parameter(self, lam):
+        """
+        Set the lambda regularization parameter.
+
+        Parameters:
+            lam (float): regularization parameter.
+        """
         self.lam = lam
 
     @staticmethod
     def _get_laplacian(dim):
         """
-        Calculate the Laplacian matrix.
+        Build the Laplacian matrix.
 
         Parameters:
-            dim (int): The dimension of the matrix.
+            dim (int): dimension of the matrix.
 
         Returns:
-            numpy.ndarray: The Laplacian matrix.
+            numpy.ndarray: Laplacian matrix.
         """
         diag = np.array([-1] + [-2] * (dim - 2) + [-1])
         D = np.diag(diag).astype(float)
@@ -52,32 +76,40 @@ class QUnfoldQUBO:
         D += np.diag(diag1, k=1) + np.diag(diag1, k=-1)
         return D
 
-    def _define_variables(self):
+    def _define_variables(self, opt):
         """
-        Define the variables for the QUBO problem.
+        Define the list of variables for the QUBO problem.
+
+        Parameters:
+            opt (bool): enables optimal range for the integer variables.
 
         Returns:
-            list: List of encoded integer variables.
+            list: encoded integer variables.
         """
-
-        # Get largest power of 2 integer below the total number of entries
-        n = int(2 ** np.floor(np.log2(sum(self.d)))) - 1
-
-        # Encode integer variables using logarithmic binary encoding
-        vars = [LogEncInteger(f"x{i}", value_range=(0, n)) for i in range(len(self.d))]
-        return vars
+        variables = []
+        if opt:
+            for i, mean in enumerate(self.d):
+                error = 5 * mean**0.5
+                lower = 0 if mean - error < 0 else int(np.floor(mean - error))
+                upper = 1 if mean == 0 else int(np.ceil(mean + error))
+                variables.append(LogEncInteger(f"x{i}", value_range=(lower, upper)))
+        else:
+            variables = [
+                LogEncInteger(f"x{i}", value_range=(0, int(sum(self.d))))
+                for i in range(len(self.d))
+            ]
+        return variables
 
     def _define_hamiltonian(self, x):
         """
-        Define the Hamiltonian for the QUBO problem.
+        Define the Hamiltonian expression for the QUBO problem.
 
         Parameters:
-            x (list): List of encoded integer variables.
+            x (list): encoded integer variables.
 
         Returns:
-            pyqubo.Expression: The Hamiltonian expression.
+            pyqubo.Expression: Hamiltonian expression.
         """
-
         hamiltonian = 0
         dim = len(x)
 
@@ -94,105 +126,64 @@ class QUnfoldQUBO:
                 hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
-    def _define_pyqubo_model(self):
+    def initialize_qubo_model(self, optimize_vars_range=True):
         """
-        Define the PyQUBO model for the QUBO problem.
-
-        Returns:
-            tuple: Labels for the variables and the PyQUBO model.
-        """
-
-        x = self._define_variables()
-        h = self._define_hamiltonian(x)
-        labels = [x[i].label for i in range(len(x))]
-        model = h.compile()
-        return labels, model
-
-    def _lambda_optimization(self, annealer, *args):
-        """
-        Perform optimization of the regularization parameter. Still work in progress.
+        Initialize QUBO model and BQM instance for the unfolding problem.
 
         Parameters:
-            annealer (function): The function used to evaluate the unfolded distribution.
-            *args: Additional arguments to be passed to the annealer function.
-
-        Returns:
-            numpy.ndarray: The best choice of the unfolded distribution.
+            optimize_vars_range (bool, optional): enables optimal range for the integer variables (default is True).
         """
-
-        if isinstance(self.lam, float):
-            return annealer(*args)
-
-        results = {}
-        for regularization_param in self.lam:
-            list_of_lam = self.lam
-            self.lam = regularization_param
-            result_temp = annealer(*args)
-            energy = self.compute_energy(result_temp)
-            results[tuple(result_temp)] = (self.lam, energy)
-            self.lam = list_of_lam
-
-        best_result = min(results, key=lambda k: results[k][1])
-        return np.array(best_result)
+        x = self._define_variables(opt=optimize_vars_range)
+        h = self._define_hamiltonian(x)
+        self.labels = [x[i].label for i in range(len(x))]
+        self.model = h.compile()
+        self.bqm = self.model.to_bqm()
 
     def solve_simulated_annealing(self, num_reads=100, seed=None):
         """
-        Solve the QUBO problem using the Simulated Annealing sampler.
+        Solve the unfolding QUBO problem using the Simulated Annealing sampler.
 
         Parameters:
-            num_reads (int, optional): Number of reads for the sampler (default is 100).
-            seed (int, optional): Seed for random number generation (default is None).
+            num_reads (int, optional): number of reads for the sampler (default is 100).
+            seed (int, optional): seed for random number generation (default is None).
 
         Returns:
-            numpy.ndarray: Array of solutions.
+            numpy.ndarray: unfolded histogram.
         """
-
-        def simulated_solver(num_reads, seed):
-            labels, model = self._define_pyqubo_model()
-            sampler = SimulatedAnnealingSampler()
-            sampleset = sampler.sample(model.to_bqm(), num_reads=num_reads, seed=seed)
-            decoded_sampleset = model.decode_sampleset(sampleset)
-            best_sample = min(decoded_sampleset, key=lambda s: s.energy)
-            return np.array([best_sample.subh[label] for label in labels])
-
-        result = self._lambda_optimization(simulated_solver, num_reads, seed)
-        return result
+        sampler = SimulatedAnnealingSampler()
+        sampleset = sampler.sample(self.bqm, num_reads=num_reads, seed=seed)
+        decoded_sampleset = self.model.decode_sampleset(sampleset)
+        best_sample = min(decoded_sampleset, key=lambda s: s.energy)
+        return np.array([best_sample.subh[label] for label in self.labels])
 
     def solve_hybrid_sampler(self):
         """
-        Solve the QUBO problem using the Leap Hybrid sampler.
-        If the self.lam parameter is provided as a list, an optimization is performed in order to find the best result.
+        Solve the unfolding QUBO problem using the Leap Hybrid sampler.
 
         Returns:
-            numpy.ndarray: Array of solutions.
+            numpy.ndarray: unfolded histogram.
         """
-
-        def hybrid_solver():
-            labels, model = self._define_pyqubo_model()
-            sampler = LeapHybridSampler()
-            sampleset = sampler.sample(model.to_bqm())
-            decoded_sampleset = model.decode_sampleset(sampleset)
-            best_sample = min(decoded_sampleset, key=lambda s: s.energy)
-            return np.array([best_sample.subh[label] for label in labels])
-
-        result = self._lambda_optimization(hybrid_solver)
-        return result
+        sampler = LeapHybridSampler()
+        sampleset = sampler.sample(self.bqm)
+        decoded_sampleset = self.model.decode_sampleset(sampleset)
+        best_sample = min(decoded_sampleset, key=lambda s: s.energy)
+        return np.array([best_sample.subh[label] for label in self.labels])
 
     def compute_energy(self, x):
         """
-        Computes the energy of the system for the given solution.
+        Compute the energy of the Hamiltoninan for the given input histogram.
 
         Args:
-            x (numpy.ndarray): An array containing the solution to the QUBO problem.
+            x (numpy.ndarray): input histogram.
 
         Returns:
-            float: The computed energy for the given solution.
+            float: energy for the given input.
         """
+        # TODO: fix for the case 'optimize_vars_range=True'
         num_bits = int(np.floor(np.log2(sum(self.d))))
         x_binary = {}
         for i, entry in enumerate(x):
             bitstr = np.binary_repr(int(entry), width=num_bits)
             for j, bit in enumerate(bitstr[::-1]):
                 x_binary[f"x{i}[{j}]"] = int(bit)
-        _, model = self._define_pyqubo_model()
-        return model.to_bqm().energy(x_binary)
+        return self.bqm.energy(x_binary)

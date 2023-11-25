@@ -5,4 +5,3 @@ pytest
 hypothesis
 scipy
 black
-tox
