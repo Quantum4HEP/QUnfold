@@ -25,7 +25,7 @@ class QUnfoldQUBO:
 
         Parameters:
             response (numpy.ndarray, optional): input response matrix (default is None).
-            measured (numpy.ndarray, optinoal): input measured histogram (default is None).
+            measured (numpy.ndarray, optional): input measured histogram (default is None).
             lam (float, optional): regularization parameter (default is 0.0).
         """
         self.R = response
@@ -39,7 +39,7 @@ class QUnfoldQUBO:
         Parameters:
             response (numpy.ndarray): input response matrix.
         """
-        self.response = response
+        self.R = response
 
     def set_measured(self, measured):
         """
@@ -48,7 +48,7 @@ class QUnfoldQUBO:
         Parameters:
             measured (numpy.ndarray): input measured histogram.
         """
-        self.measured = measured
+        self.d = measured
 
     def set_lam_parameter(self, lam):
         """
