@@ -32,7 +32,7 @@ from QUnfold.utility import TH1_to_array, TMatrix_to_array
 log = get_custom_logger(__name__)
 
 # RooUnfold settings
-loaded_RooUnfold = r.gSystem.Load("../HEP_deps/RooUnfold/libRooUnfold.so")
+loaded_RooUnfold = r.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
     log.error("RooUnfold not found!")
     sys.exit(0)

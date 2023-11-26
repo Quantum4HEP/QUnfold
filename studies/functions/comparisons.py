@@ -120,8 +120,8 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         plt.legend()
 
         # Save plot
-        if not os.path.exists("../img/comparisons"):
-            os.makedirs("../img/comparisons")
-        plt.savefig("../img/comparisons/{}.png".format(distr))
+        if not os.path.exists("studies/img//comparisons"):
+            os.makedirs("studies/img//comparisons")
+        plt.savefig("studies/img//comparisons/{}.png".format(distr))
 
     plt.close()

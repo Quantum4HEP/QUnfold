@@ -28,8 +28,8 @@ def RooUnfold_plot_response(response, distr):
     """
 
     # Creating the path
-    if not os.path.exists("../img/RooUnfold/{}".format(distr)):
-        os.makedirs("../img/RooUnfold/{}".format(distr))
+    if not os.path.exists("studies/img/RooUnfold/{}".format(distr)):
+        os.makedirs("studies/img/RooUnfold/{}".format(distr))
 
     # Basic properties
     m_response_save = response.HresponseNoOverflow()
@@ -41,7 +41,7 @@ def RooUnfold_plot_response(response, distr):
 
     # Save canvas
     m_response_canvas.Draw()
-    m_response_canvas.SaveAs("../img/RooUnfold/{}/response.png".format(distr))
+    m_response_canvas.SaveAs("studies/img/RooUnfold/{}/response.png".format(distr))
 
 
 def RooUnfold_unfolder(type, m_response, h_measured):
@@ -122,4 +122,4 @@ def RooUnfold_plot(truth, measured, unfolded, distr):
 
     # Save canvas
     canvas.Draw()
-    canvas.SaveAs("../img/RooUnfold/{}/unfolded_{}.png".format(distr, ext))
+    canvas.SaveAs("studies/img/RooUnfold/{}/unfolded_{}.png".format(distr, ext))

@@ -39,8 +39,8 @@ def QUnfold_unfolder_and_plot(
     """
 
     # Create dirs
-    if not os.path.exists("../img/QUnfold/{}".format(distr)):
-        os.makedirs("../img/QUnfold/{}".format(distr))
+    if not os.path.exists("studies/img/QUnfold/{}".format(distr)):
+        os.makedirs("studies/img/QUnfold/{}".format(distr))
 
     # Unfolder
     unfolder = QUnfoldQUBO(response, measured, lam=0.05)
@@ -57,10 +57,10 @@ def QUnfold_unfolder_and_plot(
             unfolded=unfolded,
             binning=np.linspace(min_bin, max_bin, bins + 1),
         )
-        plotter.savePlot("../img/QUnfold/{}/unfolded_SA.png".format(distr), "SA")
-        plotter.saveResponse("../img/QUnfold/{}/response.png".format(distr))
+        plotter.savePlot("studies/img/QUnfold/{}/unfolded_SA.png".format(distr), "SA")
+        plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
         print(
-            "The png file ../img/QUnfold/{}/unfolded_SA.png has been created".format(
+            "The png file studies/img/QUnfold/{}/unfolded_SA.png has been created".format(
                 distr
             )
         )
@@ -75,10 +75,10 @@ def QUnfold_unfolder_and_plot(
             unfolded=unfolded,
             binning=np.linspace(min_bin, max_bin, bins + 1),
         )
-        plotter.savePlot("../img/QUnfold/{}/unfolded_HYB.png".format(distr), "HYB")
-        plotter.saveResponse("../img/QUnfold/{}/response.png".format(distr))
+        plotter.savePlot("studies/img/QUnfold/{}/unfolded_HYB.png".format(distr), "HYB")
+        plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
         print(
-            "The png file ../img/QUnfold/{}/unfolded_HYB.png has been created".format(
+            "The png file studies/img/QUnfold/{}/unfolded_HYB.png has been created".format(
                 distr
             )
         )
