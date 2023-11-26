@@ -18,9 +18,7 @@ import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
 
-def QUnfold_unfolder_and_plot(
-    unf_type, response, measured, truth, distr, bins, min_bin, max_bin
-):
+def QUnfold_unfolder_and_plot(unf_type, response, measured, truth, distr, bins, min_bin, max_bin):
     """
     Unfolds the measured data using QUnfold.
 
@@ -59,11 +57,7 @@ def QUnfold_unfolder_and_plot(
         )
         plotter.savePlot("studies/img/QUnfold/{}/unfolded_SA.png".format(distr), "SA")
         plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
-        print(
-            "The png file studies/img/QUnfold/{}/unfolded_SA.png has been created".format(
-                distr
-            )
-        )
+        print("The png file studies/img/QUnfold/{}/unfolded_SA.png has been created".format(distr))
 
     # Unfold with hybrid solver
     elif unf_type == "HYB":
@@ -77,10 +71,6 @@ def QUnfold_unfolder_and_plot(
         )
         plotter.savePlot("studies/img/QUnfold/{}/unfolded_HYB.png".format(distr), "HYB")
         plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
-        print(
-            "The png file studies/img/QUnfold/{}/unfolded_HYB.png has been created".format(
-                distr
-            )
-        )
+        print("The png file studies/img/QUnfold/{}/unfolded_HYB.png has been created".format(distr))
 
     return unfolded

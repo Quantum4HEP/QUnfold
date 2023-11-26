@@ -83,9 +83,7 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
     bin_edges = np.linspace(min_bin, max_bin, bins + 1)
     marker_offset = (bin_edges[1] - bin_edges[0]) / 2.0
     plt.step(
-        x=np.concatenate(
-            ([bin_edges[0] - (bin_edges[1] - bin_edges[0])], bin_edges[:-1])
-        ),
+        x=np.concatenate(([bin_edges[0] - (bin_edges[1] - bin_edges[0])], bin_edges[:-1])),
         y=np.concatenate(([truth[0]], truth)),
         label="Truth",
         color="black",
@@ -97,21 +95,13 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         # Plot each unfolding method
         chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":
-            plot_errorbar(
-                bin_edges - marker_offset, unfolded, "red", "o", method, chi2_dof
-            )
+            plot_errorbar(bin_edges - marker_offset, unfolded, "red", "o", method, chi2_dof)
         elif method == "SVD":
-            plot_errorbar(
-                bin_edges - marker_offset, unfolded, "green", "s", method, chi2_dof
-            )
+            plot_errorbar(bin_edges - marker_offset, unfolded, "green", "s", method, chi2_dof)
         elif method == "SA":
-            plot_errorbar(
-                bin_edges - marker_offset, unfolded, "purple", "*", method, chi2_dof
-            )
+            plot_errorbar(bin_edges - marker_offset, unfolded, "purple", "*", method, chi2_dof)
         elif method == "HYB":
-            plot_errorbar(
-                bin_edges - marker_offset, unfolded, "orange", "*", method, chi2_dof
-            )
+            plot_errorbar(bin_edges - marker_offset, unfolded, "orange", "*", method, chi2_dof)
 
         # Plot settings
         plt.xlabel("Bins")

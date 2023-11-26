@@ -34,9 +34,7 @@ def smear(xt, bias, smearing, eff=1):
     return xt + xsmear
 
 
-def generate_standard(
-    truth, measured, response, type, distr, samples, bias, smearing, eff
-):
+def generate_standard(truth, measured, response, type, distr, samples, bias, smearing, eff):
     """
     Generate data for standard distributions.
 
@@ -99,9 +97,7 @@ def generate_standard(
         return response
 
 
-def generate_double_peaked(
-    truth, measured, response, type, samples, bias, smearing, eff
-):
+def generate_double_peaked(truth, measured, response, type, samples, bias, smearing, eff):
     """
     Generate data for the double peaked distributions.
 

@@ -37,9 +37,7 @@ def test_TH1_to_array():
     # Test no overflow case
     bin_contents = TH1_to_array(histo, overflow=False)
     assert bin_contents.shape[0] == 5  # array size
-    nptest.assert_array_equal(
-        bin_contents, np.array([0, 1, 2, 3, 4])
-    )  # bin contents equality
+    nptest.assert_array_equal(bin_contents, np.array([0, 1, 2, 3, 4]))  # bin contents equality
 
     # Test overflow case
     bin_contents = TH1_to_array(histo, overflow=True)
@@ -86,9 +84,7 @@ def test_TVector_to_array():
 
     # Tests
     assert numpy_array.shape[0] == 3  # array size
-    nptest.assert_array_equal(
-        numpy_array, np.array([0, 1, 2])
-    )  # array content equality
+    nptest.assert_array_equal(numpy_array, np.array([0, 1, 2]))  # array content equality
 
 
 def test_TMatrix_to_array():
@@ -107,6 +103,4 @@ def test_TMatrix_to_array():
 
     # Tests
     assert numpy_array.shape == (2, 2)  # array shape
-    nptest.assert_array_equal(
-        numpy_array, np.array([[0, 0], [0, 1]])
-    )  # array content equality
+    nptest.assert_array_equal(numpy_array, np.array([[0, 0], [0, 1]]))  # array content equality

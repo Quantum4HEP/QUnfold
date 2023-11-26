@@ -34,9 +34,7 @@ class CustomColoredFormatter(logging.Formatter):
         """
 
         log_color = self.COLORS.get(record.levelname, self.COLORS["RESET"])
-        record.levelname = (
-            f"{log_color}{record.levelname}\033[0m"  # Reset color after levelname
-        )
+        record.levelname = f"{log_color}{record.levelname}\033[0m"  # Reset color after levelname
         return super().format(record)
 
 

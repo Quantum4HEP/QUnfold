@@ -83,8 +83,5 @@ def TMatrix_to_array(matrix):
         numpy.array: array representing the content of the TMatrixD.
     """
     return np.array(
-        [
-            [matrix[i][j] for j in range(matrix.GetNcols())]
-            for i in range(matrix.GetNrows())
-        ]
+        [[matrix[i][j] for j in range(matrix.GetNcols())] for i in range(matrix.GetNrows())]
     )
