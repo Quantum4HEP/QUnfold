@@ -126,12 +126,12 @@ class QUnfoldQUBO:
                 hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
-    def initialize_qubo_model(self, optimize_vars_range=True):
+    def initialize_qubo_model(self, optimize_vars_range=False):
         """
         Initialize QUBO model and BQM instance for the unfolding problem.
 
         Parameters:
-            optimize_vars_range (bool, optional): enables optimal range for the integer variables (default is True).
+            optimize_vars_range (bool, optional): enables optimal range for the integer variables (default is False).
         """
         x = self._define_variables(opt=optimize_vars_range)
         h = self._define_hamiltonian(x)
