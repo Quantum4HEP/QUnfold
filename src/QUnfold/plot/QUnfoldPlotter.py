@@ -116,31 +116,64 @@ class QUnfoldPlotter:
             method (str): Unfolding method type.
         """
 
-        # Plot truth and measured histogram
-        for histo, label in [(self.truth, "Truth"), (self.measured, "Measured")]:
-            steps = np.append(histo, [histo[-1]])
-            plt.step(self.binning, steps, label=label, where="post")
+        # Divide into subplots
+        fig = plt.figure()
+        gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0)
+        ax1 = fig.add_subplot(gs[0])
+        ax2 = fig.add_subplot(gs[1], sharex=ax1)
+        marker_size = 3.5
+
+        # Plot Truth
+        truth_steps = np.append(self.truth, [self.truth[-1]])
+        ax1.step(self.binning, truth_steps, label="Truth", where="post", color="tab:blue")
+        ax1.fill_between(self.binning, truth_steps, step="post", alpha=0.3, color="tab:blue")
+
+        # Plot measured
+        meas_steps = np.append(self.measured, [self.measured[-1]])
+        ax1.step(self.binning, meas_steps, label="Measured", where="post", color="tab:orange")
 
         # Plot unfolded histogram with chi2 test
         binwidths = np.diff(self.binning)
-        x = self.binning[:-1] + binwidths / 2
+        bin_midpoints = self.binning[:-1] + binwidths / 2
         chi2 = round(self._compute_chi2_dof(self.unfolded, self.truth), 2)
         label = rf"Unfolded {method} $\chi^2 = {chi2}$"
-        plt.errorbar(
-            x,
+        ax1.errorbar(
+            x=bin_midpoints,
             y=self.unfolded,
             yerr=np.sqrt(self.unfolded),
             label=label,
             marker="o",
-            ms=5,
+            ms=marker_size,
             c="green",
             linestyle="None",
         )
 
+        # Plot ratio QUnfold to truth
+        ax2.axhline(y=1, color="tab:blue")
+        ax2.errorbar(
+            x=bin_midpoints,
+            y=self.unfolded / self.truth,
+            yerr=np.sqrt(self.unfolded) / self.truth,
+            ms=marker_size,
+            fmt="o",
+            color="g",
+        )
+
+        # Plot style settings
+        ax1.tick_params(axis="x", which="both", bottom=True, top=False, direction="in")
+        ax2.tick_params(axis="x", which="both", bottom=True, top=True, direction="in")
+        ax1.set_xlim(self.binning[0], self.binning[-1])
+        ax1.set_ylim(0, ax1.get_ylim()[1])
+        ax2.set_yticks([0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75])
+        ax2.set_yticklabels(["", "0.5", "", "1.0", "", "1.5", ""])
+        ax1.tick_params(axis="x", which="both", bottom=False, top=False, labelbottom=False)
+
         # Plot settings
-        plt.xlabel("Bins")
-        plt.ylabel("Entries")
-        plt.legend(loc="upper right")
+        ax2.set_ylabel("Ratio to\ntruth")
+        ax2.set_xlabel("Bins")
+        ax1.set_ylabel("Entries")
+        ax1.legend(loc="upper right")
+        plt.tight_layout()
 
     def plot(self, method=""):
         """
