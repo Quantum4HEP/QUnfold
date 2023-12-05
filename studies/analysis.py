@@ -15,15 +15,15 @@ import sys
 import ROOT as r
 
 # My modules
-from functions.custom_logger import get_custom_logger
-from functions.generator import generate
-from functions.RooUnfold import (
+from analysis_functions.custom_logger import get_custom_logger
+from analysis_functions.generator import generate
+from analysis_functions.RooUnfold import (
     RooUnfold_unfolder,
     RooUnfold_plot,
     RooUnfold_plot_response,
 )
-from functions.QUnfolder import QUnfold_unfolder_and_plot
-from functions.comparisons import plot_comparisons
+from analysis_functions.QUnfolder import QUnfold_unfolder_and_plot
+from analysis_functions.comparisons import plot_comparisons
 
 # QUnfold modules
 from QUnfold.utility import TH1_to_array, TMatrix_to_array
