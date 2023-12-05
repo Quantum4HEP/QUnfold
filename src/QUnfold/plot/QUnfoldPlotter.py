@@ -122,7 +122,8 @@ class QUnfoldPlotter:
             plt.step(self.binning, steps, label=label, where="post")
 
         # Plot unfolded histogram with chi2 test
-        x = self.binning[:-1]
+        binwidths = np.diff(self.binning)
+        x = self.binning[:-1] + binwidths / 2
         chi2 = round(self._compute_chi2_dof(self.unfolded, self.truth), 2)
         label = rf"Unfolded {method} $\chi^2 = {chi2}$"
         plt.errorbar(
