@@ -8,7 +8,7 @@
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
 # Variables
-repo="https://gitlab.cern.ch/RooUnfold/RooUnfold.git"
+repo="https://gitlab.cern.ch/gbianco/RooUnfold"
 tag="3.0.0"
 
 # Install prerequisites
