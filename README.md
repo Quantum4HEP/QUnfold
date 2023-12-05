@@ -100,7 +100,7 @@ from QUnfold import QUnfoldPlotter
 # Read numpy data from a file or sample them
 truth = ... # truth distribution
 measured = ... # measured distribution
-response = ... # response matrix (supposed to be normalized)
+response = ... # response matrix
 binning = ... # binning of the distributions
 
 # Run unfolding

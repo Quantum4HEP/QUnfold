@@ -26,7 +26,7 @@ from analysis_functions.QUnfolder import QUnfold_unfolder_and_plot
 from analysis_functions.comparisons import plot_comparisons
 
 # QUnfold modules
-from QUnfold.utility import TH1_to_array, TMatrix_to_array
+from QUnfold.utility import TH1_to_array, TH2_to_array, normalize_response
 
 # Logger settings
 log = get_custom_logger(__name__)
@@ -82,7 +82,9 @@ def main():
         # QUnfold settings
         truth = TH1_to_array(truth, overflow=False)
         measured = TH1_to_array(measured, overflow=False)
-        response = TMatrix_to_array(response.Mresponse(norm=True))
+        response = normalize_response(
+            TH2_to_array(response.Hresponse()), TH1_to_array(response.Htruth())
+        )
 
         # Simulated annealing (SA)
         unfolded_SA = QUnfold_unfolder_and_plot(
