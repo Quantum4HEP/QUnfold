@@ -9,8 +9,7 @@
 
 # TODO: introdurre bias?
 # TODO: barre di errore
-# TODO: hit miss
-# TODO: fakes
+# TODO: scegliere binnaggio
 
 # STD libraries
 import argparse as ap
@@ -67,9 +66,8 @@ def get_trees_info(reco_file, particle_file, do_response=False):
 
     # Binning
     # fmt: off
-    pT_lep1_binning = [28.00, 34.00, 39.00, 45.00, 52.00, 61.00, 71.00, 83.00, 97.00, 115.00, 134.00, 158.00, 188.00, 223.00, 268.00, 338.00, 400.00]
-    pT_lep2_binning = [28.00, 32.00, 37.00, 44.00, 51.00, 61.00, 73.00, 88.00, 105.00, 123.00, 150.00, 182.00, 223.00]
-    
+    pT_lep1_binning = np.linspace(50, 200, 20)
+    pT_lep2_binning = np.linspace(30, 120, 20)
     eta_lep1_binning = np.linspace(-2.5, 2.5, 15)
     eta_lep2_binning = np.linspace(-2.5, 2.5, 15)
     
