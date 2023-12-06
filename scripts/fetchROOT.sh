@@ -19,14 +19,14 @@ echo ""
 
 # Get the ROOT distribution version and unpack it
 echo "3) Downloading ROOT v6.28.04:"
-wget https://root.cern/download/root_v6.28.04.Linux-ubuntu22-x86_64-gcc11.3.tar.gz
-gunzip root_v6.28.04.Linux-ubuntu22-x86_64-gcc11.3.tar.gz
-tar -xvf root_v6.28.04.Linux-ubuntu22-x86_64-gcc11.3.tar
+wget https://root.cern/download/root_v6.28.10.Linux-ubuntu22-x86_64-gcc11.4.tar.gz
+gunzip root_v6.28.10.Linux-ubuntu22-x86_64-gcc11.4.tar.gz
+tar -xvf root_v6.28.10.Linux-ubuntu22-x86_64-gcc11.4.tar
 echo ""
 
 # Clear and move files
 echo "4) Moving ROOT in the HEP_deps directory:"
-rm root_v6.28.04.Linux-ubuntu22-x86_64-gcc11.3.tar
+rm root_v6.28.10.Linux-ubuntu22-x86_64-gcc11.4.tar
 mkdir -p HEP_deps
 mv root HEP_deps
 echo "All done."
