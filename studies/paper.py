@@ -9,6 +9,9 @@
 # TODO: aggiungi altre metriche
 # TODO: errori con iterazioni
 
+# STD modules
+import argparse as ap
+
 # Data science modules
 import ROOT
 
@@ -19,7 +22,7 @@ from paper_functions.comparisons import make_comparisons
 # Main function
 def main():
     # Read input data
-    file = ROOT.TFile("data/simulated/output/unfolding_input.root", "READ")
+    file = ROOT.TFile(args.file, "READ")
     reco = file.Get("reco")
     particle = file.Get("particle")
 
@@ -29,4 +32,15 @@ def main():
 
 # Main program
 if __name__ == "__main__":
+    # Parser settings
+    parser = ap.ArgumentParser(description="Parsing input arguments.")
+    parser.add_argument(
+        "-f",
+        "--file",
+        default="",
+        help="Input data file.",
+    )
+    args = parser.parse_args()
+
+    # Main part
     main()
