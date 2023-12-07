@@ -17,9 +17,9 @@ from array import array
 import sys
 
 # Data science modules
+import ROOT
 import uproot
 import awkward as ak
-import ROOT
 import numpy as np
 
 # My modules
