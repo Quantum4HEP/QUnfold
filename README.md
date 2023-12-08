@@ -127,6 +127,8 @@ which will produce a similar result to this unfolded normal distribution:
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/examples/simneal_result.png" style="width: 45%;">
 </p>
 
+:warning: The response matrix must be normalized in order to keep the correct binary encoding of input data. The procedure is described in [this](https://github.com/JustWhit3/QUnfold/wiki/How-to-use#:~:text=The%20response%20matrix%20must%20be%20normalized%20before%20unfolding) twiki page.
+
 ### ROOT case
 
 To use `ROOT` data add the following steps at the beginning of the code:
