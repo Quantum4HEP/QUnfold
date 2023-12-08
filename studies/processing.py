@@ -185,7 +185,7 @@ def get_trees_info(reco_file, particle_file, do_response=False):
         phi_lep2_response = create_response_matrix(phi_lep2_binning, "particle_phi_lep2_vs_phi_lep2")
         y_lep1_response = create_response_matrix(y_lep1_binning, "particle_y_lep1_vs_y_lep1")
         y_lep2_response = create_response_matrix(y_lep2_binning, "particle_y_lep2_vs_y_lep2")
-        DR_b1b2_response = create_response_matrix(DR_b1b2_binning, "particle_DR_vs_DR")
+        DR_b1b2_response = create_response_matrix(DR_b1b2_binning, "particle_DR_b1b2_vs_DR_b1b2")
 
     # Iterate over events
     print("- Reco file: {}".format(reco_file))
@@ -193,10 +193,6 @@ def get_trees_info(reco_file, particle_file, do_response=False):
     for reco_event, particle_event in tqdm(
         zip(reco_info, particle_info), total=len(reco_info), ncols=100
     ):
-        
-        # Require at least two b-jets
-        bjet_mask = abs(reco_event["Jet.Flavor"]) == 5
-        if len(reco_event["Jet.Flavor"][bjet_mask]) < 2: continue
         
         # Particle selection pT
         particle_pT_lep1, particle_pT_lep2 = get_info_at_particle_level(particle_event, "Particle.PT")
@@ -228,7 +224,10 @@ def get_trees_info(reco_file, particle_file, do_response=False):
         
         # Reco selection
         fill_flag = 0
-        if len(reco_event["Electron.PT"]) == 2 and len(reco_event["Muon.PT"]) == 0:
+        bjet_mask = abs(reco_event["Jet.Flavor"]) == 5
+        b_jets_leq_2 = len(reco_event["Jet.Flavor"][bjet_mask]) >= 2
+        
+        if len(reco_event["Electron.PT"]) == 2 and len(reco_event["Muon.PT"]) == 0 and b_jets_leq_2:
             sorted_leptons_pT = ak.argsort(reco_event["Electron.PT"], axis=-1, ascending=False)
             sorted_jets_pT = ak.argsort(reco_event["Jet.PT"], axis=-1, ascending=False)
             
@@ -277,7 +276,7 @@ def get_trees_info(reco_file, particle_file, do_response=False):
             
             if do_response:
                 fill_flag = True
-        elif len(reco_event["Muon.PT"]) == 2 and len(reco_event["Electron.PT"]) == 0:
+        elif len(reco_event["Muon.PT"]) == 2 and len(reco_event["Electron.PT"]) == 0 and b_jets_leq_2:
             sorted_leptons_pT = ak.argsort(reco_event["Muon.PT"], axis=-1, ascending=False)
             sorted_jets_pT = ak.argsort(reco_event["Jet.PT"], axis=-1, ascending=False)
             
@@ -326,7 +325,7 @@ def get_trees_info(reco_file, particle_file, do_response=False):
         
             if do_response:
                 fill_flag = True
-        elif len(reco_event["Electron.PT"]) == 1 and len(reco_event["Muon.PT"]) == 1:
+        elif len(reco_event["Electron.PT"]) == 1 and len(reco_event["Muon.PT"]) == 1 and b_jets_leq_2:
             sorted_jets_pT = ak.argsort(reco_event["Jet.PT"], axis=-1, ascending=False)
             
             if reco_event["Electron.PT"][0] > reco_event["Muon.PT"][0]:

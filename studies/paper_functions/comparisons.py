@@ -202,7 +202,7 @@ def make_plots(SA_info, HYB_info, IBU_info, SVD_info, truth, measured, binning, 
     plt.tight_layout()
     if not os.path.exists("studies/img/paper"):
         os.makedirs("studies/img/paper")
-    plt.savefig("studies/img/paper/comparison_{}.png".format(var))
+    plt.savefig(f"studies/img/paper/comparison_{var}.png")
     plt.close()
 
 
@@ -224,9 +224,10 @@ def compute_chi2(unfolded, truth):
 
 def make_comparisons(reco, particle):
     # Variables
+    # fmt: off
+    variables = ["DR_b1b2", "pT_lep1", "pT_lep2", "eta_lep1", "eta_lep2", "m_l1l2", "phi_lep1", "phi_lep2", "y_lep1", "y_lep2"]
     ntoys = 2
     chi2_round = 3
-    variables = ["pT_lep1", "pT_lep2", "eta_lep1", "eta_lep2"]
 
     # RUnning over variables
     for var in variables:
@@ -247,11 +248,11 @@ def make_comparisons(reco, particle):
         print(f"- Running on {ntoys} toys...")
         for i in tqdm.trange(ntoys, ncols=100):
             # Raw input
-            m_response = reco.Get("particle_{0}_vs_{0}".format(var))
+            m_response = reco.Get(f"particle_{var}_vs_{var}")
             h_measured = reco.Get(var)
-            h_truth = particle.Get("particle_{0}".format(var))
-            h_mc_measured = reco.Get("mc_{}".format(var))
-            h_mc_truth = particle.Get("mc_particle_{0}".format(var))
+            h_truth = particle.Get(f"particle_{var}")
+            h_mc_measured = reco.Get(f"mc_{var}")
+            h_mc_truth = particle.Get(f"mc_particle_{var}")
 
             # Prepare unfolding input
             measured = TH1_to_array(h_measured)
