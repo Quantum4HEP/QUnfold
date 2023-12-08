@@ -125,12 +125,18 @@ class QUnfoldPlotter:
 
         # Plot Truth
         truth_steps = np.append(self.truth, [self.truth[-1]])
-        ax1.step(self.binning, truth_steps, label="Truth", where="post", color="tab:blue")
-        ax1.fill_between(self.binning, truth_steps, step="post", alpha=0.3, color="tab:blue")
+        ax1.step(
+            self.binning, truth_steps, label="Truth", where="post", color="tab:blue"
+        )
+        ax1.fill_between(
+            self.binning, truth_steps, step="post", alpha=0.3, color="tab:blue"
+        )
 
         # Plot measured
         meas_steps = np.append(self.measured, [self.measured[-1]])
-        ax1.step(self.binning, meas_steps, label="Measured", where="post", color="tab:orange")
+        ax1.step(
+            self.binning, meas_steps, label="Measured", where="post", color="tab:orange"
+        )
 
         # Plot unfolded histogram with chi2 test
         binwidths = np.diff(self.binning)
@@ -166,7 +172,9 @@ class QUnfoldPlotter:
         ax1.set_ylim(0, ax1.get_ylim()[1])
         ax2.set_yticks([0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75])
         ax2.set_yticklabels(["", "0.5", "", "1.0", "", "1.5", ""])
-        ax1.tick_params(axis="x", which="both", bottom=False, top=False, labelbottom=False)
+        ax1.tick_params(
+            axis="x", which="both", bottom=False, top=False, labelbottom=False
+        )
 
         # Plot settings
         ax2.set_ylabel("Ratio to\ntruth")

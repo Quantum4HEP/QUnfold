@@ -4,6 +4,6 @@ matplotlib
 pytest
 hypothesis
 scipy
-black
 tqdm
 uproot
+black==23.11.0

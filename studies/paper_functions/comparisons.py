@@ -32,7 +32,9 @@ if not loaded_RooUnfold == 0:
     sys.exit(0)
 
 
-def make_plots(SA_info, HYB_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys, lam):
+def make_plots(
+    SA_info, HYB_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys, lam
+):
     # Divide into subplots
     fig = plt.figure()
     gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0)

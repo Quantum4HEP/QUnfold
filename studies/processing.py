@@ -45,16 +45,24 @@ m_muon = 0.1056583715
 
 
 def get_info_at_particle_level(event, var):
-    lepton_mask = (abs(event["Particle.PID"]) == 11) | (abs(event["Particle.PID"]) == 13)
-    sorted_leptons = ak.argsort(event["Particle.PT"][lepton_mask], axis=-1, ascending=False)
+    lepton_mask = (abs(event["Particle.PID"]) == 11) | (
+        abs(event["Particle.PID"]) == 13
+    )
+    sorted_leptons = ak.argsort(
+        event["Particle.PT"][lepton_mask], axis=-1, ascending=False
+    )
     leading_lepton = event[var][lepton_mask][sorted_leptons[0]]
     subleading_lepton = event[var][lepton_mask][sorted_leptons[1]]
     return leading_lepton, subleading_lepton
 
 
 def get_m_l1l2_at_particle_level(event):
-    lepton_mask = (abs(event["Particle.PID"]) == 11) | (abs(event["Particle.PID"]) == 13)
-    sorted_leptons = ak.argsort(event["Particle.PT"][lepton_mask], axis=-1, ascending=False)
+    lepton_mask = (abs(event["Particle.PID"]) == 11) | (
+        abs(event["Particle.PID"]) == 13
+    )
+    sorted_leptons = ak.argsort(
+        event["Particle.PT"][lepton_mask], axis=-1, ascending=False
+    )
     inv_mass = compute_invariant_mass(
         event["Particle.PT"][lepton_mask][sorted_leptons[0]],
         event["Particle.Eta"][lepton_mask][sorted_leptons[0]],
@@ -82,7 +90,9 @@ def get_DR_b1b2_at_particle_level(event):
 
 def create_response_matrix(binning, name):
     bins = len(binning) - 1
-    response_TH2D = ROOT.TH2D(name, name, bins, array("d", binning), bins, array("d", binning))
+    response_TH2D = ROOT.TH2D(
+        name, name, bins, array("d", binning), bins, array("d", binning)
+    )
     response = ROOT.RooUnfoldResponse(
         response_TH2D.ProjectionX(),
         response_TH2D.ProjectionY(),
@@ -509,7 +519,9 @@ def get_trees_info(reco_file, particle_file, do_response=False):
 def main():
     # Create trees
     print("\nCreating particle- and reco-level trees:")
-    reco_level, particle_level = get_trees_info(args.reco, args.particle, do_response=False)
+    reco_level, particle_level = get_trees_info(
+        args.reco, args.particle, do_response=False
+    )
 
     # Save output trees
     output = ROOT.TFile(args.output, "RECREATE")
@@ -542,7 +554,9 @@ def main():
     for h_reco, h_particle in zip(reco_level.keys(), mc_level.keys()):
         binning = reco_level[h_reco][1]
         bins = len(binning) - 1
-        reco_histo = ROOT.TH1D(f"mc_{h_reco}", f"mc_{h_reco}", bins, array("d", binning))
+        reco_histo = ROOT.TH1D(
+            f"mc_{h_reco}", f"mc_{h_reco}", bins, array("d", binning)
+        )
         particle_histo = ROOT.TH1D(
             f"mc_{h_particle}", f"mc_{h_particle}", bins, array("d", binning)
         )

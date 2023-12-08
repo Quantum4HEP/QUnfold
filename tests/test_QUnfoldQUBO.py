@@ -25,7 +25,9 @@ def test_qunfoldqubo_constructor_and_setters():
     regularization_parameter = 0.1
 
     # Test constructors
-    qunfold_qubo = QUnfoldQUBO(response_matrix, measured_distribution, lam=regularization_parameter)
+    qunfold_qubo = QUnfoldQUBO(
+        response_matrix, measured_distribution, lam=regularization_parameter
+    )
 
     assert np.array_equal(qunfold_qubo.R, response_matrix)
     assert np.array_equal(qunfold_qubo.d, measured_distribution)
@@ -57,5 +59,7 @@ def test_get_laplacian():
 
     # Test for a 4x4 Laplacian matrix
     laplacian_matrix_4x4 = qunfold_qubo._get_laplacian(4)
-    expected_matrix_4x4 = np.array([[-1, 1, 0, 0], [1, -2, 1, 0], [0, 1, -2, 1], [0, 0, 1, -1]])
+    expected_matrix_4x4 = np.array(
+        [[-1, 1, 0, 0], [1, -2, 1, 0], [0, 1, -2, 1], [0, 0, 1, -1]]
+    )
     assert np.array_equal(laplacian_matrix_4x4, expected_matrix_4x4)
