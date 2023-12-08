@@ -46,13 +46,25 @@ def make_plots(
 
     # Plot truth
     truth_steps = np.append(truth, [truth[-1]])
-    ax1.step(binning, truth_steps, label="Truth", where="post", color="tab:blue")
+    ax1.step(
+        binning,
+        truth_steps,
+        label=r"Truth ($\mathtt{Madgraph}$)",
+        where="post",
+        color="tab:blue",
+    )
     ax1.fill_between(binning, truth_steps, step="post", alpha=0.3, color="tab:blue")
     ax2.axhline(y=1, color="tab:blue")
 
     # Plot measured
     meas_steps = np.append(measured, [measured[-1]])
-    ax1.step(binning, meas_steps, label="Measured", where="post", color="tab:orange")
+    ax1.step(
+        binning,
+        meas_steps,
+        label=r"Measured ($\mathtt{Delphes}$)",
+        where="post",
+        color="tab:orange",
+    )
     ax1.fill_between(binning, meas_steps, step="post", alpha=0.3, color="tab:orange")
 
     # Plot SA
@@ -151,6 +163,21 @@ def make_plots(
         color="purple",
     )
 
+    # Set var name to latex
+    variable_labels = {
+        "pT_lep1": r"$p_T^{lep1}$ [GeV]",
+        "pT_lep2": r"$p_T^{lep2}$ [GeV]",
+        "eta_lep1": r"$\eta^{lep1}$",
+        "eta_lep2": r"$\eta^{lep2}$",
+        "DR_b1b2": r"$\Delta R_{b1b2}$",
+        "m_l1l2": r"$m_{l1l2}$ [GeV]",
+        "phi_lep1": r"$\phi_{lep1}$",
+        "phi_lep2": r"$\phi_{lep2}$",
+        "y_lep1": r"$\y_{lep1}$",
+        "y_lep2": r"$\y_{lep2}$",
+    }
+    varname = variable_labels.get(var)
+
     # Plot settings
     ax1.tick_params(axis="x", which="both", bottom=True, top=False, direction="in")
     ax2.tick_params(axis="x", which="both", bottom=True, top=True, direction="in")
@@ -160,16 +187,6 @@ def make_plots(
     ax2.set_yticklabels(["", "0.5", "", "1.0", "", "1.5", ""])
     ax1.tick_params(axis="x", which="both", bottom=False, top=False, labelbottom=False)
     ax2.set_ylabel("Ratio to\ntruth")
-    if var == "pT_lep1":
-        varname = r"$p_T^{lep1}$ [Gev]"
-    elif var == "pT_lep2":
-        varname = r"$p_T^{lep2}$ [Gev]"
-    elif var == "eta_lep1":
-        varname = r"$\eta^{lep1}$"
-    elif var == "eta_lep2":
-        varname = r"$\eta^{lep2}$"
-    else:
-        varname = var
     ax2.set_xlabel(varname, loc="center")
     ax1.set_ylabel("Entries", loc="center")
     ax1.legend(loc="best")

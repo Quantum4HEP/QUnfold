@@ -18,29 +18,12 @@ import ROOT
 # My modules
 from paper_functions.comparisons import make_comparisons
 
-
-# Main function
-def main():
+# Main program
+if __name__ == "__main__":
     # Read input data
-    file = ROOT.TFile(args.file, "READ")
+    file = ROOT.TFile("data/simulated/output/unfolding_input.root", "READ")
     reco = file.Get("reco")
     particle = file.Get("particle")
 
     # Make comparisons
     make_comparisons(reco, particle)
-
-
-# Main program
-if __name__ == "__main__":
-    # Parser settings
-    parser = ap.ArgumentParser(description="Parsing input arguments.")
-    parser.add_argument(
-        "-f",
-        "--file",
-        default="",
-        help="Input data file.",
-    )
-    args = parser.parse_args()
-
-    # Main part
-    main()
