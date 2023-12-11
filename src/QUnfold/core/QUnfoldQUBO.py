@@ -146,6 +146,12 @@ class QUnfoldQUBO:
         error = np.sqrt(np.diagonal(cov_matrix) / num_reads)
         return solution, error
 
+    def solve_quantum_annealing(self, num_reads):
+        """
+        TODO: docstring
+        """
+        pass
+
     def solve_hybrid_sampler(self):
         """
         Solve the unfolding QUBO problem using the Leap Hybrid sampler.
@@ -153,6 +159,7 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: unfolded histogram.
         """
+        # TODO: fix solution selection and error computation
         sampler = LeapHybridSampler()
         sampleset = sampler.sample(self.bqm)
         decoded_sampleset = self.model.decode_sampleset(sampleset)
