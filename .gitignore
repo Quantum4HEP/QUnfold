@@ -5,7 +5,6 @@
 **/.hypothesis
 studies/RooUnfold/RooUnfold
 .vscode
-**/.tox
 **/.mypy_cache
 **/.pytest_cache
 HEP_deps
