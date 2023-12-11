@@ -1,10 +1,3 @@
-# ---------------------- Metadata ----------------------
-#
-# File name:  physics.py
-# Author:     Simone Gasperini (biancogianluca9@gmail.com)
-# Date:       2023-12-07
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import numpy as np
 
 

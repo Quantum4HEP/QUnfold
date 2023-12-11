@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  analysis.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-08-02
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # Main modules
 import sys
 import ROOT as r
@@ -28,7 +18,6 @@ loaded_RooUnfold = r.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
     log.error("RooUnfold not found!")
     sys.exit(0)
-
 
 # Input variables
 distributions = ["normal", "gamma", "exponential", "breit-wigner", "double-peaked"]

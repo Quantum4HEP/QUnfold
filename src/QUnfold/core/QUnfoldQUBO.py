@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  QUnfoldQUBO.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com) & Simone Gasperini (simone.gasperini4@unibo.it)
-# Date:       2023-06-16
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import numpy as np
 from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler

@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# ---------------------- Metadata ----------------------
-#
-# File name:  fetchROOT.sh
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-16
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # Update the system first
 echo "1) Updating the system:"
 sudo apt update && sudo apt upgrade

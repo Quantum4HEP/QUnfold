@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  generator.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-14
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # Main modules
 import ROOT as r
 import numpy as np

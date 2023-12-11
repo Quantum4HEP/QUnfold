@@ -1,10 +1,3 @@
-# ---------------------- Metadata ----------------------
-#
-# File name:  QUnfolder.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-12-05
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # TODO: errore chi2 STD o STD mean?
 # TODO: calcola chi2 covarianze
 # TODO: triangular discriminator

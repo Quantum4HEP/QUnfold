@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  comparisons.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-26
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import os
 import matplotlib.pyplot as plt
 import numpy as np

@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# ---------------------- Metadata ----------------------
-#
-# File name:  fetchRooUnfold.sh
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-13
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # Variables
 repo="https://gitlab.cern.ch/gbianco/RooUnfold"
 tag="3.0.0"

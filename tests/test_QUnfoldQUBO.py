@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  test_QUnfoldQUBO.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-11-16
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import numpy as np
 from QUnfold import QUnfoldQUBO
 

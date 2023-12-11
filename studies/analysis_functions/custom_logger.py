@@ -1,10 +1,3 @@
-# ---------------------- Metadata ----------------------
-#
-# File name:  CustomLogger.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-11-07
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import logging
 
 

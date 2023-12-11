@@ -1,14 +1,4 @@
-# ---------------------- Metadata ----------------------
-#
-# File name:  processing.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-11-16
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # Simulated process: gg -> tt~ -> WbWb -> l l~ nu nu~ b b~
-
-# TODO: barre di errore
-# TODO: interesting variables: energy, variabili sui jets o bjets
 
 # Main modules
 import argparse as ap

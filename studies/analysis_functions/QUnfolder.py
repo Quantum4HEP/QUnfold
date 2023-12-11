@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  QUnfold.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-07-27
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import os
 import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter

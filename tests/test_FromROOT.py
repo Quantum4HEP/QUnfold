@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  test_FromROOT.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-11-10
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 import ROOT as r
 import numpy as np
 import numpy.testing as nptest

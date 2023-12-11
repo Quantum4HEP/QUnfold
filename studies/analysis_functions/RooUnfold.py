@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# ---------------------- Metadata ----------------------
-#
-# File name:  RooUnfold.py
-# Author:     Gianluca Bianco (biancogianluca9@gmail.com)
-# Date:       2023-06-13
-# Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
-
 # Main modules
 import os
 import ROOT as r
