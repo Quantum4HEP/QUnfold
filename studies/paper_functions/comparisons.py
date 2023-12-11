@@ -169,8 +169,8 @@ def make_plots(
         "m_l1l2": r"$m_{l1l2}$ [GeV]",
         "phi_lep1": r"$\phi_{lep1}$",
         "phi_lep2": r"$\phi_{lep2}$",
-        "y_lep1": r"$\y_{lep1}$",
-        "y_lep2": r"$\y_{lep2}$",
+        "y_lep1": r"$y_{lep1}$",
+        "y_lep2": r"$y_{lep2}$",
     }
     varname = variable_labels.get(var)
 
@@ -216,8 +216,10 @@ def make_plots(
     # Save plot
     plt.tight_layout()
     if not os.path.exists("studies/img/paper"):
-        os.makedirs("studies/img/paper")
-    plt.savefig(f"studies/img/paper/comparison_{var}.png")
+        os.makedirs("studies/img/paper/png")
+        os.makedirs("studies/img/paper/pdf")
+    plt.savefig(f"studies/img/paper/png/comparison_{var}.png")
+    plt.savefig(f"studies/img/paper/pdf/comparison_{var}.pdf")
     plt.close()
 
 
@@ -240,7 +242,7 @@ def compute_chi2(unfolded, truth):
 def make_comparisons(reco, particle):
     # Variables
     # fmt: off
-    variables = ["DR_b1b2", "pT_lep1", "pT_lep2", "eta_lep1", "eta_lep2", "m_l1l2", "phi_lep1", "phi_lep2", "y_lep1", "y_lep2"]
+    variables = ["DR_b1b2", "pT_lep1", "pT_lep2", "eta_lep1", "eta_lep2", "m_l1l2", "phi_lep1", "phi_lep2", "y_lep1", "y_lep2"] 
     ntoys = 2
     chi2_round = 3
 
