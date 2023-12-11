@@ -285,7 +285,7 @@ def make_comparisons(reco, particle):
                 lam = 0.01
             unfolder = QUnfoldQUBO(measured=measured, response=response, lam=lam)
             unfolder.initialize_qubo_model(optimize_vars_range=False)
-            unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
+            unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=10)
             SA_results.append(unfolded_SA)
             SA_chi2.append(compute_chi2(unfolded_SA, truth))
 

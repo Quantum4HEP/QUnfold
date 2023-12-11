@@ -4,23 +4,15 @@ import numpy as np
 from scipy.stats import chisquare
 
 
-def plot_errorbar(bin_edges, bin_contents, color, marker, method, chi2):
+def plot_errorbar(bin_edges, bin_contents, bin_errors, color, marker, method, chi2):
     """
-    Plots an error bar plot with specified bin edges, bin contents, color, marker, and method.
-
-    Args:
-        bin_edges (array-like): The bin edges for the error bars.
-        bin_contents (array-like): The bin contents for the error bars.
-        color (str): The color of the error bars.
-        marker (str): The marker style for the error bars.
-        method (str): The method label for the error bars.
-        chi2 (float): The chi2 of comparison about truth and unfolded distribution.
+    TODO: docstring
     """
 
     plt.errorbar(
         x=bin_edges[:-1],
         y=bin_contents,
-        yerr=np.sqrt(bin_contents),
+        yerr=bin_errors,
         color=color,
         marker=marker,
         ms=5,

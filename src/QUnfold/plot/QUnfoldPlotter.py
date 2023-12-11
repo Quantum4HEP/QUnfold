@@ -8,7 +8,7 @@ class QUnfoldPlotter:
     Class used to plot QUnfold data and results.
     """
 
-    def __init__(self, response, measured, truth, unfolded, binning):
+    def __init__(self, response, measured, truth, unfolded, error, binning):
         """
         Constructs a QUnfoldPlotter class for visualizing unfolding results.
 
@@ -17,13 +17,15 @@ class QUnfoldPlotter:
             measured (np.array): The measured (observed) data distribution.
             truth (np.array): The true distribution.
             unfolded (np.array): The unfolded distribution.
+            error (np.array): The error on the unfolded distribution.
             binning (np.array): The binning information for the histograms.
         """
 
         self.response = response
         self.measured = measured
-        self.unfolded = unfolded
         self.truth = truth
+        self.unfolded = unfolded
+        self.error = error
         self.binning = binning
 
     def __plotResponseSetup(self):
@@ -135,7 +137,7 @@ class QUnfoldPlotter:
         ax1.errorbar(
             x=bin_midpoints,
             y=self.unfolded,
-            yerr=np.sqrt(self.unfolded),
+            yerr=self.error,
             label=label,
             marker="o",
             ms=marker_size,
@@ -148,7 +150,7 @@ class QUnfoldPlotter:
         ax2.errorbar(
             x=bin_midpoints,
             y=self.unfolded / self.truth,
-            yerr=np.sqrt(self.unfolded) / self.truth,
+            yerr=self.error / self.truth,
             ms=marker_size,
             fmt="o",
             color="g",

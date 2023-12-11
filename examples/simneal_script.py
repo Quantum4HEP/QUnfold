@@ -39,9 +39,9 @@ if __name__ == "__main__":
     measured, _ = np.histogram(meas_data, bins=bins)
 
     # Run simulated annealing to solve QUBO problem
-    unfolder = QUnfoldQUBO(response, measured, lam=0.05)
+    unfolder = QUnfoldQUBO(response, measured, lam=0.1)
     unfolder.initialize_qubo_model(optimize_vars_range=False)
-    unfolded = unfolder.solve_simulated_annealing(num_reads=100, seed=seed)
+    unfolded, error = unfolder.solve_simulated_annealing(num_reads=10, seed=seed)
 
     # Plot unfolding result
     plotter = QUnfoldPlotter(
@@ -49,6 +49,7 @@ if __name__ == "__main__":
         measured=measured,
         truth=true,
         unfolded=unfolded,
+        error=error,
         binning=bins,
     )
     plotter.saveResponse("examples/simneal_response.png")

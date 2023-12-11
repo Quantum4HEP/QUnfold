@@ -101,7 +101,7 @@ binning = ... # binning of the distributions
 # Run unfolding
 unfolder = QUnfoldQUBO(response, measured, lam=0.1)
 unfolder.initialize_qubo_model()
-unfolded_SA = unfolder.solve_simulated_annealing(num_reads=100)
+unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=10)
 
 # Plot results
 plotter = QUnfoldPlotter(
@@ -109,6 +109,7 @@ plotter = QUnfoldPlotter(
     measured=measured,
     truth=truth,
     unfolded=unfolded_SA,
+    error=error_SA,
     binning=binning,
 )
 plotter.plotResponse()

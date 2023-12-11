@@ -129,22 +129,22 @@ class QUnfoldQUBO:
         self.model = h.compile()
         self.bqm = self.model.to_bqm()
 
-    def solve_simulated_annealing(self, num_reads=100, seed=None):
+    def solve_simulated_annealing(self, num_reads=1, seed=None):
         """
-        Solve the unfolding QUBO problem using the Simulated Annealing sampler.
-
-        Parameters:
-            num_reads (int, optional): number of reads for the sampler (default is 100).
-            seed (int, optional): seed for random number generation (default is None).
-
-        Returns:
-            numpy.ndarray: unfolded histogram.
+        TODO: docstring
         """
         sampler = SimulatedAnnealingSampler()
-        sampleset = sampler.sample(self.bqm, num_reads=num_reads, seed=seed)
-        decoded_sampleset = self.model.decode_sampleset(sampleset)
-        best_sample = min(decoded_sampleset, key=lambda s: s.energy)
-        return np.array([best_sample.subh[label] for label in self.labels])
+        sample_set = sampler.sample(self.bqm, num_reads=num_reads, seed=seed)
+        solution_set = np.array(
+            [
+                [sample.subh[label] for label in self.labels]
+                for sample in self.model.decode_sampleset(sample_set)
+            ]
+        )
+        solution = np.round(np.mean(solution_set, axis=0))
+        cov_matrix = np.cov(solution_set, rowvar=False, ddof=1)
+        error = np.sqrt(np.diagonal(cov_matrix) / num_reads)
+        return solution, error
 
     def solve_hybrid_sampler(self):
         """
