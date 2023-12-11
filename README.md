@@ -58,12 +58,7 @@ Further documentation:
 
 ## Developer environment
 
-To setup the environment for `QUnfold` development you need two dependencies:
-
-- [`tox>=4`](https://tox.wiki/en/latest/)
-- [`conda`](https://docs.conda.io/en/latest/)
-
-To setup the `conda` conda environment and install the `QUnfold` library (only the first time):
+To setup the environment for `QUnfold` development you need [`conda`](https://docs.conda.io/en/latest/):
 
 ```shell
 conda create --name qunfold-dev python==3.10
@@ -151,7 +146,7 @@ response = TH2_to_array(response.Hresponse())
 Tests are performed using [`pytest`](https://docs.pytest.org/en/7.4.x/) in verbose mode. To run them:
 
 ```shell
-tox -e tests
+python -m pytest tests
 ```
 
 ## Examples
@@ -159,7 +154,7 @@ tox -e tests
 Look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) folder for more details. To run the example:
 
 ```bash
-tox -e example
+python examples/simneal_script.py
 ```
 
 Results are saved into the `/examples` directory.
@@ -174,7 +169,7 @@ All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [
 
 To run all the studies you will need to install some HEP dependencies:
 
-- [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/04**.
+- [`ROOT`](https://root.cern/releases/release-62804/): **v6.28/10**.
 
 - [`RooUnfold`](https://gitlab.cern.ch/RooUnfold/RooUnfold): **v3.0.0**. See [this user guide](https://statisticalmethods.web.cern.ch/StatisticalMethods/unfolding/RooUnfold_01-Methods_PY/) for a good user guide, the official [Doxygen](http://roounfold.web.cern.ch/index.html) page and the [repository](https://github.com/roofit-dev/RooUnfold).
 
@@ -199,7 +194,7 @@ source HEP_deps/root/bin/thisroot.sh
 To run the whole analysis script:
 
 ```shell
-tox -e analysis
+python studies/analysis.py
 ```
 
 Pseudo-data will be generated following common distributions (normal, exponential, etc...) which will be unfolded using `RooUnfold` and the following common classical methods:

@@ -8,13 +8,9 @@
 # Date:       2023-08-02
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# STD modules
+# Main modules
 import sys
-
-# Data science modules
 import ROOT as r
-
-# My modules
 from analysis_functions.custom_logger import get_custom_logger
 from analysis_functions.generator import generate
 from analysis_functions.RooUnfold import (
@@ -24,14 +20,10 @@ from analysis_functions.RooUnfold import (
 )
 from analysis_functions.QUnfolder import QUnfold_unfolder_and_plot
 from analysis_functions.comparisons import plot_comparisons
-
-# QUnfold modules
 from QUnfold.utility import TH1_to_array, TH2_to_array, normalize_response
 
-# Logger settings
+# Settings
 log = get_custom_logger(__name__)
-
-# RooUnfold settings
 loaded_RooUnfold = r.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
     log.error("RooUnfold not found!")
@@ -49,7 +41,7 @@ smearing = 0.21
 eff = 0.92
 
 
-def main():
+if __name__ == "__main__":
     # Iterate over distributions
     for distr in distributions:
         # Generate data
@@ -110,7 +102,3 @@ def main():
         # Plot comparisons
         plot_comparisons(data, distr, truth, bins, min_bin, max_bin)
         log.info("Done\n")
-
-
-if __name__ == "__main__":
-    main()

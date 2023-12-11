@@ -8,13 +8,11 @@
 # Date:       2023-06-13
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# STD modules
+# Main modules
 import os
-
-# Data science modules
 import ROOT as r
 
-# ROOT settings
+# Settings
 r.gROOT.SetBatch(True)
 
 

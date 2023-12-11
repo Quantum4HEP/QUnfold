@@ -8,13 +8,8 @@
 # Date:       2023-07-27
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Standard modules
 import os
-
-# Data science modules
 import numpy as np
-
-# QUnfold modules
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
 

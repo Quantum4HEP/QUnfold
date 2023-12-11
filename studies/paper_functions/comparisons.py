@@ -10,22 +10,18 @@
 # TODO: triangular discriminator
 # TODO: barre di errore truth ecc?
 
-# STD modules
+# Main modules
 import sys, os
 import tqdm
-
-# Data science modules
 import ROOT
 from scipy.stats import chisquare
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-
-# QUnfold modules
 from QUnfold import QUnfoldQUBO
 from QUnfold.utility import TH1_to_array, TH2_to_array, normalize_response
 
-# RooUnfold settings
+# Settings
 loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
     print("RooUnfold not found!")

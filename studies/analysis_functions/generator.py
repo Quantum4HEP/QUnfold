@@ -8,11 +8,11 @@
 # Date:       2023-06-14
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Data science modules
+# Main modules
 import ROOT as r
 import numpy as np
 
-# ROOT settings
+# Settings
 r.gROOT.SetBatch(True)
 
 

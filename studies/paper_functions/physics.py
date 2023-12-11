@@ -5,7 +5,6 @@
 # Date:       2023-12-07
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Data science modules
 import numpy as np
 
 

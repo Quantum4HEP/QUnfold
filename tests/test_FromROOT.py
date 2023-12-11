@@ -3,19 +3,14 @@
 
 # ---------------------- Metadata ----------------------
 #
-# File name:  test_ROOT_converter.py
+# File name:  test_FromROOT.py
 # Author:     Gianluca Bianco (biancogianluca9@gmail.com)
 # Date:       2023-11-10
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Data science modules
 import ROOT as r
 import numpy as np
-
-# Testing modules
 import numpy.testing as nptest
-
-# QUnfold modules
 from QUnfold.utility import (
     TH1_to_array,
     TH2_to_array,

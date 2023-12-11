@@ -9,16 +9,10 @@
 # TODO: aggiungi altre metriche
 # TODO: errori con iterazioni
 
-# STD modules
 import argparse as ap
-
-# Data science modules
 import ROOT
-
-# My modules
 from paper_functions.comparisons import make_comparisons
 
-# Main program
 if __name__ == "__main__":
     # Read input data
     file = ROOT.TFile("data/simulated/output/unfolding_input.root", "READ")

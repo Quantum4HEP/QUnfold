@@ -8,10 +8,7 @@
 # Date:       2023-06-26
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# STD modules
 import os
-
-# Data science modules
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import chisquare

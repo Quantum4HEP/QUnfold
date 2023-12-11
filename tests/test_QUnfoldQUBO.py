@@ -8,10 +8,7 @@
 # Date:       2023-11-16
 # Copyright:  (c) 2023 Gianluca Bianco under the MIT license.
 
-# Data science modules
 import numpy as np
-
-# QUnfold modules
 from QUnfold import QUnfoldQUBO
 
 

@@ -10,19 +10,15 @@
 # TODO: barre di errore
 # TODO: interesting variables: energy, variabili sui jets o bjets
 
-# STD libraries
+# Main modules
 import argparse as ap
 from tqdm import tqdm
 from array import array
 import sys
-
-# Data science modules
 import ROOT
 import uproot
 import awkward as ak
 import numpy as np
-
-# My modules
 from paper_functions.physics import (
     compute_invariant_mass,
     compute_energy,
@@ -32,8 +28,6 @@ from paper_functions.physics import (
 
 # ROOT settings
 ROOT.gROOT.SetBatch(True)
-
-# RooUnfold settings
 loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
     print("RooUnfold not found!")
@@ -516,15 +510,20 @@ def get_trees_info(reco_file, particle_file, do_response=False):
     return reco_tree, particle_tree
 
 
-def main():
+if __name__ == "__main__":
+    # Input variables
+    reco = "data/simulated/input/reco_ATLAS.root"
+    particle = "data/simulated/input/particle_ATLAS.root"
+    reco_response = "data/simulated/input/reco_ATLAS_response.root"
+    particle_response = "data/simulated/input/particle_ATLAS_response.root"
+    output = "data/simulated/output/unfolding_input.root"
+
     # Create trees
     print("\nCreating particle- and reco-level trees:")
-    reco_level, particle_level = get_trees_info(
-        args.reco, args.particle, do_response=False
-    )
+    reco_level, particle_level = get_trees_info(reco, particle, do_response=False)
 
     # Save output trees
-    output = ROOT.TFile(args.output, "RECREATE")
+    output = ROOT.TFile(output, "RECREATE")
     reco_dir = output.mkdir("reco")
     particle_dir = output.mkdir("particle")
     for h_reco, h_particle in zip(reco_level.keys(), particle_level.keys()):
@@ -546,7 +545,7 @@ def main():
     # Create response matrices data
     print("\nCreating response matrices:")
     response_matrices, reco_level, mc_level = get_trees_info(
-        args.reco_response, args.particle_response, do_response=True
+        reco_response, particle_response, do_response=True
     )
     for response in response_matrices:
         reco_dir.cd()
@@ -570,42 +569,3 @@ def main():
         reco_histo.Write()
         particle_dir.cd()
         particle_histo.Write()
-
-
-if __name__ == "__main__":
-    # Parser settings
-    parser = ap.ArgumentParser(description="Parsing input arguments.")
-    parser.add_argument(
-        "-p",
-        "--particle",
-        default="",
-        help="Particle-level file.",
-    )
-    parser.add_argument(
-        "-r",
-        "--reco",
-        default="",
-        help="Reco-level file.",
-    )
-    parser.add_argument(
-        "-pr",
-        "--particle-response",
-        default="",
-        help="Particle-level file for response matrix.",
-    )
-    parser.add_argument(
-        "-rr",
-        "--reco-response",
-        default="",
-        help="Reco-level file for response matrix.",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        default="",
-        help="Output root file name.",
-    )
-    args = parser.parse_args()
-
-    # Main part
-    main()
