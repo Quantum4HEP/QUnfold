@@ -163,8 +163,6 @@ Results are saved into the `/examples` directory.
 
 This section contains instructions to run unfolding with other packages in order to do comparisons with `QUnfold`. All the code lies under the `studies` directory.
 
-All the dependencies are managed by [tox](https://tox.wiki/en/latest/), except [the ones related to HEP](#install-hep-dependencies).
-
 ### Install HEP dependencies
 
 To run all the studies you will need to install some HEP dependencies:
