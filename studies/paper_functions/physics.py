@@ -45,7 +45,30 @@ def compute_DR(eta1, phi1, eta2, phi2):
     if delta_phi < -np.pi:
         delta_phi += 2 * np.pi
 
-    # Calcola la distanza angolare
     delta_R = np.sqrt(delta_eta**2 + delta_phi**2)
 
     return delta_R
+
+
+def compute_DR_reco(eta, phi):
+    delta_eta = eta[:, 0] - eta[:, 1]
+    delta_phi = phi[:, 0] - phi[:, 1]
+
+    delta_phi = np.where(delta_phi > np.pi, delta_phi - 2 * np.pi, delta_phi)
+    delta_phi = np.where(delta_phi < -np.pi, delta_phi + 2 * np.pi, delta_phi)
+
+    DR_b1b2 = np.sqrt(delta_eta**2 + delta_phi**2)
+
+    return DR_b1b2
+
+
+def compute_DR_particle(eta1, eta2, phi1, phi2):
+    delta_eta = eta1 - eta2
+    delta_phi = phi1 - phi2
+
+    delta_phi = np.where(delta_phi > np.pi, delta_phi - 2 * np.pi, delta_phi)
+    delta_phi = np.where(delta_phi < -np.pi, delta_phi + 2 * np.pi, delta_phi)
+
+    DR_b1b2 = np.sqrt(delta_eta**2 + delta_phi**2)
+
+    return DR_b1b2

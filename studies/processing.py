@@ -365,12 +365,12 @@ def get_trees_info(reco_file, particle_file, do_response=False):
                 reco_pT_lep2_list.append(reco_event["Electron.PT"][0])
                 
                 # Eta
-                reco_eta_lep1_list.append(reco_event["Electron.Eta"][0])
-                reco_eta_lep2_list.append(reco_event["Muon.Eta"][0])
+                reco_eta_lep1_list.append(reco_event["Muon.Eta"][0])
+                reco_eta_lep2_list.append(reco_event["Electron.Eta"][0])
                 
                 # Phi
-                reco_phi_lep1_list.append(reco_event["Electron.Phi"][0])
-                reco_phi_lep2_list.append(reco_event["Muon.Phi"][0])
+                reco_phi_lep1_list.append(reco_event["Muon.Phi"][0])
+                reco_phi_lep2_list.append(reco_event["Electron.Phi"][0])
                 
                 # y
                 energy_lep1 = compute_energy(m_muon, reco_event["Muon.PT"][0], reco_event["Muon.Phi"][0], reco_event["Muon.Eta"][0])
