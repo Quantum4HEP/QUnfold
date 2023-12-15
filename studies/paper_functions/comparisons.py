@@ -1,11 +1,4 @@
-# TODO: errore chi2 STD o STD mean?
-# TODO: calcola chi2 covarianze
-# TODO: triangular discriminator
-# TODO: barre di errore truth ecc?
-
-# Main modules
 import sys, os
-import tqdm
 import ROOT
 from scipy.stats import chisquare
 import numpy as np
@@ -14,7 +7,7 @@ import matplotlib
 from QUnfold import QUnfoldQUBO
 from QUnfold.utility import TH1_to_array, TH2_to_array, normalize_response
 
-# Settings
+# RooUnfold settings
 loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
 if not loaded_RooUnfold == 0:
     print("RooUnfold not found!")
@@ -60,7 +53,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     ax1.errorbar(
         x=bin_midpoints,
         y=SA_info["mean"],
-        yerr=SA_info["STD"],
+        yerr=SA_info["std"],
         label=label,
         marker="o",
         ms=marker_size,
@@ -71,7 +64,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     ax2.errorbar(
         x=bin_midpoints,
         y=SA_info["mean"] / truth,
-        yerr=SA_info["STD"] / truth,
+        yerr=SA_info["std"] / truth,
         ms=marker_size,
         fmt="o",
         color="green",
@@ -83,7 +76,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     ax1.errorbar(
         x=bin_midpoints,
         y=IBU_info["mean"],
-        yerr=IBU_info["STD"],
+        yerr=IBU_info["std"],
         label=label,
         marker="s",
         ms=marker_size,
@@ -94,7 +87,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     ax2.errorbar(
         x=bin_midpoints,
         y=IBU_info["mean"] / truth,
-        yerr=IBU_info["STD"] / truth,
+        yerr=IBU_info["std"] / truth,
         ms=marker_size,
         fmt="s",
         color="red",
@@ -106,7 +99,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     ax1.errorbar(
         x=bin_midpoints,
         y=SVD_info["mean"],
-        yerr=SVD_info["STD"],
+        yerr=SVD_info["std"],
         label=label,
         marker="p",
         ms=marker_size,
@@ -117,7 +110,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     ax2.errorbar(
         x=bin_midpoints,
         y=SVD_info["mean"] / truth,
-        yerr=SVD_info["STD"] / truth,
+        yerr=SVD_info["std"] / truth,
         ms=marker_size,
         fmt="p",
         color="purple",
@@ -242,7 +235,7 @@ def make_comparisons(reco, particle):
         lam = 0.0
         num_reads = 100
         unfolder = QUnfoldQUBO(measured=measured, response=response, lam=lam)
-        unfolder.initialize_qubo_model(optimize_vars_range=False)
+        unfolder.initialize_qubo_model()
         unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=num_reads)
         chi2_SA = compute_chi2(unfolded_SA, truth)
 
@@ -280,21 +273,21 @@ def make_comparisons(reco, particle):
         # SA results
         SA_info = {
             "mean": unfolded_SA,
-            "STD": error_SA,
+            "std": error_SA,
             "chi2": np.round(chi2_SA, 3),
         }
 
         # IBU results
         IBU_info = {
             "mean": unfolded_IBU,
-            "STD": error_IBU,
+            "std": error_IBU,
             "chi2": np.round(chi2_IBU, 3),
         }
 
         # SVD results
         SVD_info = {
             "mean": unfolded_SVD,
-            "STD": error_SVD,
+            "std": error_SVD,
             "chi2": np.round(chi2_SVD, 3),
         }
 

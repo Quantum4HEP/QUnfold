@@ -2,12 +2,13 @@ import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 from QUnfold.utility import normalize_response
 
+
 if __name__ == "__main__":
     # Set parameters for data generation
-    num_entries = 40000
-    num_bins = 16
-    min_bin = -8.0
-    max_bin = 8.0
+    num_entries = 20000
+    num_bins = 15
+    min_bin = -7.0
+    max_bin = 7.0
     bins = np.linspace(min_bin, max_bin, num_bins + 1)
 
     seed = 42
@@ -35,19 +36,19 @@ if __name__ == "__main__":
     )
 
     # Generate truth and measured histograms
-    true, _ = np.histogram(true_data, bins=bins)
+    truth, _ = np.histogram(true_data, bins=bins)
     measured, _ = np.histogram(meas_data, bins=bins)
 
     # Run simulated annealing to solve QUBO problem
     unfolder = QUnfoldQUBO(response, measured, lam=0.1)
-    unfolder.initialize_qubo_model(optimize_vars_range=False)
-    unfolded, error = unfolder.solve_simulated_annealing(num_reads=10, seed=seed)
+    unfolder.initialize_qubo_model()
+    unfolded, error = unfolder.solve_simulated_annealing(num_reads=100, seed=seed)
 
     # Plot unfolding result
     plotter = QUnfoldPlotter(
         response=response,
         measured=measured,
-        truth=true,
+        truth=truth,
         unfolded=unfolded,
         error=error,
         binning=bins,
