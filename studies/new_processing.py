@@ -88,13 +88,10 @@ def hist_resp_builder(
 
 
 def reco_filter_bjet(events_idx, reco_info, var):
-    # Variables
+    # Selection
     e_size = reco_info["Electron_size"]
     mu_size = reco_info["Muon_size"]
     bjet_size = np.sum(np.abs(reco_info["Jet.Flavor"] == 5), axis=1)
-    reco_var_dilep = None
-
-    # Selection
     mask_dilep = (
         ((e_size == 2) & (mu_size == 0))
         | ((e_size == 0) & (mu_size == 2))
@@ -104,18 +101,20 @@ def reco_filter_bjet(events_idx, reco_info, var):
     bjet_pt_dilep = reco_info["Jet.PT"][mask_dilep]
     sorted_dilep_idx = np.argsort(bjet_pt_dilep)
 
-    # Compute result
+    # Variables
+    reco_var_dilep = None
     if var == "DR_b1b2":
-        reco_eta_dilep = reco_info["Jet.Eta"][mask_dilep][sorted_dilep_idx][:, :2]
-        reco_phi_dilep = reco_info["Jet.Phi"][mask_dilep][sorted_dilep_idx][:, :2]
+        reco_eta_dilep = reco_info["Jet.Eta"][mask_dilep][sorted_dilep_idx][:, -2:]
+        reco_phi_dilep = reco_info["Jet.Phi"][mask_dilep][sorted_dilep_idx][:, -2:]
         reco_var_dilep = compute_DR_reco(reco_eta_dilep, reco_phi_dilep)
 
+    # Result
     temp = reco_var_dilep
-    concat_pt = np.array([None] * len(events_idx))
+    concat_var = np.array([None] * len(events_idx))
     concat_idx = events_dilep_idx
-    concat_pt[mask_dilep] = temp[np.argsort(concat_idx)]
+    concat_var[mask_dilep] = temp[np.argsort(concat_idx)]
 
-    return concat_pt
+    return concat_var
 
 
 def reco_filter_lep(events_idx, reco_info, var):
@@ -171,11 +170,11 @@ def reco_filter_lep(events_idx, reco_info, var):
     ]
 
     temp = np.concatenate((reco_var_ee, reco_var_mumu, reco_var_emu))
-    concat_pt = np.array([[None, None]] * len(events_idx))
+    concat_var = np.array([[None, None]] * len(events_idx))
     concat_idx = np.concatenate((events_ee_idx, events_mumu_idx, events_emu_idx))
-    concat_pt[mask_ee | mask_mumu | mask_emu] = temp[np.argsort(concat_idx)]
+    concat_var[mask_ee | mask_mumu | mask_emu] = temp[np.argsort(concat_idx)]
 
-    return concat_pt[:, 1], concat_pt[:, 0]
+    return concat_var[:, 1], concat_var[:, 0]
 
 
 def process(
