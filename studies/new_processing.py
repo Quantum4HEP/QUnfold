@@ -1,6 +1,4 @@
 # TODO: correggi numero di entries salvate
-# TODO: aggiungi m_l1l2 and DR_b1b2
-# TODO: tests dettagliati
 
 import ROOT
 import uproot
@@ -19,6 +17,7 @@ from paper_functions.physics import (
 # Constants (GeV)
 m_electron = 0.0005109989461
 m_muon = 0.1056583715
+m_bjet = 4.18
 
 
 def get_info_particle_level(particle_info, list_particleIDs, list_partvars):
@@ -105,11 +104,28 @@ def reco_filter_bjet(events_idx, reco_info, var):
 
     # Variables
     reco_var_dilep = None
-    if var == "DR_b1b2":
-        reco_eta_dilep = reco_info["Jet.Eta"][mask_dilep][sorted_dilep_idx][:, -2:]
-        reco_phi_dilep = reco_info["Jet.Phi"][mask_dilep][sorted_dilep_idx][:, -2:]
-        reco_var_dilep = compute_DR_reco(reco_eta_dilep, reco_phi_dilep)
+    reco_pT_dilep = reco_info["Jet.PT"][mask_dilep][sorted_dilep_idx]
+    reco_eta_dilep = reco_info["Jet.Eta"][mask_dilep][sorted_dilep_idx]
+    reco_phi_dilep = reco_info["Jet.Phi"][mask_dilep][sorted_dilep_idx]
+    bjet_mask = reco_info["Jet.Flavor"][mask_dilep][sorted_dilep_idx] == 5
 
+    if var == "DR_b1b2":
+        reco_var_dilep = compute_DR_reco(
+            reco_eta_dilep[bjet_mask][:, -2:], reco_phi_dilep[bjet_mask][:, -2:]
+        )
+    elif var == "m_b1b2":
+        reco_e_dilep = compute_energy(
+            m_bjet,
+            reco_pT_dilep[bjet_mask][:, -2:],
+            reco_phi_dilep[bjet_mask][:, -2:],
+            reco_eta_dilep[bjet_mask][:, -2:],
+        )
+        reco_var_dilep = compute_invariant_mass_reco(
+            reco_pT_dilep[bjet_mask][:, -2:],
+            reco_eta_dilep[bjet_mask][:, -2:],
+            reco_phi_dilep[bjet_mask][:, -2:],
+            reco_e_dilep,
+        )
     # Result
     temp = reco_var_dilep
     concat_var = np.array([None] * len(events_idx))
@@ -311,6 +327,23 @@ def process(
         particle_e_lep2,
     )
 
+    # m_b1b2
+    reco_m_b1b2 = reco_filter_bjet(events_idx, reco_info, "m_b1b2")
+    particle_e_bjet1, particle_e_bjet2 = particle_info["5"]["Particle.E"]
+    particle_pT_bjet1, particle_pT_bjet2 = particle_info["5"]["Particle.PT"]
+    particle_Eta_bjet1, particle_Eta_bjet2 = particle_info["5"]["Particle.Eta"]
+    particle_Phi_bjet1, particle_Phi_bjet2 = particle_info["5"]["Particle.Phi"]
+    particle_m_b1b2 = compute_invariant_mass_particle(
+        particle_pT_bjet1,
+        particle_Eta_bjet1,
+        particle_Phi_bjet1,
+        particle_e_bjet1,
+        particle_pT_bjet2,
+        particle_Eta_bjet2,
+        particle_Phi_bjet2,
+        particle_e_bjet2,
+    )
+
     # Binning
     binning_leading_pT = np.linspace(0, 400, 30)
     binning_subleading_pT = np.linspace(0, 400, 30)
@@ -321,6 +354,7 @@ def process(
     binning_leading_y = np.linspace(0, 5, 30)
     binning_subleading_y = np.linspace(0, 5, 30)
     binning_m_l1l2 = np.linspace(0, 800, 30)
+    binning_m_b1b2 = np.linspace(0, 800, 30)
     binning_DR_b1b2 = np.linspace(0, 6, 30)
 
     # Result
@@ -335,6 +369,7 @@ def process(
         ("y_lep2", reco_y_lep2, particle_y_lep2, binning_subleading_y),
         ("DR_b1b2", reco_DR_b1b2, particle_DR_b1b2, binning_DR_b1b2),
         ("m_l1l2", reco_m_l1l2, particle_m_l1l2, binning_m_l1l2),
+        ("m_b1b2", reco_m_b1b2, particle_m_b1b2, binning_m_b1b2),
     ]
 
     processed = []
@@ -376,7 +411,7 @@ if __name__ == "__main__":
             "Particle.Rapidity",
             "Particle.PID",
         ],
-        "5": ["Particle.Eta", "Particle.Phi", "Particle.PT"],
+        "5": ["Particle.Eta", "Particle.Phi", "Particle.PT", "Particle.E"],
     }
 
     # Create and save reco and particle info
