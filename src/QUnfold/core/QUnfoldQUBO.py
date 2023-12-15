@@ -2,6 +2,7 @@ import numpy as np
 from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
+from dwave.system import DWaveSampler, EmbeddingComposite
 
 
 class QUnfoldQUBO:
@@ -145,18 +146,25 @@ class QUnfoldQUBO:
         solution, error = self._post_process_sampleset(sampleset=sampleset)
         return solution, error
 
-    def solve_quantum_annealing(self, num_reads):
-        """
-        TODO: docstring
-        """
-        pass
-
     def solve_hybrid_sampler(self):
         """
         TODO: docstring
         """
         sampler = LeapHybridSampler()
         sampleset = sampler.sample(self.bqm)
+        decoded_sample = self.model.decode_sampleset(sampleset)[0]
+        solution = np.round(
+            np.array([decoded_sample.subh[label] for label in self.labels])
+        )
+        error = np.zeros(len(solution))
+        return solution, error
+
+    def solve_quantum_annealing(self, num_reads):
+        """
+        TODO: docstring
+        """
+        sampler = EmbeddingComposite(DWaveSampler())
+        sampleset = sampler.sample(self.bqm, num_reads=num_reads)
         solution, error = self._post_process_sampleset(sampleset=sampleset)
         return solution, error
 
