@@ -429,10 +429,10 @@ def get_trees_info(reco_file, particle_file, do_response=False):
                 y_lep2_response.Fill(reco_y_lep2_list[-1], particle_y_lep2_list[-1])
                 
                 # m_l1l2
-                m_l1l2_response.Fill(reco_m_l1l2_list[-1], reco_m_l1l2_list[-1])
+                m_l1l2_response.Fill(reco_m_l1l2_list[-1], particle_m_l1l2_list[-1])
                 
                 # DR_b1b2
-                DR_b1b2_response.Fill(reco_DR_b1b2_list[-1], reco_DR_b1b2_list[-1])
+                DR_b1b2_response.Fill(reco_DR_b1b2_list[-1], particle_DR_b1b2_list[-1])
             else:
                 # pT
                 pT_lep1_response.Miss(particle_pT_lep1_list[-1])

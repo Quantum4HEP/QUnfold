@@ -1,5 +1,6 @@
 # TODO: correggi numero di entries salvate
 # TODO: aggiungi m_l1l2 and DR_b1b2
+# TODO: tests dettagliati
 
 import ROOT
 import uproot
@@ -7,7 +8,8 @@ import awkward as ak
 import numpy as np
 from array import array
 from paper_functions.physics import (
-    compute_invariant_mass,
+    compute_invariant_mass_reco,
+    compute_invariant_mass_particle,
     compute_energy,
     compute_rapidity,
     compute_DR_reco,
@@ -117,6 +119,93 @@ def reco_filter_bjet(events_idx, reco_info, var):
     return concat_var
 
 
+def reco_filter_m_l1l2(events_idx, reco_info):
+    # Variables
+    reco_var_e = None
+    reco_var_mu = None
+    e_size = reco_info["Electron_size"]
+    mu_size = reco_info["Muon_size"]
+    bjet_size = np.sum(np.abs(reco_info["Jet.Flavor"] == 5), axis=1)
+
+    # ee / 2 b-jets
+    mask_ee = (e_size == 2) & (mu_size == 0) & (bjet_size >= 2)
+    events_ee_idx = events_idx[mask_ee]
+    electron_pt_ee = reco_info["Electron.PT"][mask_ee]
+    sorted_ee_idx = np.argsort(electron_pt_ee)
+
+    reco_pT_ee = reco_info["Electron.PT"][mask_ee][sorted_ee_idx]
+    reco_eta_ee = reco_info["Electron.Eta"][mask_ee][sorted_ee_idx]
+    reco_phi_ee = reco_info["Electron.Phi"][mask_ee][sorted_ee_idx]
+    reco_e_ee = compute_energy(
+        m_electron,
+        reco_pT_ee,
+        reco_phi_ee,
+        reco_eta_ee,
+    )
+    reco_var_ee = compute_invariant_mass_reco(
+        reco_pT_ee, reco_eta_ee, reco_phi_ee, reco_e_ee
+    )
+
+    # mumu / 2 b-jets
+    mask_mumu = (e_size == 0) & (mu_size == 2) & (bjet_size >= 2)
+    events_mumu_idx = events_idx[mask_mumu]
+    muon_pt_mumu = reco_info["Muon.PT"][mask_mumu]
+    sorted_mumu_idx = np.argsort(muon_pt_mumu)
+
+    reco_pT_mumu = reco_info["Muon.PT"][mask_mumu][sorted_mumu_idx]
+    reco_eta_mumu = reco_info["Muon.Eta"][mask_mumu][sorted_mumu_idx]
+    reco_phi_mumu = reco_info["Muon.Phi"][mask_mumu][sorted_mumu_idx]
+    reco_e_mumu = compute_energy(
+        m_muon,
+        reco_pT_mumu,
+        reco_phi_mumu,
+        reco_eta_mumu,
+    )
+    reco_var_mumu = compute_invariant_mass_reco(
+        reco_pT_mumu, reco_eta_mumu, reco_phi_mumu, reco_e_mumu
+    )
+
+    # emu / 2 b-jets
+    mask_emu = (e_size == 1) & (mu_size == 1) & (bjet_size >= 2)
+    events_emu_idx = events_idx[mask_emu]
+    electron_pt_emu = reco_info["Electron.PT"][mask_emu]
+    muon_pt_emu = reco_info["Muon.PT"][mask_emu]
+    sorted_emu_idx = np.argsort(np.hstack((electron_pt_emu, muon_pt_emu)))
+
+    reco_pT_emu = np.hstack(
+        (reco_info["Electron.PT"][mask_emu], reco_info["Muon.PT"][mask_emu])
+    )[sorted_emu_idx]
+    reco_eta_emu = np.hstack(
+        (reco_info["Electron.Eta"][mask_emu], reco_info["Muon.Eta"][mask_emu])
+    )[sorted_emu_idx]
+    reco_phi_emu = np.hstack(
+        (reco_info["Electron.Phi"][mask_emu], reco_info["Muon.Phi"][mask_emu])
+    )[sorted_emu_idx]
+    reco_e_e = compute_energy(
+        m_electron,
+        reco_info["Electron.PT"][mask_emu],
+        reco_info["Electron.Phi"][mask_emu],
+        reco_info["Electron.Eta"][mask_emu],
+    )
+    reco_e_mu = compute_energy(
+        m_muon,
+        reco_info["Muon.PT"][mask_emu],
+        reco_info["Muon.Phi"][mask_emu],
+        reco_info["Muon.Eta"][mask_emu],
+    )
+    reco_e_emu = np.hstack((reco_e_e, reco_e_mu))[sorted_emu_idx]
+    reco_var_emu = compute_invariant_mass_reco(
+        reco_pT_emu, reco_eta_emu, reco_phi_emu, reco_e_emu
+    )
+
+    temp = np.concatenate((reco_var_ee, reco_var_mumu, reco_var_emu))
+    concat_var = np.array([None] * len(events_idx))
+    concat_idx = np.concatenate((events_ee_idx, events_mumu_idx, events_emu_idx))
+    concat_var[mask_ee | mask_mumu | mask_emu] = temp[np.argsort(concat_idx)]
+
+    return concat_var
+
+
 def reco_filter_lep(events_idx, reco_info, var):
     # Variables
     reco_var_e = None
@@ -208,6 +297,20 @@ def process(
         particle_eta_bjet1, particle_eta_bjet2, particle_phi_bjet1, particle_phi_bjet2
     )
 
+    # m_l1l2
+    reco_m_l1l2 = reco_filter_m_l1l2(events_idx, reco_info)
+    particle_e_lep1, particle_e_lep2 = particle_info["11,13"]["Particle.E"]
+    particle_m_l1l2 = compute_invariant_mass_particle(
+        particle_pT_lep1,
+        particle_Eta_lep1,
+        particle_Phi_lep1,
+        particle_e_lep1,
+        particle_pT_lep2,
+        particle_Eta_lep2,
+        particle_Phi_lep2,
+        particle_e_lep2,
+    )
+
     # Binning
     binning_leading_pT = np.linspace(0, 400, 30)
     binning_subleading_pT = np.linspace(0, 400, 30)
@@ -231,6 +334,7 @@ def process(
         ("y_lep1", reco_y_lep1, particle_y_lep1, binning_leading_y),
         ("y_lep2", reco_y_lep2, particle_y_lep2, binning_subleading_y),
         ("DR_b1b2", reco_DR_b1b2, particle_DR_b1b2, binning_DR_b1b2),
+        ("m_l1l2", reco_m_l1l2, particle_m_l1l2, binning_m_l1l2),
     ]
 
     processed = []
@@ -270,6 +374,7 @@ if __name__ == "__main__":
             "Particle.Phi",
             "Particle.E",
             "Particle.Rapidity",
+            "Particle.PID",
         ],
         "5": ["Particle.Eta", "Particle.Phi", "Particle.PT"],
     }
