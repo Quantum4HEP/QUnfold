@@ -21,9 +21,7 @@ if not loaded_RooUnfold == 0:
     sys.exit(0)
 
 
-def make_plots(
-    SA_info, HYB_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys, lam
-):
+def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys, lam):
     # Divide into subplots
     fig = plt.figure()
     gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0)
@@ -57,9 +55,8 @@ def make_plots(
     ax1.fill_between(binning, meas_steps, step="post", alpha=0.3, color="tab:orange")
 
     # Plot SA
-    SA_chi2_mean = SA_info["chi2_mean"]
-    SA_chi2_STD = SA_info["chi2_STD"]
-    label = rf"Unfolded (SA) $\chi^2 = {SA_chi2_mean} \pm {SA_chi2_STD}$"
+    SA_chi2 = SA_info["chi2"]
+    label = rf"Unfolded (SA) $\chi^2 = {SA_chi2}$"
     ax1.errorbar(
         x=bin_midpoints,
         y=SA_info["mean"],
@@ -80,34 +77,9 @@ def make_plots(
         color="green",
     )
 
-    # Plot HYB
-    # HYB_chi2_mean = HYB_info["chi2_mean"]
-    # HYB_chi2_STD = HYB_info["chi2_STD"]
-    # label = rf"Unfolded (HYB) $\chi^2 = {HYB_chi2_mean} \pm {HYB_chi2_STD}$"
-    # ax1.errorbar(
-    #     x=bin_midpoints,
-    #     y=HYB_info["mean"],
-    #     yerr=SA_info["STD"],
-    #     label=label,
-    #     marker="^",
-    #     ms=marker_size,
-    #     c="purple",
-    #     linestyle="None",
-    # )
-
-    # ax2.errorbar(
-    #     x=bin_midpoints,
-    #     y=HYB_info["mean"] / truth,
-    #     yerr=HYB_info["STD"] / truth,
-    #     ms=marker_size,
-    #     fmt="^",
-    #     color="purple",
-    # )
-
     # Plot IBU
-    IBU_chi2_mean = IBU_info["chi2_mean"]
-    IBU_chi2_STD = IBU_info["chi2_STD"]
-    label = rf"Unfolded (IBU) $\chi^2 = {IBU_chi2_mean} \pm {IBU_chi2_STD}$"
+    IBU_chi2 = IBU_info["chi2"]
+    label = rf"Unfolded (IBU) $\chi^2 = {IBU_chi2}$"
     ax1.errorbar(
         x=bin_midpoints,
         y=IBU_info["mean"],
@@ -129,9 +101,8 @@ def make_plots(
     )
 
     # Plot SVD
-    SVD_chi2_mean = SVD_info["chi2_mean"]
-    SVD_chi2_STD = SVD_info["chi2_STD"]
-    label = rf"Unfolded (SVD) $\chi^2 = {SVD_chi2_mean} \pm {SVD_chi2_STD}$"
+    SVD_chi2 = SVD_info["chi2"]
+    label = rf"Unfolded (SVD) $\chi^2 = {SVD_chi2}$"
     ax1.errorbar(
         x=bin_midpoints,
         y=SVD_info["mean"],
@@ -162,8 +133,7 @@ def make_plots(
         "m_l1l2": r"$m_{l1l2}$ [GeV]",
         "phi_lep1": r"$\phi_{lep1}$",
         "phi_lep2": r"$\phi_{lep2}$",
-        "y_lep1": r"$y_{lep1}$",
-        "y_lep2": r"$y_{lep2}$",
+        "m_b1b2": r"$m_{b1b2 [GeV]$",
     }
     varname = variable_labels.get(var)
 
@@ -183,7 +153,7 @@ def make_plots(
     # Add text for N toys
     offset = matplotlib.text.OffsetFrom(ax1.get_legend(), (1.0, 0.0))
     ax1.annotate(
-        f"Number of Toys: {ntoys}",
+        f"Number of reads: {ntoys}",
         xy=(0, 0),
         size=10,
         xycoords="figure fraction",
@@ -234,122 +204,101 @@ def compute_chi2(unfolded, truth):
 
 def make_comparisons(reco, particle):
     # Variables
-    # fmt: off
-    variables = ["DR_b1b2", "pT_lep1", "pT_lep2", "eta_lep1", "eta_lep2", "m_l1l2", "phi_lep1", "phi_lep2", "y_lep1", "y_lep2"] 
-    ntoys = 2
-    chi2_round = 3
+    variables = [
+        "pT_lep1",
+        "pT_lep2",
+        "DR_b1b2",
+        "eta_lep1",
+        "eta_lep2",
+        "m_l1l2",
+        "phi_lep1",
+        "phi_lep2",
+        "m_b1b2",
+    ]
 
     # RUnning over variables
     for var in variables:
-        print(f"Processing the {var} variable:")
+        print(f"Processing the {var} variable...")
 
-        # Variables
-        SA_results = []
-        HYB_results = []
-        IBU_results = []
-        SVD_results = []
+        # Raw input
+        m_response = reco.Get(f"particle_{var}_vs_{var}")
+        h_measured = reco.Get(var)
+        h_truth = particle.Get(f"particle_{var}")
+        h_mc_measured = reco.Get(f"mc_{var}")
+        h_mc_truth = particle.Get(f"mc_particle_{var}")
 
-        SA_chi2 = []
-        HYB_chi2 = []
-        IBU_chi2 = []
-        SVD_chi2 = []
+        # Prepare unfolding input
+        measured = TH1_to_array(h_measured)
+        truth = TH1_to_array(h_truth)
+        response = normalize_response(
+            TH2_to_array(m_response), TH1_to_array(h_mc_truth)
+        )
+        binning = [
+            reco.Get(var).GetXaxis().GetBinLowEdge(bin)
+            for bin in range(1, reco.Get(var).GetNbinsX() + 2)
+        ]
 
-        # Running over toys
-        print(f"- Running on {ntoys} toys...")
-        for i in tqdm.trange(ntoys, ncols=100):
-            # Raw input
-            m_response = reco.Get(f"particle_{var}_vs_{var}")
-            h_measured = reco.Get(var)
-            h_truth = particle.Get(f"particle_{var}")
-            h_mc_measured = reco.Get(f"mc_{var}")
-            h_mc_truth = particle.Get(f"mc_particle_{var}")
+        # Unfold with QUnfold
+        lam = 0.0
+        num_reads = 100
+        unfolder = QUnfoldQUBO(measured=measured, response=response, lam=lam)
+        unfolder.initialize_qubo_model(optimize_vars_range=False)
+        unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=num_reads)
+        chi2_SA = compute_chi2(unfolded_SA, truth)
 
-            # Prepare unfolding input
-            measured = TH1_to_array(h_measured)
-            truth = TH1_to_array(h_truth)
-            response = normalize_response(TH2_to_array(m_response), TH1_to_array(h_mc_truth))
-            binning = [
-                reco.Get(var).GetXaxis().GetBinLowEdge(bin)
-                for bin in range(1, reco.Get(var).GetNbinsX() + 2)
-            ]
+        # Make RooUnfold response
+        m_response = ROOT.RooUnfoldResponse(h_mc_measured, h_mc_truth, m_response)
 
-            # Unfold with QUnfold
-            lam = 0.0
-            if var == "pT_lep1":
-                lam = 0.04
-            elif var == "pT_lep2":
-                lam = 0.3
-            elif var == "eta_lep1":
-                lam = 0.05
-            elif var == "eta_lep2":
-                lam = 0.01
-            unfolder = QUnfoldQUBO(measured=measured, response=response, lam=lam)
-            unfolder.initialize_qubo_model(optimize_vars_range=False)
-            unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=10)
-            SA_results.append(unfolded_SA)
-            SA_chi2.append(compute_chi2(unfolded_SA, truth))
+        # Unfold with RooUnfold IBU
+        unfolder = ROOT.RooUnfoldBayes("IBU", "Iterative Bayesian")
+        unfolder.SetIterations(4)
+        unfolder.SetVerbose(0)
+        unfolder.SetResponse(m_response)
+        unfolder.SetMeasured(h_measured)
+        unfolded_IBU_histo = unfolder.Hunfold(unfolder.kCovToys)
+        unfolded_IBU = TH1_to_array(unfolded_IBU_histo)
+        start, stop = 1, unfolded_IBU_histo.GetNbinsX() + 1
+        error_IBU = np.array(
+            [unfolded_IBU_histo.GetBinError(i) for i in range(start, stop)]
+        )
+        chi2_IBU = compute_chi2(unfolded_IBU, truth)
 
-            # unfolded_HYB = unfolder.solve_hybrid_sampler()
-            # HYB_results.append(unfolded_HYB)
-            # HYB_chi2.append(compute_chi2(unfolded_HYB, truth))
-
-            # Make RooUnfold response
-            m_response = ROOT.RooUnfoldResponse(h_mc_measured, h_mc_truth, m_response)
-
-            # Unfold with RooUnfold IBU
-            unfolder = ROOT.RooUnfoldBayes("IBU", "Iterative Bayesian")
-            unfolder.SetIterations(4)
-            # unfolder.SetSmoothing(0)
-            unfolder.SetVerbose(0)
-            unfolder.SetResponse(m_response)
-            unfolder.SetMeasured(h_measured)
-            unfolded_IBU = TH1_to_array(unfolder.Hunfold(3))
-            IBU_results.append(unfolded_IBU)
-            IBU_chi2.append(compute_chi2(unfolded_IBU, truth))
-
-            # Unfold with RooUnfold SVD
-            unfolder = ROOT.RooUnfoldSvd("SVD", "SVD Tikhonov")
-            unfolder.SetKterm(2)
-            unfolder.SetVerbose(0)
-            unfolder.SetResponse(m_response)
-            unfolder.SetMeasured(h_measured)
-            unfolded_SVD = TH1_to_array(unfolder.Hunfold(3))
-            SVD_results.append(unfolded_SVD)
-            SVD_chi2.append(compute_chi2(unfolded_SVD, truth))
+        # Unfold with RooUnfold SVD
+        unfolder = ROOT.RooUnfoldSvd("SVD", "SVD Tikhonov")
+        unfolder.SetKterm(2)
+        unfolder.SetVerbose(0)
+        unfolder.SetResponse(m_response)
+        unfolder.SetMeasured(h_measured)
+        unfolded_SVD_histo = unfolder.Hunfold(unfolder.kCovToys)
+        unfolded_SVD = TH1_to_array(unfolded_SVD_histo)
+        start, stop = 1, unfolded_IBU_histo.GetNbinsX() + 1
+        error_SVD = np.array(
+            [unfolded_SVD_histo.GetBinError(i) for i in range(start, stop)]
+        )
+        chi2_SVD = compute_chi2(unfolded_SVD, truth)
 
         # SA results
         SA_info = {
-            "mean": np.mean(SA_results, axis=0),
-            "STD": np.std(SA_results, axis=0),
-            "chi2_mean": np.round(np.mean(SA_chi2), chi2_round),
-            "chi2_STD": np.round(np.std(SA_chi2), chi2_round),
+            "mean": unfolded_SA,
+            "STD": error_SA,
+            "chi2": np.round(chi2_SA, 3),
         }
-
-        # HYB results
-        # HYB_info = {
-        #     "mean": np.mean(HYB_results, axis=0),
-        #     "STD": np.std(HYB_results, axis=0),
-        #     "chi2_mean": np.round(np.mean(HYB_chi2), chi2_round),
-        #     "chi2_STD": np.round(np.std(HYB_chi2), chi2_round)
-        # }
-        HYB_info = {}
 
         # IBU results
         IBU_info = {
-            "mean": np.mean(IBU_results, axis=0),
-            "STD": np.std(IBU_results, axis=0),
-            "chi2_mean": np.round(np.mean(IBU_chi2), chi2_round),
-            "chi2_STD": np.round(np.std(IBU_chi2), chi2_round),
+            "mean": unfolded_IBU,
+            "STD": error_IBU,
+            "chi2": np.round(chi2_IBU, 3),
         }
 
         # SVD results
         SVD_info = {
-            "mean": np.mean(SVD_results, axis=0),
-            "STD": np.std(SVD_results, axis=0),
-            "chi2_mean": np.round(np.mean(SVD_chi2), chi2_round),
-            "chi2_STD": np.round(np.std(SVD_chi2), chi2_round),
+            "mean": unfolded_SVD,
+            "STD": error_SVD,
+            "chi2": np.round(chi2_SVD, 3),
         }
 
         # Make plots
-        make_plots(SA_info, HYB_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys, lam)
-        print()
+        make_plots(
+            SA_info, IBU_info, SVD_info, truth, measured, binning, var, num_reads, lam
+        )
