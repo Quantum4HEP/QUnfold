@@ -22,6 +22,7 @@ class QUnfoldQUBO:
         self.R = response
         self.d = measured
         self.lam = lam
+        self.num_log_qubits = 0
 
     def set_response(self, response):
         """
@@ -136,6 +137,7 @@ class QUnfoldQUBO:
         self.labels = [x[i].label for i in range(len(x))]
         self.model = h.compile()
         self.bqm = self.model.to_bqm()
+        self.num_log_qubits = len(self.bqm.variables)
 
     def solve_simulated_annealing(self, num_reads, seed=None):
         """
