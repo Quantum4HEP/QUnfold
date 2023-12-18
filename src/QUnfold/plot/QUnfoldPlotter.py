@@ -133,7 +133,7 @@ class QUnfoldPlotter:
         binwidths = np.diff(self.binning)
         bin_midpoints = self.binning[:-1] + binwidths / 2
         chi2 = round(self._compute_chi2_dof(self.unfolded, self.truth), 2)
-        label = rf"Unfolded {method} $\chi^2 = {chi2}$"
+        label = rf"Unfolded {method} ($\chi^2 = {chi2}$)"
         ax1.errorbar(
             x=bin_midpoints,
             y=self.unfolded,
