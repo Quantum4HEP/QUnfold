@@ -158,7 +158,7 @@ class QUnfoldQUBO:
         solution = np.round(
             np.array([decoded_sample.subh[label] for label in self.labels])
         )
-        error = np.zeros(len(solution))
+        error = np.sqrt(solution)
         return solution, error
 
     def solve_quantum_annealing(self, num_reads):
