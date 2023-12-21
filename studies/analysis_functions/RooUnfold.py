@@ -1,6 +1,7 @@
 # Main modules
 import os
 import ROOT as r
+import numpy as np
 
 # Settings
 r.gROOT.SetBatch(True)
@@ -68,7 +69,11 @@ def RooUnfold_unfolder(type, m_response, h_measured):
     histo = unfolder.Hunfold()
     histo.SetName("unfolded_{}".format(type))
 
-    return histo
+    # Get error
+    start, stop = 1, histo.GetNbinsX() + 1
+    error = np.array([histo.GetBinError(i) for i in range(start, stop)])
+
+    return histo, error
 
 
 def RooUnfold_plot(truth, measured, unfolded, distr):

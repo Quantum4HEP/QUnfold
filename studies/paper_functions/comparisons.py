@@ -126,7 +126,7 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
         "m_l1l2": r"$m_{l1l2}$ [GeV]",
         "phi_lep1": r"$\phi_{lep1}$",
         "phi_lep2": r"$\phi_{lep2}$",
-        "m_b1b2": r"$m_{b1b2 [GeV]$",
+        "m_b1b2": r"$m_{b1b2}$ [GeV]",
     }
     varname = variable_labels.get(var)
 

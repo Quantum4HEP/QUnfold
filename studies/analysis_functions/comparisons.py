@@ -49,7 +49,7 @@ def compute_chi2_dof(bin_contents, truth_bin_contents):
     return chi2_dof
 
 
-def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
+def plot_comparisons(data, errors, distr, truth, bins, min_bin, max_bin):
     """
     Plots the unfolded distributions for different unfolding methods.
 
@@ -71,25 +71,49 @@ def plot_comparisons(data, distr, truth, bins, min_bin, max_bin):
         linestyle="dashed",
     )
 
-    # Iterate over the unfolding methodsunfolded
+    # Iterate over the unfolding methods
     for method, unfolded in data.items():
         # Plot each unfolding method
         chi2_dof = compute_chi2_dof(unfolded, truth)
         if method == "IBU4":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "red", "o", method, chi2_dof
+                bin_edges - marker_offset,
+                unfolded,
+                errors[method],
+                "red",
+                "o",
+                method,
+                chi2_dof,
             )
         elif method == "SVD":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "green", "s", method, chi2_dof
+                bin_edges - marker_offset,
+                unfolded,
+                errors[method],
+                "green",
+                "s",
+                method,
+                chi2_dof,
             )
         elif method == "SA":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "purple", "*", method, chi2_dof
+                bin_edges - marker_offset,
+                unfolded,
+                errors[method],
+                "purple",
+                "*",
+                method,
+                chi2_dof,
             )
         elif method == "HYB":
             plot_errorbar(
-                bin_edges - marker_offset, unfolded, "orange", "*", method, chi2_dof
+                bin_edges - marker_offset,
+                unfolded,
+                errors[method],
+                "orange",
+                "*",
+                method,
+                chi2_dof,
             )
 
         # Plot settings

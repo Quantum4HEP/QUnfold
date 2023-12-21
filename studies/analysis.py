@@ -47,15 +47,15 @@ if __name__ == "__main__":
         r_response.UseOverflow(False)
 
         # Matrix inversion (MI)
-        unfolded_MI = RooUnfold_unfolder("MI", r_response, measured)
+        unfolded_MI, error_MI = RooUnfold_unfolder("MI", r_response, measured)
         RooUnfold_plot(truth, measured, unfolded_MI, distr)
 
         # Iterative Bayesian unfolding (IBU)
-        unfolded_IBU = RooUnfold_unfolder("IBU", r_response, measured)
+        unfolded_IBU, error_IBU = RooUnfold_unfolder("IBU", r_response, measured)
         RooUnfold_plot(truth, measured, unfolded_IBU, distr)
 
         # Tikhonov unfolding (SVD)
-        unfolded_SVD = RooUnfold_unfolder("SVD", r_response, measured)
+        unfolded_SVD, error_SVD = RooUnfold_unfolder("SVD", r_response, measured)
         RooUnfold_plot(truth, measured, unfolded_SVD, distr)
 
         ########################## Quantum ###########################
@@ -68,12 +68,12 @@ if __name__ == "__main__":
         )
 
         # Simulated annealing (SA)
-        unfolded_SA = QUnfold_unfolder_and_plot(
+        unfolded_SA, error_SA = QUnfold_unfolder_and_plot(
             "SA", response, measured, truth, distr, bins, min_bin, max_bin
         )
 
         # Hybrid solver (HYB)
-        unfolded_HYB = QUnfold_unfolder_and_plot(
+        unfolded_HYB, error_HYB = QUnfold_unfolder_and_plot(
             "HYB", response, measured, truth, distr, bins, min_bin, max_bin
         )
 
@@ -87,7 +87,14 @@ if __name__ == "__main__":
             "SA": unfolded_SA,
             "HYB": unfolded_HYB,
         }
+        errors = {
+            "IBU4": error_IBU,
+            "MI": error_MI,
+            "SVD": error_SVD,
+            "SA": error_SA,
+            "HYB": error_HYB,
+        }
 
         # Plot comparisons
-        plot_comparisons(data, distr, truth, bins, min_bin, max_bin)
+        plot_comparisons(data, errors, distr, truth, bins, min_bin, max_bin)
         log.info("Done\n")

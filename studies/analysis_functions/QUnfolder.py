@@ -22,7 +22,7 @@ def QUnfold_unfolder_and_plot(
 
     # Unfold with simulated annealing
     if unf_type == "SA":
-        unfolded, error = unfolder.solve_simulated_annealing(num_reads=10)
+        unfolded, error = unfolder.solve_simulated_annealing(num_reads=100)
         plotter = QUnfoldPlotter(
             response=response,
             measured=measured,
@@ -41,7 +41,7 @@ def QUnfold_unfolder_and_plot(
 
     # Unfold with hybrid solver
     elif unf_type == "HYB":
-        unfolded = unfolder.solve_hybrid_sampler()
+        unfolded, error = unfolder.solve_hybrid_sampler()
         plotter = QUnfoldPlotter(
             response=response,
             measured=measured,
