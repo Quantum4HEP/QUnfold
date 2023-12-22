@@ -1,5 +1,3 @@
-# TODO: correggi numero di entries salvate
-
 import ROOT
 import uproot
 import awkward as ak
@@ -319,15 +317,15 @@ def process(
     )
 
     # Binning
-    binning_leading_pT = np.linspace(0, 400, 30)
-    binning_subleading_pT = np.linspace(0, 400, 30)
-    binning_leading_eta = np.linspace(-2.5, 2.5, 20)
-    binning_subleading_eta = np.linspace(-2.5, 2.5, 20)
-    binning_leading_phi = np.linspace(-3.0, 3.0, 30)
-    binning_subleading_phi = np.linspace(-3.0, 3.0, 30)
-    binning_m_l1l2 = np.linspace(0, 800, 30)
-    binning_m_b1b2 = np.linspace(0, 800, 30)
-    binning_DR_b1b2 = np.linspace(0, 6, 30)
+    binning_leading_pT = np.linspace(20, 180, 30)
+    binning_subleading_pT = np.linspace(20, 140, 30)
+    binning_leading_eta = np.linspace(-2.2, 2.2, 20)
+    binning_subleading_eta = np.linspace(-2.2, 2.2, 20)
+    binning_leading_phi = np.linspace(-3.0, 3.0, 20)
+    binning_subleading_phi = np.linspace(-3.0, 3.0, 20)
+    binning_m_l1l2 = np.linspace(0, 400, 30)
+    binning_m_b1b2 = np.linspace(20, 500, 30)
+    binning_DR_b1b2 = np.linspace(1, 5, 20)
 
     # Result
     variables = [

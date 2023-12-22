@@ -1,4 +1,3 @@
-import argparse as ap
 import ROOT
 from paper_functions.comparisons import make_comparisons
 

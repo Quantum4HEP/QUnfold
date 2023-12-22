@@ -72,8 +72,9 @@ class QUnfoldQUBO:
         """
         TODO: docstring
         """
-        efficiencies = np.sum(self.R, axis=0)
-        num_entries = int(sum(self.d / efficiencies))
+        eff = np.sum(self.R, axis=0)
+        # eff[eff == 0] = 1
+        num_entries = int(sum(self.d / eff))
         return num_entries
 
     def _define_variables(self):
