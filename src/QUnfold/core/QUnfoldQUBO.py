@@ -126,7 +126,7 @@ class QUnfoldQUBO:
             ]
         )
         solution = np.round(np.mean(results, axis=0))
-        error = np.std(results, axis=0)
+        error = np.std(results, axis=0) / np.sqrt(len(solution))
         return solution, error
 
     def initialize_qubo_model(self):
