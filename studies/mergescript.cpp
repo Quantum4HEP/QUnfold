@@ -50,15 +50,21 @@ void skimmer(std::string inputfile, bool single_file_flag = true){
     }
     // Create a new file + a clone of old tree in new file
     
-    TFile newfile("temp.root", "recreate");
+    
     if(single_file_flag){
-    std::remove("temp.root");
     std::string newtreename = inputfile.substr(0, inputfile.length() - 5) + "_skimmed.root";
     TFile newfile(newtreename.c_str(), "recreate");
-    }
     auto newtree = oldtree->CloneTree();
     newtree->Print();
     newfile.Write();
+    }
+    else{
+    TFile newfile("temp.root", "recreate");
+    auto newtree = oldtree->CloneTree();
+    newtree->Print();
+    newfile.Write();
+    }
+    
 
 }
 int merger(std::string outname,std::string rundirs_path = "Events") {
