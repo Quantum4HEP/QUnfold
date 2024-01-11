@@ -317,15 +317,71 @@ def process(
     )
 
     # Binning
-    binning_leading_pT = np.linspace(20, 180, 30)
-    binning_subleading_pT = np.linspace(20, 140, 30)
+    binning_leading_pT = np.array(
+        [
+            10.00,
+            20.00,
+            30.00,
+            40.00,
+            50.00,
+            60.00,
+            71.00,
+            83.00,
+            97.00,
+            115.00,
+            134.00,
+            158.00,
+            188.00,
+            223.00,
+            268.00,
+            338.00,
+        ]
+    )
+    binning_subleading_pT = np.array(
+        [
+            10.00,
+            20.00,
+            30.00,
+            40.00,
+            50.00,
+            61.00,
+            73.00,
+            88.00,
+            105.00,
+            123.00,
+            150.00,
+            200.00,
+        ]
+    )
+    binning_m_l1l2 = np.array(
+        [
+            10.00,
+            25.00,
+            40.00,
+            55.00,
+            70.00,
+            85.00,
+            100.00,
+            115.00,
+            131.00,
+            150.00,
+            173.00,
+            200.00,
+            230.00,
+            270.00,
+            310.00,
+            360.00,
+            440.00,
+            550.00,
+        ]
+    )
+    binning_DR_b1b2 = np.linspace(1, 5, 21)
+
+    binning_m_b1b2 = np.linspace(20, 500, 30)
     binning_leading_eta = np.linspace(-2.2, 2.2, 20)
     binning_subleading_eta = np.linspace(-2.2, 2.2, 20)
     binning_leading_phi = np.linspace(-3.0, 3.0, 20)
     binning_subleading_phi = np.linspace(-3.0, 3.0, 20)
-    binning_m_l1l2 = np.linspace(0, 400, 30)
-    binning_m_b1b2 = np.linspace(20, 500, 30)
-    binning_DR_b1b2 = np.linspace(1, 5, 20)
 
     # Result
     variables = [
@@ -349,13 +405,13 @@ def process(
 
 if __name__ == "__main__":
     # Input
-    reco_file = "data/simulated/input/reco_ATLAS.root"
-    particle_file = "data/simulated/input/particle_ATLAS.root"
-    reco_response_file = "data/simulated/input/reco_ATLAS_response.root"
-    particle_response_file = "data/simulated/input/particle_ATLAS_response.root"
+    reco_file = "data/simulated_final/input/reco_ATLAS.root"
+    particle_file = "data/simulated_final/input/particle_ATLAS.root"
+    reco_response_file = "data/simulated_final/input/reco_ATLAS_response.root"
+    particle_response_file = "data/simulated_final/input/particle_ATLAS_response.root"
 
     # Output
-    outname = "data/simulated/output/unfolding_input.root"
+    outname = "data/simulated_final/output/unfolding_input.root"
 
     # Reco variables
     list_recovars = [
