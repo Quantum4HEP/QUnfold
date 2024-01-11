@@ -1,6 +1,7 @@
 # Main modules
 import ROOT as r
 import numpy as np
+from array import array
 
 # Settings
 r.gROOT.SetBatch(True)
@@ -150,7 +151,7 @@ def generate_double_peaked(
         return response
 
 
-def generate(distr, bins, min_bin, max_bin, samples, bias, smearing, eff):
+def generate(distr, binning, samples, bias, smearing, eff):
     """
     Generate simulated data and response for a given distribution.
 
@@ -171,9 +172,20 @@ def generate(distr, bins, min_bin, max_bin, samples, bias, smearing, eff):
     """
 
     # Initialize variables
-    truth = r.TH1F("Truth", "", bins, min_bin, max_bin)
-    measured = r.TH1F("Measured", "", bins, min_bin, max_bin)
-    response = r.RooUnfoldResponse(bins, min_bin, max_bin)
+    bins = len(binning) - 1
+    truth = r.TH1F(
+        "Truth",
+        "",
+        bins,
+        array("d", binning),
+    )
+    measured = r.TH1F(
+        "Measured",
+        "",
+        bins,
+        array("d", binning),
+    )
+    response = r.RooUnfoldResponse(bins, binning[0], binning[-1])
 
     # Fill histograms
     if any(d in distr for d in ["normal", "breit-wigner", "exponential", "gamma"]):

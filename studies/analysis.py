@@ -1,6 +1,7 @@
 # Main modules
 import sys
 import ROOT as r
+import numpy as np
 from analysis_functions.custom_logger import get_custom_logger
 from analysis_functions.generator import generate
 from analysis_functions.RooUnfold import (
@@ -20,23 +21,26 @@ if not loaded_RooUnfold == 0:
     sys.exit(0)
 
 # Input variables
-distributions = ["normal", "gamma", "exponential", "breit-wigner", "double-peaked"]
+distributions = {
+    "normal": np.linspace(0, 10, 21),
+    "gamma": np.linspace(0, 10, 21),
+    "exponential": np.linspace(0, 10, 21),
+    "breit-wigner": np.linspace(0, 10, 21),
+    "double-peaked": np.linspace(0, 10, 21),
+}
 samples = 10000
-max_bin = 10
-min_bin = 0
-bins = 20
 bias = -0.13
 smearing = 0.21
-eff = 0.92
+eff = 0.7
 
 
 if __name__ == "__main__":
     # Iterate over distributions
-    for distr in distributions:
+    for distr, binning in distributions.items():
         # Generate data
         log.info("Unfolding the {} distribution".format(distr))
         truth, measured, response = generate(
-            distr, bins, min_bin, max_bin, samples, bias, smearing, eff
+            distr, binning, samples, bias, smearing, eff
         )
 
         ########################## Classic ###########################
@@ -54,10 +58,6 @@ if __name__ == "__main__":
         unfolded_IBU, error_IBU = RooUnfold_unfolder("IBU", r_response, measured)
         RooUnfold_plot(truth, measured, unfolded_IBU, distr)
 
-        # Tikhonov unfolding (SVD)
-        unfolded_SVD, error_SVD = RooUnfold_unfolder("SVD", r_response, measured)
-        RooUnfold_plot(truth, measured, unfolded_SVD, distr)
-
         ########################## Quantum ###########################
 
         # QUnfold settings
@@ -69,32 +69,30 @@ if __name__ == "__main__":
 
         # Simulated annealing (SA)
         unfolded_SA, error_SA = QUnfold_unfolder_and_plot(
-            "SA", response, measured, truth, distr, bins, min_bin, max_bin
+            "SA", response, measured, truth, distr, binning
         )
 
-        # Hybrid solver (HYB)
+        # # Hybrid solver (HYB)
         unfolded_HYB, error_HYB = QUnfold_unfolder_and_plot(
-            "HYB", response, measured, truth, distr, bins, min_bin, max_bin
+            "HYB", response, measured, truth, distr, binning
         )
 
         ########################## Compare ###########################
 
         # Comparison settings
         data = {
-            "IBU4": TH1_to_array(unfolded_IBU, overflow=False),
             "MI": TH1_to_array(unfolded_MI, overflow=False),
-            "SVD": TH1_to_array(unfolded_SVD, overflow=False),
+            "IBU4": TH1_to_array(unfolded_IBU, overflow=False),
             "SA": unfolded_SA,
             "HYB": unfolded_HYB,
         }
         errors = {
-            "IBU4": error_IBU,
             "MI": error_MI,
-            "SVD": error_SVD,
+            "IBU4": error_IBU,
             "SA": error_SA,
             "HYB": error_HYB,
         }
 
         # Plot comparisons
-        plot_comparisons(data, errors, distr, truth, bins, min_bin, max_bin)
+        plot_comparisons(data, errors, distr, truth, measured, binning)
         log.info("Done\n")

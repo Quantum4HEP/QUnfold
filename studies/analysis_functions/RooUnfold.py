@@ -66,7 +66,7 @@ def RooUnfold_unfolder(type, m_response, h_measured):
     unfolder.SetVerbose(0)
     unfolder.SetResponse(m_response)
     unfolder.SetMeasured(h_measured)
-    histo = unfolder.Hunfold()
+    histo = unfolder.Hunfold(unfolder.kErrors)
     histo.SetName("unfolded_{}".format(type))
 
     # Get error
