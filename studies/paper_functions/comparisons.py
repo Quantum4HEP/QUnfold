@@ -14,9 +14,9 @@ if not loaded_RooUnfold == 0:
     sys.exit(0)
 
 
-def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys, lam):
+def make_plots(SA_info, IBU_info, MI_info, truth, measured, binning, var, ntoys, lam):
     # Divide into subplots
-    fig = plt.figure()
+    fig = plt.figure(figsize=(7.6, 6.0))
     gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0)
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1], sharex=ax1)
@@ -47,15 +47,15 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
     )
     ax1.fill_between(binning, meas_steps, step="post", alpha=0.3, color="tab:orange")
 
-    # Plot SA
-    SA_chi2 = SA_info["chi2"]
-    label = rf"Sim. Annealing ($\chi^2 = {SA_chi2}$)"
+    # Plot MI
+    MI_chi2 = MI_info["chi2"]
+    label = r"{} ($\chi^2 = {:.2f}$)".format(r"$\mathtt{RooUnfold}$ (MI)", MI_chi2)
     ax1.errorbar(
         x=bin_midpoints,
-        y=SA_info["mean"],
-        yerr=SA_info["std"],
+        y=MI_info["mean"],
+        yerr=MI_info["std"],
         label=label,
-        marker="o",
+        marker="s",
         ms=marker_size,
         c="green",
         linestyle="None",
@@ -63,22 +63,22 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
 
     ax2.errorbar(
         x=bin_midpoints,
-        y=SA_info["mean"] / truth,
-        yerr=SA_info["std"] / truth,
+        y=MI_info["mean"] / truth,
+        yerr=MI_info["std"] / truth,
         ms=marker_size,
-        fmt="o",
+        fmt="s",
         color="green",
     )
 
     # Plot IBU
     IBU_chi2 = IBU_info["chi2"]
-    label = rf"IBU ($\chi^2 = {IBU_chi2}$)"
+    label = r"{} ($\chi^2 = {:.2f}$)".format(r"$\mathtt{RooUnfold}$ (IBU)", IBU_chi2)
     ax1.errorbar(
         x=bin_midpoints,
         y=IBU_info["mean"],
         yerr=IBU_info["std"],
         label=label,
-        marker="s",
+        marker="o",
         ms=marker_size,
         c="red",
         linestyle="None",
@@ -89,32 +89,32 @@ def make_plots(SA_info, IBU_info, SVD_info, truth, measured, binning, var, ntoys
         y=IBU_info["mean"] / truth,
         yerr=IBU_info["std"] / truth,
         ms=marker_size,
-        fmt="s",
+        fmt="o",
         color="red",
     )
 
-    # Plot SVD
-    # SVD_chi2 = SVD_info["chi2"]
-    # label = rf"Unfolded (SVD) $\chi^2 = {SVD_chi2}$"
-    # ax1.errorbar(
-    #     x=bin_midpoints,
-    #     y=SVD_info["mean"],
-    #     yerr=SVD_info["std"],
-    #     label=label,
-    #     marker="p",
-    #     ms=marker_size,
-    #     c="purple",
-    #     linestyle="None",
-    # )
+    # Plot SA
+    SA_chi2 = SA_info["chi2"]
+    label = r"{} ($\chi^2 = {:.2f}$)".format(r"$\mathtt{QUnfold}$ (SIM)", SA_chi2)
+    ax1.errorbar(
+        x=bin_midpoints,
+        y=SA_info["mean"],
+        yerr=SA_info["std"],
+        label=label,
+        marker="*",
+        ms=marker_size,
+        c="purple",
+        linestyle="None",
+    )
 
-    # ax2.errorbar(
-    #     x=bin_midpoints,
-    #     y=SVD_info["mean"] / truth,
-    #     yerr=SVD_info["std"] / truth,
-    #     ms=marker_size,
-    #     fmt="p",
-    #     color="purple",
-    # )
+    ax2.errorbar(
+        x=bin_midpoints,
+        y=SA_info["mean"] / truth,
+        yerr=SA_info["std"] / truth,
+        ms=marker_size,
+        fmt="*",
+        color="purple",
+    )
 
     # Set var name to latex
     variable_labels = {
@@ -265,20 +265,19 @@ def make_comparisons(reco, particle):
         )
         chi2_IBU = compute_chi2(unfolded_IBU, truth)
 
-        # Unfold with RooUnfold SVD
-        # unfolder = ROOT.RooUnfoldSvd("SVD", "SVD Tikhonov")
-        # bins = len(binning) - 1
-        # unfolder.SetKterm(int(bins / 2))
-        # unfolder.SetVerbose(0)
-        # unfolder.SetResponse(m_response)
-        # unfolder.SetMeasured(h_measured)
-        # unfolded_SVD_histo = unfolder.Hunfold(unfolder.kCovToys)
-        # unfolded_SVD = TH1_to_array(unfolded_SVD_histo)
-        # start, stop = 1, unfolded_IBU_histo.GetNbinsX() + 1
-        # error_SVD = np.array(
-        #     [unfolded_SVD_histo.GetBinError(i) for i in range(start, stop)]
-        # )
-        # chi2_SVD = compute_chi2(unfolded_SVD, truth)
+        # Unfold with RooUnfold Matrix Inversion
+        unfolder = ROOT.RooUnfoldInvert("MI", "Matrix Inversion")
+        bins = len(binning) - 1
+        unfolder.SetVerbose(0)
+        unfolder.SetResponse(m_response)
+        unfolder.SetMeasured(h_measured)
+        unfolded_MI_histo = unfolder.Hunfold(unfolder.kErrors)
+        unfolded_MI = TH1_to_array(unfolded_MI_histo)
+        start, stop = 1, unfolded_IBU_histo.GetNbinsX() + 1
+        error_MI = np.array(
+            [unfolded_MI_histo.GetBinError(i) for i in range(start, stop)]
+        )
+        chi2_MI = compute_chi2(unfolded_MI, truth)
 
         # SA results
         SA_info = {
@@ -294,15 +293,14 @@ def make_comparisons(reco, particle):
             "chi2": np.round(chi2_IBU, 1),
         }
 
-        # SVD results
-        # SVD_info = {
-        #     "mean": unfolded_SVD,
-        #     "std": error_SVD,
-        #     "chi2": np.round(chi2_SVD, 3),
-        # }
-        SVD_info = {}
+        # MI results
+        MI_info = {
+            "mean": unfolded_MI,
+            "std": error_MI,
+            "chi2": np.round(chi2_MI, 3),
+        }
 
         # Make plots
         make_plots(
-            SA_info, IBU_info, SVD_info, truth, measured, binning, var, num_reads, lam
+            SA_info, IBU_info, MI_info, truth, measured, binning, var, num_reads, lam
         )
