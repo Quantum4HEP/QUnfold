@@ -124,8 +124,6 @@ def make_plots(SA_info, IBU_info, MI_info, truth, measured, binning, var, ntoys,
         "eta_lep2": r"$\eta^{lep2}$",
         "DR_b1b2": r"$\Delta R_{b1b2}$",
         "m_l1l2": r"$m_{l1l2}$ [GeV]",
-        "phi_lep1": r"$\phi_{lep1}$",
-        "phi_lep2": r"$\phi_{lep2}$",
         "m_b1b2": r"$m_{b1b2}$ [GeV]",
     }
     varname = variable_labels.get(var)
@@ -198,15 +196,13 @@ def compute_chi2(unfolded, truth):
 def make_comparisons(reco, particle):
     # Variables
     variables = [
-        "pT_lep1",
-        "pT_lep2",
-        "DR_b1b2",
+        # "pT_lep1",
+        # "pT_lep2",
+        # "DR_b1b2",
         "eta_lep1",
-        "eta_lep2",
-        "m_l1l2",
-        "phi_lep1",
-        "phi_lep2",
-        "m_b1b2",
+        # "eta_lep2",
+        # "m_l1l2",
+        # "m_b1b2",
     ]
 
     # RUnning over variables

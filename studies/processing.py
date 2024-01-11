@@ -375,11 +375,34 @@ def process(
             550.00,
         ]
     )
-    binning_DR_b1b2 = np.linspace(1, 5, 21)
+    binning_DR_b1b2 = np.array(
+        [
+            1.0,
+            1.2,
+            1.4,
+            1.6,
+            1.8,
+            2.0,
+            2.2,
+            2.4,
+            2.6,
+            2.8,
+            3.0,
+            3.2,
+            3.4,
+            3.6,
+            3.8,
+            4.0,
+            4.2,
+            4.4,
+            4.6,
+        ]
+    )
+
+    binning_leading_eta = np.linspace(-2.5, 2.5, 31)
+    binning_subleading_eta = np.linspace(-2.2, 2.2, 20)
 
     binning_m_b1b2 = np.linspace(20, 500, 30)
-    binning_leading_eta = np.linspace(-2.2, 2.2, 20)
-    binning_subleading_eta = np.linspace(-2.2, 2.2, 20)
     binning_leading_phi = np.linspace(-3.0, 3.0, 20)
     binning_subleading_phi = np.linspace(-3.0, 3.0, 20)
 
