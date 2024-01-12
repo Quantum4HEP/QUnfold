@@ -196,13 +196,13 @@ def compute_chi2(unfolded, truth):
 def make_comparisons(reco, particle):
     # Variables
     variables = [
-        # "pT_lep1",
-        # "pT_lep2",
-        # "DR_b1b2",
+        "pT_lep1",
+        "pT_lep2",
+        "DR_b1b2",
         "eta_lep1",
-        # "eta_lep2",
-        # "m_l1l2",
-        # "m_b1b2",
+        "eta_lep2",
+        "m_l1l2",
+        "m_b1b2",
     ]
 
     # RUnning over variables
@@ -237,6 +237,12 @@ def make_comparisons(reco, particle):
         elif var == "m_l1l2":
             lam = 0.0
         elif var == "DR_b1b2":
+            lam = 0.0001
+        elif var == "eta_lep1":
+            lam = 0.001
+        elif var == "eta_lep2":
+            lam = 0.001
+        elif var == "m_b1b2":
             lam = 0.0
         unfolder = QUnfoldQUBO(measured=measured, response=response, lam=lam)
         unfolder.initialize_qubo_model()

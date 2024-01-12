@@ -377,6 +377,9 @@ def process(
     )
     binning_DR_b1b2 = np.array(
         [
+            0.4,
+            0.6,
+            0.8,
             1.0,
             1.2,
             1.4,
@@ -396,13 +399,28 @@ def process(
             4.2,
             4.4,
             4.6,
+            4.8,
+        ]  # Equally spaced, but for this variable it is ok
+    )
+    binning_m_b1b2 = np.array(
+        [
+            0.00,
+            # 25.00,
+            55.00,
+            85.00,
+            115.00,
+            150.00,
+            200.00,
+            270.00,
+            360.00,
+            550.00,
+            800.00,
         ]
     )
-
     binning_leading_eta = np.linspace(-2.5, 2.5, 31)
-    binning_subleading_eta = np.linspace(-2.2, 2.2, 20)
+    binning_subleading_eta = np.linspace(-2.5, 2.5, 31)
 
-    binning_m_b1b2 = np.linspace(20, 500, 30)
+    # Unused
     binning_leading_phi = np.linspace(-3.0, 3.0, 20)
     binning_subleading_phi = np.linspace(-3.0, 3.0, 20)
 
