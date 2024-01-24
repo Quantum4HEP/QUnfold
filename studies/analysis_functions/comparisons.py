@@ -23,6 +23,7 @@ def plot_errorbar(
         truth (array-like): The true values corresponding to each bin, used for the ratio plot.
     """
 
+    # Plot stuff
     ax1.errorbar(
         x=bin_edges,
         y=bin_contents,
@@ -96,7 +97,7 @@ def plot_comparisons(data, errors, distr, truth, measured, binning):
     bin_midpoints = bin_edges[:-1] + binwidths / 2
 
     # Divide into subplots
-    fig = plt.figure(figsize=(7.6, 6.0))
+    fig = plt.figure(figsize=(8.6, 7.0))
     gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0)
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1], sharex=ax1)
@@ -154,19 +155,6 @@ def plot_comparisons(data, errors, distr, truth, measured, binning):
                 chi2_dof,
                 truth,
             )
-        elif method == "SA":
-            plot_errorbar(
-                ax1,
-                ax2,
-                bin_midpoints,
-                unfolded,
-                errors[method],
-                "purple",
-                "*",
-                r"$\mathtt{QUnfold}$ (SIM)",
-                chi2_dof,
-                truth,
-            )
         elif method == "HYB":
             plot_errorbar(
                 ax1,
@@ -177,6 +165,19 @@ def plot_comparisons(data, errors, distr, truth, measured, binning):
                 "orange",
                 "*",
                 r"$\mathtt{QUnfold}$ (HYB)",
+                chi2_dof,
+                truth,
+            )
+        elif method == "SA":
+            plot_errorbar(
+                ax1,
+                ax2,
+                bin_midpoints,
+                unfolded,
+                errors[method],
+                "purple",
+                "*",
+                r"$\mathtt{QUnfold}$ (SIM)",
                 chi2_dof,
                 truth,
             )
@@ -199,7 +200,9 @@ def plot_comparisons(data, errors, distr, truth, measured, binning):
         # Save plot
         plt.tight_layout()
         if not os.path.exists("studies/img/comparisons"):
-            os.makedirs("studies/img/comparisons")
-        plt.savefig("studies/img/comparisons/{}.png".format(distr))
+            os.makedirs("studies/img/comparisons/png")
+            os.makedirs("studies/img/comparisons/pdf")
+        plt.savefig("studies/img/comparisons/png/{}.png".format(distr))
+        plt.savefig("studies/img/comparisons/pdf/{}.pdf".format(distr))
 
     plt.close()
