@@ -27,6 +27,7 @@
 - [Studies](#studies)
   - [Install HEP dependencies](#install-hep-dependencies)
   - [Run the analysis](#run-the-analysis)
+  - [Run the paper studies](#run-the-paper-studies)
 - [Projects using QUnfold](#projects-using-qunfold)
 - [Credits](#credits)
   - [Main developers](#main-developers)
@@ -38,11 +39,12 @@ This module consists of an implementation of the [unfolding](https://indico.cern
 For the moment you can use it in two modes:
 
 - Simulated annealing (`solve_simulated_annealing`): which uses simulated quantum computer to compute the result.
+- Quantum annealing (`solve_quantum_annealing`): which uses [D-Wave](https://www.dwavesys.com/) resources to perform  quantum annealing to compute the result.
 - Hybrid solver (`solve_hybrid_sampler`): which uses [D-Wave](https://www.dwavesys.com/) resources to perform hybrid quantum annealing (classical + quantum hardware) to compute the result.
 
 Idea was born by me and [Simone](https://github.com/SimoneGasperini) during a quantum computing school of Cineca and is inspired by the work done by [Riccardo Di Sipio](https://github.com/rdisipio) et al. which can be found [here](https://github.com/rdisipio/quantum_unfolding).
 
-:warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements](https://github.com/JustWhit3/QUnfold/issues) and [issues](https://github.com/JustWhit3/QUnfold/issues/3) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
+:warning: The project is currently work-in-progress and it is still not ready for production. Some [improvements and issues](https://github.com/JustWhit3/QUnfold/issues) should be investigated and solved before releasing and packaging an official version of the software. Any help would be more than welcome! See the [contribution](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md) file if interested.
 
 ## Documentation
 
@@ -207,6 +209,14 @@ Comparisons are performed with the following `QUnfold` methods:
 - D-Wave Hybrid solver - QUBO unfolding
 
 The output plots and chi2 for each distribution will be saved into an external `img` directory.
+
+## Run the paper studies
+
+To run the code related to the technical QUnfold paper we are developing:
+
+```shell
+python studies/paper.py
+```
 
 ## Projects using QUnfold
 
