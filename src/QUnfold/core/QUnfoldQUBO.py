@@ -70,11 +70,15 @@ class QUnfoldQUBO:
 
     def _get_expected_num_entries(self):
         """
-        TODO: docstring
+        Get the vector of the number of the expected entries of the MC truth distribution.
+
+        Returns:
+            numpy.ndarray: the vector of the number of the expected entries of the MC truth distribution.
         """
         eff = np.sum(self.R, axis=0)
-        # eff[eff == 0] = 1
-        num_entries = int(sum(self.d / eff))
+        eff[eff == 0] = 1  # Hack needed to not raise error
+        num_entries = self.d / eff
+
         return num_entries
 
     def _define_variables(self):
@@ -86,9 +90,16 @@ class QUnfoldQUBO:
         """
         num_entries = self._get_expected_num_entries()
         variables = [
-            LogEncInteger(f"x{i}", value_range=(0, num_entries))
+            LogEncInteger(
+                f"x{i}",
+                value_range=(
+                    -int(num_entries[i] * 0.2),
+                    int(num_entries[i]) + int(num_entries[i] * 0.2) + 1,
+                ),
+            )
             for i in range(len(self.d))
         ]
+
         return variables
 
     def _define_hamiltonian(self, x):
@@ -115,18 +126,20 @@ class QUnfoldQUBO:
 
     def _post_process_sampleset(self, sampleset):
         """
-        TODO: docstring
+        Process the sampleset and gives solution and error of the unfolding.
+
+        Args:
+            sampleset (sampleset): the sampleset to be processed.
+
+        Returns:
+            numpy.ndarray: the unfolded distribution.
+            numpy.ndarray: the error of the unfolded distribution.
         """
-        median_energy = np.median(sampleset.record.energy)
-        filtered_sampleset = sampleset.filter(pred=lambda s: s.energy < median_energy)
-        results = np.array(
-            [
-                [sample.subh[label] for label in self.labels]
-                for sample in self.model.decode_sampleset(filtered_sampleset)
-            ]
-        )
-        solution = np.round(np.mean(results, axis=0))
-        error = np.std(results, axis=0) / np.sqrt(len(solution))
+        decoded_sampleset = self.model.decode_sampleset(sampleset)
+        best_sample = min(decoded_sampleset, key=lambda s: s.energy)
+        solution = np.array([best_sample.subh[label] for label in self.labels])
+        error = np.sqrt(solution)
+
         return solution, error
 
     def initialize_qubo_model(self):
@@ -142,7 +155,14 @@ class QUnfoldQUBO:
 
     def solve_simulated_annealing(self, num_reads, seed=None):
         """
-        TODO: docstring
+        Compute the unfolded distribution using simulated annealing.
+
+        Args:
+            num_reads (int): the number of reads used to approximate the solution.
+            seed (int, optional): The seed used to randomize the reads. Defaults to None.
+
+        Returns:
+            numpy.ndarray: the unfolded distribution.
         """
         sampler = SimulatedAnnealingSampler()
         sampleset = sampler.sample(self.bqm, num_reads=num_reads, seed=seed)
@@ -151,7 +171,10 @@ class QUnfoldQUBO:
 
     def solve_hybrid_sampler(self):
         """
-        TODO: docstring
+        Compute the unfolded distribution using hybrid solver.
+
+        Returns:
+            numpy.ndarray: the unfolded distribution.
         """
         sampler = LeapHybridSampler()
         sampleset = sampler.sample(self.bqm)
@@ -164,7 +187,13 @@ class QUnfoldQUBO:
 
     def solve_quantum_annealing(self, num_reads):
         """
-        TODO: docstring
+        Compute the unfolded distribution using quantum annealing.
+
+        Args:
+            num_reads (int): the number of reads used to approximate the solution.
+
+        Returns:
+            numpy.ndarray: the unfolded distribution.
         """
         sampler = EmbeddingComposite(DWaveSampler())
         sampleset = sampler.sample(self.bqm, num_reads=num_reads)
@@ -181,11 +210,5 @@ class QUnfoldQUBO:
         Returns:
             float: energy for the given input.
         """
-        num_entries = self._get_expected_num_entries()
-        num_bits = int(np.ceil(np.log2(num_entries)))
-        x_binary = {}
-        for i, entry in enumerate(x):
-            bitstr = np.binary_repr(int(entry), width=num_bits)
-            for j, bit in enumerate(bitstr[::-1]):
-                x_binary[f"x{i}[{j}]"] = int(bit)
-        return self.bqm.energy(x_binary)
+
+        raise NotImplementedError("This feature is work in progress!")
