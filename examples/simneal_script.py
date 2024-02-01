@@ -5,7 +5,7 @@ from QUnfold.utility import normalize_response
 
 if __name__ == "__main__":
     # Set parameters for data generation
-    num_entries = 20000
+    num_entries = 10000
     num_bins = 15
     min_bin = -7.0
     max_bin = 7.0
@@ -23,8 +23,9 @@ if __name__ == "__main__":
     reco_data = mc_data + np.random.normal(
         loc=mean_smear, scale=std_smear, size=num_entries
     )
-    response, _, _ = np.histogram2d(reco_data, mc_data, bins=bins)
-    mc_truth, _ = np.histogram(mc_data, bins=bins)
+    binning = np.array([-np.inf] + bins.tolist() + [np.inf])
+    response, _, _ = np.histogram2d(reco_data, mc_data, bins=binning)
+    mc_truth, _ = np.histogram(mc_data, bins=binning)
     response = normalize_response(response, mc_truth)
 
     # Generate random true data
@@ -36,22 +37,26 @@ if __name__ == "__main__":
     )
 
     # Generate truth and measured histograms
-    truth, _ = np.histogram(true_data, bins=bins)
-    measured, _ = np.histogram(meas_data, bins=bins)
+    truth, _ = np.histogram(true_data, bins=binning)
+    measured, _ = np.histogram(meas_data, bins=binning)
 
     # Run simulated annealing to solve QUBO problem
     unfolder = QUnfoldQUBO(response, measured, lam=0.1)
     unfolder.initialize_qubo_model()
-    unfolded, error = unfolder.solve_simulated_annealing(num_reads=100, seed=seed)
+    unfolded, error = unfolder.solve_simulated_annealing(
+        num_reads=10, seed=seed, n_toys=100
+    )
+    print(unfolder.compute_chi2(truth, "std"))
 
     # Plot unfolding result
     plotter = QUnfoldPlotter(
-        response=response,
-        measured=measured,
-        truth=truth,
-        unfolded=unfolded,
-        error=error,
+        response=response[1:-1, 1:-1],
+        measured=measured[1:-1],
+        truth=truth[1:-1],
+        unfolded=unfolded[1:-1],
+        error=error[1:-1],
         binning=bins,
+        chi2=unfolder.compute_chi2(truth, "std"),
     )
     plotter.saveResponse("examples/simneal_response.png")
     plotter.savePlot("examples/simneal_result.png", method="SA")

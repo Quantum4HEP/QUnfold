@@ -6,3 +6,4 @@ hypothesis
 scipy
 uproot
 black==23.11.0
+tqdm

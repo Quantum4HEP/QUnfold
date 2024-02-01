@@ -50,3 +50,28 @@ def test_get_laplacian():
         [[-1, 1, 0, 0], [1, -2, 1, 0], [0, 1, -2, 1], [0, 0, 1, -1]]
     )
     assert np.array_equal(laplacian_matrix_4x4, expected_matrix_4x4)
+
+
+def test_statistics():
+    """
+    Test the statistics of the QUnfoldQUBO class (covariance, chi2, etc...).
+    """
+
+    R = np.array([[1, 2], [3, 4]])
+    meas = np.array([0.5, 0.5])
+    unfolder = QUnfoldQUBO(R, meas, lam=0.1)
+    unfolder.initialize_qubo_model()
+    unfolder.solve_simulated_annealing(num_reads=10, n_toys=1000)
+
+    # Test covariance and correlation
+    cov = unfolder.cov_matrix
+    corr = unfolder.corr_matrix
+    assert cov.shape == (2, 2)
+    assert corr.shape == (2, 2)
+
+    # Test chi2
+    truth = np.array([0.5, 0.5])
+    chi2_std = unfolder.compute_chi2(truth, method="std")
+    chi2_cov = unfolder.compute_chi2(truth, method="cov")
+    assert chi2_std != None
+    assert chi2_cov != None

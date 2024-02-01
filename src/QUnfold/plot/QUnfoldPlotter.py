@@ -8,7 +8,7 @@ class QUnfoldPlotter:
     Class used to plot QUnfold data and results.
     """
 
-    def __init__(self, response, measured, truth, unfolded, error, binning):
+    def __init__(self, response, measured, truth, unfolded, error, binning, chi2):
         """
         Constructs a QUnfoldPlotter class for visualizing unfolding results.
 
@@ -19,6 +19,7 @@ class QUnfoldPlotter:
             unfolded (np.array): The unfolded distribution.
             error (np.array): The error on the unfolded distribution.
             binning (np.array): The binning information for the histograms.
+            chi2 (float): The chi2 used in the plot.
         """
 
         self.response = response
@@ -27,6 +28,7 @@ class QUnfoldPlotter:
         self.unfolded = unfolded
         self.error = error
         self.binning = binning
+        self.chi2 = chi2
 
     def __plotResponseSetup(self):
         """
@@ -72,33 +74,6 @@ class QUnfoldPlotter:
         plt.savefig(path)
         plt.close()
 
-    def _compute_chi2_dof(self, unfolded, truth):
-        """
-        Compute the chi-squared per degree of freedom (chi2/dof) between two distributions.
-
-        Args:
-            unfolded (numpy.array): The unfolded distribution bin contents.
-            truth (numpy.array): The truth distribution bin contents.
-
-        Returns:
-            float: The chi-squared per degree of freedom.
-        """
-
-        # Trick for chi2 convergence
-        null_indices = truth == 0
-        truth[null_indices] += 1
-        unfolded[null_indices] += 1
-
-        # Compute chi2
-        chi2, _ = chisquare(
-            unfolded,
-            np.sum(unfolded) / np.sum(truth) * truth,
-        )
-        dof = len(unfolded) - 1
-        chi2_dof = chi2 / dof
-
-        return chi2_dof
-
     def __plotSetup(self, method):
         """
         Create an histogram comparison among measured, truth and unfolded distributions, with the chi2 among unfolded and truth distribution.
@@ -132,7 +107,7 @@ class QUnfoldPlotter:
         # Plot unfolded histogram with chi2 test
         binwidths = np.diff(self.binning)
         bin_midpoints = self.binning[:-1] + binwidths / 2
-        chi2 = round(self._compute_chi2_dof(self.unfolded, self.truth), 2)
+        chi2 = round(self.chi2, 2)
         label = rf"Unfolded {method} ($\chi^2 = {chi2}$)"
         ax1.errorbar(
             x=bin_midpoints,
