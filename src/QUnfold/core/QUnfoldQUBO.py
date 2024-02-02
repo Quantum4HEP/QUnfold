@@ -1,15 +1,15 @@
 import numpy as np
+from tqdm import trange
 from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, EmbeddingComposite
-import tqdm
 from scipy.stats import chisquare
 
 
 class QUnfoldQUBO:
     """
-    Class used to perform the unfolding formulated as a QUBO problem.
+    Class to solve the unfolding problem formulated as a QUBO model.
     """
 
     def __init__(self, response=None, measured=None, lam=0.0):
@@ -24,7 +24,6 @@ class QUnfoldQUBO:
         self.R = response
         self.d = measured
         self.lam = lam
-        self.num_log_qubits = 0
         self.cov_matrix = None
         self.corr_matrix = None
         self.solution = None
@@ -59,7 +58,7 @@ class QUnfoldQUBO:
     @staticmethod
     def _get_laplacian(dim):
         """
-        Build the Laplacian matrix.
+        Get the Laplacian matrix (discrete 2nd-order derivative).
 
         Parameters:
             dim (int): dimension of the matrix.
@@ -75,41 +74,40 @@ class QUnfoldQUBO:
 
     def _get_expected_num_entries(self):
         """
-        Get the vector of the number of the expected entries of the MC truth distribution.
+        Get the array of the expected number of entries in each bin.
 
         Returns:
-            numpy.ndarray: the vector of the number of the expected entries of the MC truth distribution.
+            numpy.ndarray: expected histogram.
         """
-        eff = np.sum(self.R, axis=0)
-        eff[eff == 0] = 1  # Hack needed to not raise error
-        num_entries = self.d / eff
-
+        effs = np.sum(self.R, axis=0)
+        effs[effs == 0] = 1
+        num_entries = self.d / effs
         return num_entries
 
     def _define_variables(self):
         """
-        Define the list of variables for the QUBO problem.
+        Define the binary encoded "integer" variables of the QUBO problem.
 
         Returns:
-            list: encoded integer variables.
+            list: "integer" QUBO problem variables.
         """
         num_entries = self._get_expected_num_entries()
         variables = []
         for i in range(len(num_entries)):
-            upper = int(num_entries[i] * 1.2) + 1  # Add 20% more
+            upper = int(2 ** np.ceil(np.log2((num_entries[i] + 1) * 1.2))) - 1
             var = LogEncInteger(label=f"x{i}", value_range=(0, upper))
             variables.append(var)
         return variables
 
     def _define_hamiltonian(self, x):
         """
-        Define the Hamiltonian expression for the QUBO problem.
+        Define the "integer" Hamiltonian expression of the QUBO problem.
 
         Parameters:
-            x (list): encoded integer variables.
+            x (list): "integer" QUBO problem variables.
 
         Returns:
-            pyqubo.Expression: Hamiltonian expression.
+            pyqubo.Expression: "integer" Hamiltonian expression.
         """
         hamiltonian = 0
         dim = len(x)
@@ -125,45 +123,39 @@ class QUnfoldQUBO:
 
     def _post_process_sampleset(self, sampleset):
         """
-        Process the sampleset and gives solution and error of the unfolding.
+        Post-process the output sampleset selecting and decoding the lower-energy sample.
 
         Args:
-            sampleset (sampleset): the sampleset to be processed.
+            sampleset (sampleset): set of output samples.
 
         Returns:
-            numpy.ndarray: the unfolded distribution.
+            numpy.ndarray: unfolded histogram.
         """
-        best_sample = self.model.decode_sample(sampleset.first.sample, vartype="BINARY")
-        solution = np.array([best_sample.subh[label] for label in self.labels])
-
+        sample = self.model.decode_sample(sampleset.first.sample, vartype="BINARY")
+        solution = np.array([sample.subh[label] for label in self.labels])
         return solution
 
-    def _compute_error(self, n_toys, solution, solver):
+    def _compute_error(self, num_toys, solution, solver):
         """
-        Compute the error of the unfolded distribution using pseudo-experiments in toy Monte Carlo simulations.
+        Compute the errors of the unfolded histogram by running Monte Carlo toy experiments.
 
         Args:
-            n_toys (int): the number of toy Monte Carlo experiments to be performed.
-            solution (numpy.ndarray): the unfolded distribution.
-            solver (func): a function that computes the unfolded distribution.
+            num_toys (int): number of Monte Carlo toy experiments.
+            solution (numpy.ndarray): unfolded histogram.
+            solver (func): solver callable function.
 
         Returns:
-            numpy.ndarray: The errors associated with each bin in the unfolded distribution.
-
-        Raises:
-            ValueError: If the number of toys is not a positive integer.
+            numpy.ndarray: errors on the unfolded histogram.
         """
-
-        if n_toys == 1:  # No toys case
+        if num_toys == 1:
             return np.sqrt(solution)
-        else:  # Toys case
-            unfolded_results = np.empty(shape=(n_toys, len(self.d)))
-            for i in tqdm.trange(n_toys, desc="Running on toys"):
+        else:
+            unfolded_results = np.empty(shape=(num_toys, len(self.d)))
+            for i in trange(num_toys, desc="Running on toys"):
                 smeared_d = np.random.poisson(self.d)
                 unfolder = QUnfoldQUBO(self.R, smeared_d, lam=self.lam)
                 unfolder.initialize_qubo_model()
                 unfolded_results[i] = solver(unfolder)
-
             error = np.std(unfolded_results, axis=0)
             self.cov_matrix = np.cov(unfolded_results, rowvar=False)
             self.corr_matrix = np.corrcoef(unfolded_results, rowvar=False)
@@ -171,7 +163,7 @@ class QUnfoldQUBO:
 
     def initialize_qubo_model(self):
         """
-        Initialize QUBO model and BQM instance for the unfolding problem.
+        Define the QUBO model and build the BQM instance for the unfolding problem.
         """
         x = self._define_variables()
         h = self._define_hamiltonian(x)
@@ -180,76 +172,67 @@ class QUnfoldQUBO:
         self.bqm = self.model.to_bqm()
         self.num_log_qubits = len(self.bqm.variables)
 
-    def solve_simulated_annealing(self, num_reads, seed=None, n_toys=1):
+    def solve_simulated_annealing(self, num_reads, num_toys=1, seed=None):
         """
-        Compute the unfolded distribution using simulated annealing.
+        Compute the unfolded histogram by running DWave simulated annealing sampler.
 
         Args:
-            num_reads (int): the number of reads used to approximate the solution.
-            seed (int, optional): the seed used to randomize the reads. Defaults to None.
-            n_toys (int, optional): the number of toys needed to compute the error of the unfolded distribution. If 1 the error is computed as the square-root of the number of entries in each bin, otherwise a statistical method based on toys is used. Defaults to 1.
+            num_reads (int): number of sampler runs per toy experiment.
+            num_toys (int, optional): number of Monte Carlo toy experiments (default is 1).
+            seed (int, optional): random seed (defaults is None).
 
         Returns:
-            numpy.ndarray: the unfolded distribution.
+            numpy.ndarray: unfolded histogram.
         """
 
         def solver(unfolder):
             sampler = SimulatedAnnealingSampler()
             sampleset = sampler.sample(unfolder.bqm, num_reads=num_reads, seed=seed)
-            solution = unfolder._post_process_sampleset(sampleset=sampleset)
-            return solution
+            return unfolder._post_process_sampleset(sampleset)
 
-        self.solution = solver(self)
-        error = self._compute_error(n_toys, self.solution, solver)
-
+        self.solution = solver(unfolder=self)
+        error = self._compute_error(num_toys, self.solution, solver)
         return self.solution, error
 
-    def solve_hybrid_sampler(self, n_toys=1):
+    def solve_hybrid_sampler(self, num_toys=1):
         """
-        Compute the unfolded distribution using hybrid solver.
+        Compute the unfolded histogram by running DWave hybrid sampler.
 
         Args:
-            n_toys (int, optional): the number of toys needed to compute the error of the unfolded distribution. If 1 the error is computed as the square-root of the number of entries in each bin, otherwise a statistical method based on toys is used. Defaults to 1.
+            num_toys (int, optional): number of Monte Carlo toy experiments (default is 1).
 
         Returns:
-            numpy.ndarray: the unfolded distribution.
+            numpy.ndarray: unfolded histogram.
         """
 
         def solver(unfolder):
             sampler = LeapHybridSampler()
             sampleset = sampler.sample(unfolder.bqm)
-            decoded_sample = unfolder.model.decode_sampleset(sampleset)[0]
-            solution = np.round(
-                np.array([decoded_sample.subh[label] for label in unfolder.labels])
-            )
-            return solution
+            return unfolder._post_process_sampleset(sampleset)
 
-        self.solution = solver(self)
-        error = self._compute_error(n_toys, self.solution, solver)
-
+        self.solution = solver(unfolder=self)
+        error = self._compute_error(num_toys, self.solution, solver)
         return self.solution, error
 
-    def solve_quantum_annealing(self, num_reads, n_toys=1):
+    def solve_quantum_annealing(self, num_reads, num_toys=1):
         """
-        Compute the unfolded distribution using quantum annealing.
+        Compute the unfolded histogram by running DWave quantum annealing sampler.
 
         Args:
-            num_reads (int): the number of reads used to approximate the solution.
-            n_toys (int, optional): the number of toys needed to compute the error of the unfolded distribution. If 1 the error is computed as the square-root of the number of entries in each bin, otherwise a statistical method based on toys is used. Defaults to 1.
+            num_reads (int): number of sampler runs per toy experiment.
+            num_toys (int, optional): number of Monte Carlo toy experiments (default is 1).
 
         Returns:
-            numpy.ndarray: the unfolded distribution.
+            numpy.ndarray: unfolded histogram.
         """
 
         def solver(unfolder):
             sampler = EmbeddingComposite(DWaveSampler())
             sampleset = sampler.sample(unfolder.bqm, num_reads=num_reads)
-            solution = unfolder._post_process_sampleset(sampleset=sampleset)
-            return solution
+            return unfolder._post_process_sampleset(sampleset)
 
-        self.solution = solver(self)
-        error = self._compute_error(n_toys, self.solution, solver)
-
+        self.solution = solver(unfolder=self)
+        error = self._compute_error(num_toys, self.solution, solver)
         return self.solution, error
 
     def compute_chi2(self, truth, method="std"):
@@ -267,29 +250,33 @@ class QUnfoldQUBO:
         null_indices = truth == 0
         truth[null_indices] += 1
         self.solution[null_indices] += 1
-
-        if method == "std":  # Use scipy
+        if method == "std":
             chi2, _ = chisquare(
                 self.solution,
                 np.sum(self.solution) / np.sum(truth) * truth,
             )
-        elif method == "cov":  # Use covariance matrix
+        elif method == "cov":
             residuals = self.solution - truth
             inv_covariance_matrix = np.linalg.inv(self.cov_matrix)
             chi2 = residuals.T @ inv_covariance_matrix @ residuals
-
         dof = len(self.solution)
         return chi2 / dof
 
     def compute_energy(self, x):
         """
-        Compute the energy of the Hamiltoninan for the given input histogram.
+        Compute the energy of the QUBO Hamiltoninan for the given input histogram.
 
         Args:
             x (numpy.ndarray): input histogram.
 
         Returns:
-            float: energy for the given input.
+            float: QUBO Hamiltonian energy.
         """
-
-        raise NotImplementedError("This feature is work in progress!")
+        num_entries = self._get_expected_num_entries()
+        x_binary = {}
+        for i in range(len(x)):
+            num_bits = int(np.ceil(np.log2((num_entries[i] + 1) * 1.2)))
+            bitstr = np.binary_repr(int(x[i]), width=num_bits)
+            for j, bit in enumerate(bitstr[::-1]):
+                x_binary[f"x{i}[{j}]"] = int(bit)
+        return self.bqm.energy(x_binary)

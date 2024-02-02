@@ -44,9 +44,8 @@ if __name__ == "__main__":
     unfolder = QUnfoldQUBO(response, measured, lam=0.1)
     unfolder.initialize_qubo_model()
     unfolded, error = unfolder.solve_simulated_annealing(
-        num_reads=10, seed=seed, n_toys=100
+        num_reads=10, num_toys=100, seed=seed
     )
-    print(unfolder.compute_chi2(truth, "std"))
 
     # Plot unfolding result
     plotter = QUnfoldPlotter(
