@@ -125,7 +125,7 @@ bin_bw = np.array(
 
 # Input variables
 samples = 1000000
-n_toys = 100
+n_toys = 70
 quantum = False
 distributions = {
     # "normal": bin_normal,
