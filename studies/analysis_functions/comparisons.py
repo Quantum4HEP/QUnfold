@@ -1,28 +1,12 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import chisquare
+from QUnfold.utility import compute_chi2
 
 
 def plot_errorbar(
     ax1, ax2, bin_edges, bin_contents, bin_errors, color, mark, method, chi2, truth
 ):
-    """
-    Plot error bars on two subplots representing data and the ratio of data to truth.
-
-    Args:
-        ax1 (matplotlib.axes._axes.Axes): The first subplot for the data plot.
-        ax2 (matplotlib.axes._axes.Axes): The second subplot for the ratio plot.
-        bin_edges (array-like): The bin edges for the histogram.
-        bin_contents (array-like): The content of each bin in the histogram.
-        bin_errors (array-like): The errors associated with each bin.
-        color (str): The color of the error bars and markers in the plot.
-        marker (str): The marker style for the data points in the plot.
-        method (str): The method used to obtain the data, for labeling purposes.
-        chi2 (float): The chi-squared value associated with the data fit.
-        truth (array-like): The true values corresponding to each bin, used for the ratio plot.
-    """
-
     # Plot stuff
     ax1.errorbar(
         x=bin_edges,
@@ -46,51 +30,7 @@ def plot_errorbar(
     )
 
 
-def compute_chi2_dof(bin_contents, truth_bin_contents):
-    """
-    Compute the chi-squared per degree of freedom (chi2/dof) between two distributions.
-
-    Args:
-        bin_contents (numpy.array): The observed bin contents.
-        truth_bin_contents (numpy.array): The expected bin contents.
-
-    Returns:
-        float: The chi-squared per degree of freedom.
-    """
-
-    # Trick for chi2 convergence
-    null_indices = truth_bin_contents == 0
-    truth_bin_contents[null_indices] += 1
-    bin_contents[null_indices] += 1
-
-    # Compute chi2
-    chi2, _ = chisquare(
-        bin_contents,
-        np.sum(bin_contents) / np.sum(truth_bin_contents) * truth_bin_contents,
-    )
-    dof = len(bin_contents) - 1
-    chi2_dof = chi2 / dof
-
-    return chi2_dof
-
-
-def plot_comparisons(data, errors, distr, truth, measured, binning):
-    """
-    Plots the unfolded distributions for different unfolding methods.
-
-    Args:
-        data (dict): A dictionary containing the data for each unfolding method.
-                     Keys represent method names, and values represent corresponding file paths.
-        errors (dict): A dictionary containing the errors for each unfolding method.
-                       Keys are method names, and values are corresponding error arrays.
-        distr (array-like): The generated distribution.
-        truth (array-like): The true distribution used for comparison.
-        measured (array-like): The measured distribution used for unfolding.
-        bins (int or array-like): The number of bins or bin edges for the histograms.
-        min_bin (float): The minimum value of the histogram range.
-        max_bin (float): The maximum value of the histogram range.
-    """
-
+def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
     # Binning
     bin_edges = binning
     binwidths = np.diff(bin_edges)
@@ -128,7 +68,7 @@ def plot_comparisons(data, errors, distr, truth, measured, binning):
     # Iterate over the unfolding methods
     for method, unfolded in data.items():
         # Plot each unfolding method
-        chi2_dof = compute_chi2_dof(unfolded, truth)
+        chi2_dof = round(compute_chi2(unfolded, truth, cov[method]), 4)
         if method == "MI":
             plot_errorbar(
                 ax1,
@@ -199,10 +139,10 @@ def plot_comparisons(data, errors, distr, truth, measured, binning):
 
         # Save plot
         plt.tight_layout()
-        if not os.path.exists("studies/img/comparisons"):
-            os.makedirs("studies/img/comparisons/png")
-            os.makedirs("studies/img/comparisons/pdf")
-        plt.savefig("studies/img/comparisons/png/{}.png".format(distr))
-        plt.savefig("studies/img/comparisons/pdf/{}.pdf".format(distr))
+        if not os.path.exists("studies/img/analysis"):
+            os.makedirs("studies/img/analysis/png")
+            os.makedirs("studies/img/analysis/pdf")
+        plt.savefig("studies/img/analysis/png/{}.png".format(distr))
+        plt.savefig("studies/img/analysis/pdf/{}.pdf".format(distr))
 
     plt.close()

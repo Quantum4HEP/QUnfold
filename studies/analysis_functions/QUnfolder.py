@@ -1,29 +1,13 @@
-import os
-from QUnfold import QUnfoldQUBO, QUnfoldPlotter
+from QUnfold import QUnfoldQUBO
 
 
-def QUnfold_unfolder_and_plot(unf_type, response, measured, truth, distr, binning):
-    """Unfold and plot the results using QUnfoldQUBO.
-
-    Args:
-        unf_type (str): The unfolding type, either "SA" for simulated annealing or "HYB" for hybrid solver.
-        response (type): Description of the response parameter.
-        measured (type): Description of the measured parameter.
-        truth (type): Description of the truth parameter.
-        distr (type): Description of the distr parameter.
-        binning (type): Description of the binning parameter.
-
-    Returns:
-        tuple: A tuple containing unfolded and error.
-    """
-
-    # Create dirs
-    if not os.path.exists("studies/img/QUnfold/{}".format(distr)):
-        os.makedirs("studies/img/QUnfold/{}".format(distr))
-
-    # Unfolder
-    n_reads = 1000
+def QUnfold_unfolder(unf_type, response, measured, distr, n_toys):
+    unfolded = None
+    error = None
+    cov_matrix = None
+    n_reads = 100  # 1000
     lam = 0.05
+
     if distr == "normal":
         lam = 0.03
     elif distr == "gamma":
@@ -34,64 +18,16 @@ def QUnfold_unfolder_and_plot(unf_type, response, measured, truth, distr, binnin
         lam = 0.0001
     unfolder = QUnfoldQUBO(response, measured, lam=lam)
     unfolder.initialize_qubo_model()
-    unfolded = None
-    error = None
 
-    # Unfold with simulated annealing
     if unf_type == "SA":
-        unfolded, error = unfolder.solve_simulated_annealing(num_reads=n_reads)
-        plotter = QUnfoldPlotter(
-            response=response[1:-1, 1:-1],
-            measured=measured[1:-1],
-            truth=truth[1:-1],
-            unfolded=unfolded[1:-1],
-            error=error[1:-1],
-            binning=binning,
+        unfolded, error, cov_matrix, _ = unfolder.solve_simulated_annealing(
+            num_reads=n_reads, num_toys=n_toys
         )
-        plotter.savePlot("studies/img/QUnfold/{}/unfolded_SA.png".format(distr), "SA")
-        plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
-        print(
-            "The png file studies/img/QUnfold/{}/unfolded_SA.png has been created".format(
-                distr
-            )
-        )
-
-    # Unfold with hybrid solver
     elif unf_type == "HYB":
-        unfolded, error = unfolder.solve_hybrid_sampler()
-        plotter = QUnfoldPlotter(
-            response=response[1:-1, 1:-1],
-            measured=measured[1:-1],
-            truth=truth[1:-1],
-            unfolded=unfolded[1:-1],
-            error=error[1:-1],
-            binning=binning,
-        )
-        plotter.savePlot("studies/img/QUnfold/{}/unfolded_HYB.png".format(distr), "HYB")
-        plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
-        print(
-            "The png file studies/img/QUnfold/{}/unfolded_HYB.png has been created".format(
-                distr
-            )
-        )
-
-    # unfold with quantum annealing
+        unfolded, error, cov_matrix, _ = unfolder.solve_hybrid_sampler(num_toys=n_toys)
     elif unf_type == "QA":
-        unfolded, error = unfolder.solve_quantum_annealing(num_reads=n_reads)
-        plotter = QUnfoldPlotter(
-            response=response[1:-1, 1:-1],
-            measured=measured[1:-1],
-            truth=truth[1:-1],
-            unfolded=unfolded[1:-1],
-            error=error[1:-1],
-            binning=binning,
-        )
-        plotter.savePlot("studies/img/QUnfold/{}/unfolded_QA.png".format(distr), "HYB")
-        plotter.saveResponse("studies/img/QUnfold/{}/response.png".format(distr))
-        print(
-            "The png file studies/img/QUnfold/{}/unfolded_QA.png has been created".format(
-                distr
-            )
+        unfolded, error, cov_matrix, _ = unfolder.solve_quantum_annealing(
+            num_reads=n_reads, num_toys=n_toys
         )
 
-    return unfolded, error
+    return unfolded, error, cov_matrix

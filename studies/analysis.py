@@ -4,14 +4,15 @@ import ROOT as r
 import numpy as np
 from analysis_functions.custom_logger import get_custom_logger
 from analysis_functions.generator import generate
-from analysis_functions.RooUnfold import (
-    RooUnfold_unfolder,
-    RooUnfold_plot,
-    RooUnfold_plot_response,
-)
-from analysis_functions.QUnfolder import QUnfold_unfolder_and_plot
+from analysis_functions.RooUnfold import RooUnfold_unfolder
+from analysis_functions.QUnfolder import QUnfold_unfolder
 from analysis_functions.comparisons import plot_comparisons
-from QUnfold.utility import TH1_to_array, TH2_to_array, normalize_response
+from QUnfold.utility import (
+    TH1_to_array,
+    TH2_to_array,
+    normalize_response,
+    TMatrix_to_array,
+)
 
 # Settings
 log = get_custom_logger(__name__)
@@ -123,13 +124,15 @@ bin_bw = np.array(
 )
 
 # Input variables
-distributions = {
-    "normal": bin_normal,
-    "gamma": bin_gamma,
-    "exponential": bin_exponential,
-    "breit-wigner": bin_bw,
-}
 samples = 1000000
+n_toys = 100
+quantum = False
+distributions = {
+    # "normal": bin_normal,
+    "gamma": bin_gamma,
+    # "exponential": bin_exponential,
+    # "breit-wigner": bin_bw,
+}
 bias = -0.13
 smearing = 0.21
 eff = 0.7
@@ -148,16 +151,17 @@ if __name__ == "__main__":
 
         # RooUnfold settings
         r_response = response
-        RooUnfold_plot_response(r_response, distr)
         r_response.UseOverflow(True)
 
-        # Matrix inversion (MI)
-        unfolded_MI, error_MI = RooUnfold_unfolder("MI", r_response, measured)
-        RooUnfold_plot(truth, measured, unfolded_MI, distr)
-
         # Iterative Bayesian unfolding (IBU)
-        unfolded_IBU, error_IBU = RooUnfold_unfolder("IBU", r_response, measured)
-        RooUnfold_plot(truth, measured, unfolded_IBU, distr)
+        unfolded_IBU, error_IBU, cov_IBU = RooUnfold_unfolder(
+            "IBU", r_response, measured, n_toys
+        )
+
+        # Matrix inversion (MI)
+        unfolded_MI, error_MI, cov_MI = RooUnfold_unfolder(
+            "MI", r_response, measured, n_toys
+        )
 
         ########################## Quantum ###########################
 
@@ -170,19 +174,20 @@ if __name__ == "__main__":
         )
 
         # Simulated annealing (SA)
-        unfolded_SA, error_SA = QUnfold_unfolder_and_plot(
-            "SA", response, measured, truth, distr, binning
+        unfolded_SA, error_SA, cov_SA = QUnfold_unfolder(
+            "SA", response, measured, distr, n_toys
         )
 
-        # # Hybrid solver (HYB)
-        unfolded_HYB, error_HYB = QUnfold_unfolder_and_plot(
-            "HYB", response, measured, truth, distr, binning
-        )
+        if quantum:
+            # # Hybrid solver (HYB)
+            unfolded_HYB, error_HYB, cov_HYB = QUnfold_unfolder(
+                "HYB", response, measured, distr, n_toys
+            )
 
-        # Quantum annealing (QA)
-        # unfolded_QA, error_QA = QUnfold_unfolder_and_plot(
-        #     "QA", response, measured, truth, distr, binning
-        # )
+            # Quantum annealing (QA)
+            unfolded_QA, error_QA, cov_QA = QUnfold_unfolder(
+                "QA", response, measured, distr, n_toys
+            )
 
         ########################## Compare ###########################
 
@@ -191,17 +196,40 @@ if __name__ == "__main__":
             "MI": TH1_to_array(unfolded_MI, overflow=True)[1:-1],
             "IBU4": TH1_to_array(unfolded_IBU, overflow=True)[1:-1],
             "SA": unfolded_SA[1:-1],
-            "HYB": unfolded_HYB[1:-1],
-            # "QA": unfolded_QA[1:-1],
         }
+
         errors = {
             "MI": error_MI,
             "IBU4": error_IBU,
             "SA": error_SA[1:-1],
-            "HYB": error_HYB[1:-1],
-            # "QA": error_QA[1:-1],
         }
 
-        # Plot comparisons
-        plot_comparisons(data, errors, distr, truth[1:-1], measured[1:-1], binning)
+        cov = {
+            "MI": TMatrix_to_array(cov_MI)[1:-1, 1:-1] if n_toys > 1 else None,
+            "IBU4": TMatrix_to_array(cov_IBU)[1:-1, 1:-1] if n_toys > 1 else None,
+            "SA": cov_SA[1:-1, 1:-1] if n_toys > 1 else None,
+        }
+
+        if quantum:
+            additional_quantum_data = {
+                "HYB": unfolded_HYB[1:-1],
+                "QA": unfolded_QA[1:-1],
+            }
+
+            additional_quantum_errors = {
+                "HYB": error_HYB[1:-1],
+                "QA": error_QA[1:-1],
+            }
+
+            additional_quantum_cov = {
+                "HYB": cov_HYB[1:-1, 1:-1] if n_toys > 1 else None,
+                "QA": cov_QA[1:-1, 1:-1] if n_toys > 1 else None,
+            }
+
+            data.update(additional_quantum_data)
+            errors.update(additional_quantum_errors)
+            cov.update(additional_quantum_cov)
+
+            # Plot comparisons
+        plot_comparisons(data, errors, cov, distr, truth[1:-1], measured[1:-1], binning)
         log.info("Done\n")
