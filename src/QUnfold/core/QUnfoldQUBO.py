@@ -5,6 +5,9 @@ from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, EmbeddingComposite
 from scipy.stats import chisquare
+import os
+import concurrent.futures
+from tqdm import tqdm
 
 
 class QUnfoldQUBO:
@@ -135,27 +138,45 @@ class QUnfoldQUBO:
         solution = np.array([sample.subh[label] for label in self.labels])
         return solution
 
-    def _compute_error(self, num_toys, solution, solver):
+    def _compute_error(self, n_toys, solution, solver, num_cores):
         """
-        Compute the errors of the unfolded histogram by running Monte Carlo toy experiments.
+        Compute the error of the unfolded distribution using pseudo-experiments in toy Monte Carlo simulations.
 
         Args:
-            num_toys (int): number of Monte Carlo toy experiments.
-            solution (numpy.ndarray): unfolded histogram.
-            solver (func): solver callable function.
+            n_toys (int): the number of toy Monte Carlo experiments to be performed.
+            solution (numpy.ndarray): the unfolded distribution.
+            solver (func): a function that computes the unfolded distribution.
+            num_cores (int): number of CPU cores used to compute the toys in parallel. If None, the current number of CPU cores - 2 is used.
 
         Returns:
-            numpy.ndarray: errors on the unfolded histogram.
+            numpy.ndarray: The errors associated with each bin in the unfolded distribution.
+
+        Raises:
+            ValueError: If the number of toys is not a positive integer.
         """
-        if num_toys == 1:
+
+        def toy_job(i):
+            smeared_d = np.random.poisson(self.d)
+            unfolder = QUnfoldQUBO(self.R, smeared_d, lam=self.lam)
+            unfolder.initialize_qubo_model()
+            unfolded_results[i] = solver(unfolder)
+
+        n_cores = os.cpu_count() - 2
+        if num_cores != None:
+            n_cores = num_cores
+
+        if n_toys == 1:  # No toys case
             return np.sqrt(solution)
-        else:
-            unfolded_results = np.empty(shape=(num_toys, len(self.d)))
-            for i in trange(num_toys, desc="Running on toys"):
-                smeared_d = np.random.poisson(self.d)
-                unfolder = QUnfoldQUBO(self.R, smeared_d, lam=self.lam)
-                unfolder.initialize_qubo_model()
-                unfolded_results[i] = solver(unfolder)
+        else:  # Toys case
+            unfolded_results = np.empty(shape=(n_toys, len(self.d)))
+            with concurrent.futures.ThreadPoolExecutor(max_workers=n_cores) as executor:
+                list(
+                    tqdm(
+                        executor.map(toy_job, range(n_toys)),
+                        total=n_toys,
+                        desc="Running on toys",
+                    )
+                )
             error = np.std(unfolded_results, axis=0)
             self.cov_matrix = np.cov(unfolded_results, rowvar=False)
             self.corr_matrix = np.corrcoef(unfolded_results, rowvar=False)
@@ -172,7 +193,9 @@ class QUnfoldQUBO:
         self.bqm = self.model.to_bqm()
         self.num_log_qubits = len(self.bqm.variables)
 
-    def solve_simulated_annealing(self, num_reads, num_toys=1, seed=None):
+    def solve_simulated_annealing(
+        self, num_reads, num_toys=1, seed=None, num_cores=None
+    ):
         """
         Compute the unfolded histogram by running DWave simulated annealing sampler.
 
@@ -180,6 +203,7 @@ class QUnfoldQUBO:
             num_reads (int): number of sampler runs per toy experiment.
             num_toys (int, optional): number of Monte Carlo toy experiments (default is 1).
             seed (int, optional): random seed (defaults is None).
+            num_cores (int, optional): number of CPU cores used to compute the toys in parallel (default is None).
 
         Returns:
             numpy.ndarray: unfolded histogram.
@@ -191,15 +215,16 @@ class QUnfoldQUBO:
             return unfolder._post_process_sampleset(sampleset)
 
         self.solution = solver(unfolder=self)
-        error = self._compute_error(num_toys, self.solution, solver)
+        error = self._compute_error(num_toys, self.solution, solver, num_cores)
         return self.solution, error
 
-    def solve_hybrid_sampler(self, num_toys=1):
+    def solve_hybrid_sampler(self, num_toys=1, num_cores=None):
         """
         Compute the unfolded histogram by running DWave hybrid sampler.
 
         Args:
             num_toys (int, optional): number of Monte Carlo toy experiments (default is 1).
+            num_cores (int, optional): number of CPU cores used to compute the toys in parallel (default is None).
 
         Returns:
             numpy.ndarray: unfolded histogram.
@@ -211,16 +236,17 @@ class QUnfoldQUBO:
             return unfolder._post_process_sampleset(sampleset)
 
         self.solution = solver(unfolder=self)
-        error = self._compute_error(num_toys, self.solution, solver)
+        error = self._compute_error(num_toys, self.solution, solver, num_cores)
         return self.solution, error
 
-    def solve_quantum_annealing(self, num_reads, num_toys=1):
+    def solve_quantum_annealing(self, num_reads, num_toys=1, num_cores=None):
         """
         Compute the unfolded histogram by running DWave quantum annealing sampler.
 
         Args:
             num_reads (int): number of sampler runs per toy experiment.
             num_toys (int, optional): number of Monte Carlo toy experiments (default is 1).
+            num_cores (int, optional): number of CPU cores used to compute the toys in parallel (default is None).
 
         Returns:
             numpy.ndarray: unfolded histogram.
@@ -232,7 +258,7 @@ class QUnfoldQUBO:
             return unfolder._post_process_sampleset(sampleset)
 
         self.solution = solver(unfolder=self)
-        error = self._compute_error(num_toys, self.solution, solver)
+        error = self._compute_error(num_toys, self.solution, solver, num_cores)
         return self.solution, error
 
     def compute_chi2(self, truth, method="std"):
