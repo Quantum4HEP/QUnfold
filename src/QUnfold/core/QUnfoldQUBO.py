@@ -172,9 +172,10 @@ class QUnfoldQUBO:
                         desc="Running on toys",
                     )
                 )
-            error = np.std(unfolded_results, axis=0)
             cov_matrix = np.cov(unfolded_results, rowvar=False)
+            error = np.sqrt(np.diag(cov_matrix))
             corr_matrix = np.corrcoef(unfolded_results, rowvar=False)
+            
             return error, cov_matrix, corr_matrix
 
     def initialize_qubo_model(self):
