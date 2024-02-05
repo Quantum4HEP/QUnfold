@@ -4,7 +4,6 @@ from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, EmbeddingComposite
-from scipy.stats import chisquare
 import os
 import concurrent.futures
 from tqdm import tqdm
@@ -27,9 +26,6 @@ class QUnfoldQUBO:
         self.R = response
         self.d = measured
         self.lam = lam
-        self.cov_matrix = None
-        self.corr_matrix = None
-        self.solution = None
 
     def set_response(self, response):
         """
@@ -149,10 +145,9 @@ class QUnfoldQUBO:
             num_cores (int): number of CPU cores used to compute the toys in parallel. If None, the current number of CPU cores - 2 is used.
 
         Returns:
-            numpy.ndarray: The errors associated with each bin in the unfolded distribution.
-
-        Raises:
-            ValueError: If the number of toys is not a positive integer.
+            numpy.ndarray: the errors associated with each bin in the unfolded distribution.
+            numpy.ndarray: the covariance matrix associated to the toys procedure.
+            numpy.ndarray: the correlation matrix associated to the toys procedure.
         """
 
         def toy_job(i):
@@ -166,7 +161,7 @@ class QUnfoldQUBO:
             n_cores = num_cores
 
         if n_toys == 1:  # No toys case
-            return np.sqrt(solution)
+            return np.sqrt(solution), None, None
         else:  # Toys case
             unfolded_results = np.empty(shape=(n_toys, len(self.d)))
             with concurrent.futures.ThreadPoolExecutor(max_workers=n_cores) as executor:
@@ -178,9 +173,9 @@ class QUnfoldQUBO:
                     )
                 )
             error = np.std(unfolded_results, axis=0)
-            self.cov_matrix = np.cov(unfolded_results, rowvar=False)
-            self.corr_matrix = np.corrcoef(unfolded_results, rowvar=False)
-            return error
+            cov_matrix = np.cov(unfolded_results, rowvar=False)
+            corr_matrix = np.corrcoef(unfolded_results, rowvar=False)
+            return error, cov_matrix, corr_matrix
 
     def initialize_qubo_model(self):
         """
@@ -207,6 +202,9 @@ class QUnfoldQUBO:
 
         Returns:
             numpy.ndarray: unfolded histogram.
+            numpy.ndarray: errors of the unfolded histogram.
+            numpy.ndarray: the covariance matrix associated to the errors computation.
+            numpy.ndarray: the covariance matrix associated to the errors computation.
         """
 
         def solver(unfolder):
@@ -214,9 +212,11 @@ class QUnfoldQUBO:
             sampleset = sampler.sample(unfolder.bqm, num_reads=num_reads, seed=seed)
             return unfolder._post_process_sampleset(sampleset)
 
-        self.solution = solver(unfolder=self)
-        error = self._compute_error(num_toys, self.solution, solver, num_cores)
-        return self.solution, error
+        solution = solver(unfolder=self)
+        error, cov_matrix, corr_matrix = self._compute_error(
+            num_toys, solution, solver, num_cores
+        )
+        return solution, error, cov_matrix, corr_matrix
 
     def solve_hybrid_sampler(self, num_toys=1, num_cores=None):
         """
@@ -228,6 +228,9 @@ class QUnfoldQUBO:
 
         Returns:
             numpy.ndarray: unfolded histogram.
+            numpy.ndarray: errors of the unfolded histogram.
+            numpy.ndarray: the covariance matrix associated to the errors computation.
+            numpy.ndarray: the covariance matrix associated to the errors computation.
         """
 
         def solver(unfolder):
@@ -235,9 +238,11 @@ class QUnfoldQUBO:
             sampleset = sampler.sample(unfolder.bqm)
             return unfolder._post_process_sampleset(sampleset)
 
-        self.solution = solver(unfolder=self)
-        error = self._compute_error(num_toys, self.solution, solver, num_cores)
-        return self.solution, error
+        solution = solver(unfolder=self)
+        error, cov_matrix, corr_matrix = self._compute_error(
+            num_toys, solution, solver, num_cores
+        )
+        return solution, error, cov_matrix, corr_matrix
 
     def solve_quantum_annealing(self, num_reads, num_toys=1, num_cores=None):
         """
@@ -250,6 +255,9 @@ class QUnfoldQUBO:
 
         Returns:
             numpy.ndarray: unfolded histogram.
+            numpy.ndarray: errors of the unfolded histogram.
+            numpy.ndarray: the covariance matrix associated to the errors computation.
+            numpy.ndarray: the covariance matrix associated to the errors computation.
         """
 
         def solver(unfolder):
@@ -257,36 +265,11 @@ class QUnfoldQUBO:
             sampleset = sampler.sample(unfolder.bqm, num_reads=num_reads)
             return unfolder._post_process_sampleset(sampleset)
 
-        self.solution = solver(unfolder=self)
-        error = self._compute_error(num_toys, self.solution, solver, num_cores)
-        return self.solution, error
-
-    def compute_chi2(self, truth, method="std"):
-        """
-        Compute the chi-square statistic for the unfolded distribution.
-
-        Args:
-            truth (array-like): The true distribution against which to compare.
-            method (str, optional): Method for computing chi-square. Options: "std" (use scipy) or "cov" (use covariance matrix). Default is "std".
-
-        Returns:
-            float or None: The computed chi-square statistic, or None if the method is not recognized.
-        """
-        chi2 = None
-        null_indices = truth == 0
-        truth[null_indices] += 1
-        self.solution[null_indices] += 1
-        if method == "std":
-            chi2, _ = chisquare(
-                self.solution,
-                np.sum(self.solution) / np.sum(truth) * truth,
-            )
-        elif method == "cov":
-            residuals = self.solution - truth
-            inv_covariance_matrix = np.linalg.inv(self.cov_matrix)
-            chi2 = residuals.T @ inv_covariance_matrix @ residuals
-        dof = len(self.solution)
-        return chi2 / dof
+        solution = solver(unfolder=self)
+        error, cov_matrix, corr_matrix = self._compute_error(
+            num_toys, solution, solver, num_cores
+        )
+        return solution, error, cov_matrix, corr_matrix
 
     def compute_energy(self, x):
         """

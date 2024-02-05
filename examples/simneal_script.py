@@ -1,6 +1,6 @@
 import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
-from QUnfold.utility import normalize_response
+from QUnfold.utility import normalize_response, compute_chi2
 
 
 if __name__ == "__main__":
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Run simulated annealing to solve QUBO problem
     unfolder = QUnfoldQUBO(response, measured, lam=0.1)
     unfolder.initialize_qubo_model()
-    unfolded, error = unfolder.solve_simulated_annealing(
+    unfolded, error, cov_matrix, corr_matrix = unfolder.solve_simulated_annealing(
         num_reads=10, num_toys=100, seed=seed
     )
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         unfolded=unfolded[1:-1],
         error=error[1:-1],
         binning=bins,
-        chi2=unfolder.compute_chi2(truth, "std"),
+        chi2=compute_chi2(unfolded, truth, cov_matrix),
     )
     plotter.saveResponse("examples/simneal_response.png")
     plotter.savePlot("examples/simneal_result.png", method="SA")
