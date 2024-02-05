@@ -103,7 +103,7 @@ binning = ... # binning of the distributions
 # Run unfolding
 unfolder = QUnfoldQUBO(response, measured, lam=0.1)
 unfolder.initialize_qubo_model()
-unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=10)
+unfolded_SA, error_SA, cov_matrix_SA, corr_matrix_SA = unfolder.solve_simulated_annealing(num_reads=10, num_toys=100)
 
 # Plot results
 plotter = QUnfoldPlotter(
@@ -113,6 +113,7 @@ plotter = QUnfoldPlotter(
     unfolded=unfolded_SA,
     error=error_SA,
     binning=binning,
+    chi2=compute_chi2(unfolded, truth, cov_matrix),
 )
 plotter.plotResponse()
 plotter.plot()
@@ -126,6 +127,8 @@ which will produce a similar result to this unfolded normal distribution:
 </p>
 
 :warning: The response matrix must be normalized in order to keep the correct binary encoding of input data. The procedure is described in [this](https://github.com/JustWhit3/QUnfold/wiki/How-to-use#:~:text=The%20response%20matrix%20must%20be%20normalized%20before%20unfolding) twiki page.
+
+:warning: To get more information about how the error and covariance/correlation matrices are compute see [this](https://github.com/JustWhit3/QUnfold/wiki/How-to-use#error-computation) twiki page.
 
 ### ROOT case
 
@@ -210,7 +213,9 @@ Comparisons are performed with the following `QUnfold` methods:
 
 The output plots and chi2 for each distribution will be saved into an external `img` directory.
 
-## Run the paper studies
+:warning: An error related to `RooUnfold` may appear, you can ignore it since it is a false positive.
+
+### Run the paper studies
 
 To run the code related to the technical QUnfold paper we are developing:
 
