@@ -1,45 +1,42 @@
 import numpy as np
-from scipy.stats import chisquare
+import scipy as sp
 
 
 def normalize_response(response, truth_mc):
     """
-    Function used to normalize the response matrix using the Monte Carlo generated truth distribution.
+    Normalize the response matrix using the Monte Carlo generated truth histogram.
 
     Args:
-        response (numpy.ndarray): the response matrix to be normalized.
-        truth_mc (numpy.ndarray): the Monte Carlo truth histogram used to normalize the response matrix.
+        response (numpy.ndarray): response matrix to be normalized.
+        truth_mc (numpy.ndarray): Monte Carlo truth histogram for the normalization.
 
     Returns:
-        numpy.ndarray: the normalized response matrix.
+        numpy.ndarray: normalized response matrix.
     """
     return response / (truth_mc + 1e-6)
 
 
 def compute_chi2(unfolded, truth, covariance=None):
     """
-    Compute the chi-square statistic for the unfolded distribution.
+    Compute the chi-square statistic for the unfolded histogram.
 
     Args:
-        unfolded (numpy.ndarray): the unfolded distribution to be compare with truth.
-        truth (numpy.ndarray): the true distribution against which to compare.
-        covariance (numpy.ndarray, optional): the covariance matrix to be used to compute chi2 (default None). If None, chi2 is computed using scipy.
+        unfolded (numpy.ndarray): unfolded histogram to be compared with the truth.
+        truth (numpy.ndarray): target truth histogram.
+        covariance (numpy.ndarray, optional): covariance matrix to compute the chi2 (default is None).
+        If None, chi2 is computed by using scipy.
 
     Returns:
-        float: The computed chi-square statistic.
+        float: chi-square statistic.
     """
-    chi2 = None
     null_indices = truth == 0
     truth[null_indices] += 1
     unfolded[null_indices] += 1
     if covariance is None:
-        chi2, _ = chisquare(
-            unfolded,
-            np.sum(unfolded) / np.sum(truth) * truth,
-        )
+        chi2, _ = sp.stats.chisquare(unfolded, truth)
     else:
         residuals = unfolded - truth
-        inv_covariance_matrix = np.linalg.inv(covariance)
-        chi2 = residuals.T @ inv_covariance_matrix @ residuals
+        inv_covariance = np.linalg.inv(covariance)
+        chi2 = residuals.T @ inv_covariance @ residuals
     dof = len(unfolded)
     return chi2 / dof
