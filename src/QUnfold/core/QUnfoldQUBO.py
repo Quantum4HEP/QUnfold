@@ -137,6 +137,26 @@ class QUnfoldQUBO:
                 hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
+    def _get_qubo_matrix(self):
+        """
+        Get the QUBO matrix from the BQM instance of the unfolding problem.
+
+        Returns:
+            numpy.ndarray: QUBO problem matrix.
+        """
+        qubo_dict, _ = self.bqm.to_qubo()
+        variables = sorted(self.bqm.variables)
+        num_vars = len(variables)
+        Q = np.zeros(shape=(num_vars, num_vars))
+        for i in range(num_vars):
+            for j in range(i, num_vars):
+                key = (variables[i], variables[j])
+                if key in qubo_dict:
+                    Q[i, j] = Q[j, i] = qubo_dict[key]
+                else:
+                    Q[i, j] = Q[j, i] = qubo_dict[key[::-1]]
+        return Q
+
     def _post_process_sampleset(self, sampleset):
         """
         Post-process the output sampleset selecting and decoding the lower-energy sample.
@@ -200,7 +220,7 @@ class QUnfoldQUBO:
         self.labels = [x[i].label for i in range(len(x))]
         self.model = h.compile()
         self.bqm = self.model.to_bqm()
-        self.num_log_qubits = len(self.bqm.variables)
+        self.qubo_matrix = self._get_qubo_matrix()
 
     def solve_simulated_annealing(
         self, num_reads, num_toys=1, num_cores=None, seed=None
