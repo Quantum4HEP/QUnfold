@@ -11,7 +11,7 @@ from QUnfold.utility import (
 
 def test_TH1_to_array():
     """
-    Testing the TH1_to_array function properties. Note that hypothesis is not used since it doesn't support ROOT types.
+    Testing the TH1_to_array function properties.
     """
 
     # Variables
@@ -36,7 +36,7 @@ def test_TH1_to_array():
 
 def test_TH2_to_array():
     """
-    Testing the TH2F_to_numpy function properties. Note that hypothesis is not used since it doesn't support ROOT types.
+    Testing the TH2F_to_numpy function properties.
     """
 
     # Create TH2F histogram

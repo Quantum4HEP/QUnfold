@@ -55,7 +55,7 @@ Research documentation:
 Further documentation:
 
 - [Wiki pages](https://github.com/JustWhit3/QUnfold/wiki): contain detailed description of each feature and examples.
-- [Doxygen page](https://justwhit3.github.io/QUnfold/): contains documentation about all the functions and classes of the module.
+- [ReadtheDocs page](https://qunfold.readthedocs.io/en/latest/): contains documentation about all the functions and classes of the module.
 - [Contributing file](https://github.com/JustWhit3/QUnfold/blob/main/CONTRIBUTING.md): contains instructions about how to contribute.
 
 ## Developer environment
