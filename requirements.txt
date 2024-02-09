@@ -1,5 +1,6 @@
 dwave-ocean-sdk
 pyqubo
+gurobipy
 matplotlib
 pytest
 hypothesis

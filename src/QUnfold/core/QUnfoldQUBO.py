@@ -1,6 +1,8 @@
 import os
 import numpy as np
 from tqdm import tqdm
+import gurobipy as gp
+from gurobipy import GRB
 from concurrent.futures import ThreadPoolExecutor
 from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
@@ -70,32 +72,27 @@ class QUnfoldQUBO:
         D += np.diag(diag1, k=1) + np.diag(diag1, k=-1)
         return D
 
-    def _get_expected_num_entries(self):
+    def _define_upper_bounds(self):
         """
-        Get the array of the expected number of entries in each bin.
-
-        Returns:
-            numpy.ndarray: expected histogram.
+        Define the upper bound value for each integer variable of the unfolded histogram.
         """
         effs = np.sum(self.R, axis=0)
         effs[effs == 0] = 1
         num_entries = self.d / effs
-        return num_entries
+        upper_bounds = [
+            int(2 ** np.ceil(np.log2((ne + 1) * 1.2))) - 1 for ne in num_entries
+        ]
+        self._upper_bounds = upper_bounds
 
     def _define_variables(self):
         """
-        Define the binary encoded "integer" variables of the QUBO problem.
-
-        Returns:
-            list: "integer" QUBO problem variables.
+        Define the binary encoded integer variables of the QUBO problem.
         """
-        num_entries = self._get_expected_num_entries()
-        variables = []
-        for i in range(len(num_entries)):
-            upper = int(2 ** np.ceil(np.log2((num_entries[i] + 1) * 1.2))) - 1
-            var = LogEncInteger(label=f"x{i}", value_range=(0, upper))
-            variables.append(var)
-        return variables
+        variables = [
+            LogEncInteger(label=f"x{i}", value_range=(0, int(self._upper_bounds[i])))
+            for i in range(len(self.d))
+        ]
+        self._variables = variables
 
     def _get_linear_array(self):
         """
@@ -116,16 +113,11 @@ class QUnfoldQUBO:
         G = self._get_laplacian(dim=len(self.d))
         return (self.R.T @ self.R) + self.lam * (G.T @ G)
 
-    def _define_hamiltonian(self, x):
+    def _define_hamiltonian(self):
         """
         Define the "integer" Hamiltonian expression of the QUBO problem.
-
-        Parameters:
-            x (list): "integer" QUBO problem variables.
-
-        Returns:
-            pyqubo.Expression: "integer" Hamiltonian expression.
         """
+        x = self._variables
         hamiltonian = 0
         num_bins = len(self.d)
         a = self._get_linear_array()
@@ -135,27 +127,22 @@ class QUnfoldQUBO:
         for i in range(num_bins):
             for j in range(num_bins):
                 hamiltonian += B[i, j] * x[i] * x[j]
-        return hamiltonian
+        self._hamiltonian = hamiltonian
 
-    def _get_qubo_matrix(self):
+    def _define_qubo_matrix(self):
         """
         Get the QUBO matrix from the BQM instance of the unfolding problem.
-
-        Returns:
-            numpy.ndarray: QUBO problem matrix.
         """
-        qubo_dict, _ = self.bqm.to_qubo()
-        variables = sorted(self.bqm.variables)
-        num_vars = len(variables)
-        Q = np.zeros(shape=(num_vars, num_vars))
-        for i in range(num_vars):
-            for j in range(i, num_vars):
-                key = (variables[i], variables[j])
-                if key in qubo_dict:
-                    Q[i, j] = Q[j, i] = qubo_dict[key]
-                else:
-                    Q[i, j] = Q[j, i] = qubo_dict[key[::-1]]
-        return Q
+        vars = sorted(self._bqm.variables)
+        n = len(vars)
+        a = np.array([self._bqm.get_linear(v) for v in vars])
+        B = np.zeros(shape=(n, n))
+        for i in range(n):
+            for j in range(i + 1, n):
+                B[i, j] = self._bqm.get_quadratic(vars[i], vars[j])
+        Q = 0.5 * (B + B.T)
+        np.fill_diagonal(Q, a)
+        self._qubo_matrix = Q
 
     def _post_process_sampleset(self, sampleset):
         """
@@ -167,8 +154,8 @@ class QUnfoldQUBO:
         Returns:
             numpy.ndarray: unfolded histogram.
         """
-        sample = self.model.decode_sample(sampleset.first.sample, vartype="BINARY")
-        solution = np.array([sample.subh[label] for label in self.labels])
+        sample = self._model.decode_sample(sampleset.first.sample, vartype="BINARY")
+        solution = np.array([sample.subh[var.label] for var in self._variables])
         return solution
 
     def _compute_stat_errors(self, solver, solution, num_toys, num_cores):
@@ -215,12 +202,54 @@ class QUnfoldQUBO:
         """
         Define the QUBO model and build the BQM instance for the unfolding problem.
         """
-        x = self._define_variables()
-        h = self._define_hamiltonian(x)
-        self.labels = [x[i].label for i in range(len(x))]
-        self.model = h.compile()
-        self.bqm = self.model.to_bqm()
-        self.qubo_matrix = self._get_qubo_matrix()
+        self._define_upper_bounds()
+        self._define_variables()
+        self._define_hamiltonian()
+        self._model = self._hamiltonian.compile()
+        self._bqm = self._model.to_bqm()
+        self._define_qubo_matrix()
+
+    def solve_gurobi_integer(self):
+        """
+        Compute the unfolded histogram by running Gurobi solver on the Quadratic Integer model.
+
+        Returns:
+            numpy.ndarray: unfolded histogram.
+        """
+        model = gp.Model()
+        model.setParam("OutputFlag", 0)
+        x = [model.addVar(vtype=GRB.INTEGER, lb=0, ub=ub) for ub in self._upper_bounds]
+        a = self._get_linear_array()
+        B = self._get_quadratic_matrix()
+        model.setObjective(a @ x + x @ B @ x, sense=GRB.MINIMIZE)
+        model.optimize()
+        solution = np.array([var.x for var in x])
+        return solution
+
+    def solve_gurobi_binary(self):
+        """
+        Compute the unfolded histogram by running Gurobi solver on the QUBO model.
+
+        Returns:
+            numpy.ndarray: unfolded histogram.
+        """
+        model = gp.Model()
+        model.setParam("OutputFlag", 0)
+        num_bits = [int(np.log2(ub + 1)) for ub in self._upper_bounds]
+        x = [
+            model.addVar(vtype=GRB.BINARY)
+            for i in range(len(self.d))
+            for _ in range(num_bits[i])
+        ]
+        Q = self._qubo_matrix
+        model.setObjective(x @ Q @ x, sense=GRB.MINIMIZE)
+        model.optimize()
+        bin_solution = np.array([var.x for var in x], dtype=int)
+        arrays = np.split(bin_solution, np.cumsum(num_bits[:-1]))
+        solution = np.array(
+            [int("".join(arr.astype(str))[::-1], base=2) for arr in arrays], dtype=float
+        )
+        return solution
 
     def solve_simulated_annealing(
         self, num_reads, num_toys=1, num_cores=None, seed=None
@@ -243,7 +272,7 @@ class QUnfoldQUBO:
 
         def solver(unfolder):
             sampler = SimulatedAnnealingSampler()
-            sampleset = sampler.sample(unfolder.bqm, num_reads=num_reads, seed=seed)
+            sampleset = sampler.sample(unfolder._bqm, num_reads=num_reads, seed=seed)
             return unfolder._post_process_sampleset(sampleset)
 
         solution = solver(unfolder=self)
@@ -269,7 +298,7 @@ class QUnfoldQUBO:
 
         def solver(unfolder):
             sampler = LeapHybridSampler()
-            sampleset = sampler.sample(unfolder.bqm)
+            sampleset = sampler.sample(unfolder._bqm)
             return unfolder._post_process_sampleset(sampleset)
 
         solution = solver(unfolder=self)
@@ -296,7 +325,7 @@ class QUnfoldQUBO:
 
         def solver(unfolder):
             sampler = EmbeddingComposite(DWaveSampler())
-            sampleset = sampler.sample(unfolder.bqm, num_reads=num_reads)
+            sampleset = sampler.sample(unfolder._bqm, num_reads=num_reads)
             return unfolder._post_process_sampleset(sampleset)
 
         solution = solver(unfolder=self)
@@ -315,11 +344,10 @@ class QUnfoldQUBO:
         Returns:
             float: QUBO Hamiltonian energy.
         """
-        num_entries = self._get_expected_num_entries()
         x_binary = {}
         for i in range(len(x)):
-            num_bits = int(np.ceil(np.log2((num_entries[i] + 1) * 1.2)))
+            num_bits = int(np.log2(self._upper_bounds[i] + 1))
             bitstr = np.binary_repr(int(x[i]), width=num_bits)
             for j, bit in enumerate(bitstr[::-1]):
                 x_binary[f"x{i}[{j}]"] = int(bit)
-        return self.bqm.energy(x_binary)
+        return self._bqm.energy(x_binary)
