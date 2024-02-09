@@ -2,8 +2,13 @@ Welcome to QUnfold's documentation!
 ===================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
+
+   introduction
+   qunfoldqubo
+   qunfoldplotter
+   utility
 
 
 Indices and tables
