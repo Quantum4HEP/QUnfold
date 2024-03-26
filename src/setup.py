@@ -4,7 +4,7 @@ if __name__ == "__main__":
     setup(
         name="QUnfold",
         packages=find_packages(),
-        version="0.2.0",
+        version="0.3.0",
         author="Gianluca Bianco, Simone Gasperini",
         author_email="biancogianluca9@gmail.com, simone.gasperini4@unibo.it",
         url="https://github.com/JustWhit3/QUnfold/tree/main/src/QUnfold",
