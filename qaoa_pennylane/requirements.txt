@@ -1,0 +1,4 @@
+pennylane
+jax
+optax
+tqdm
