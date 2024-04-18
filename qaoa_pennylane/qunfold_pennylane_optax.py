@@ -4,11 +4,13 @@ import jax
 import jax.numpy as jnp
 import optax
 
-a_vector = np.loadtxt("a_vector.txt")
-B_matrix = np.loadtxt("B_matrix.txt")
-solution_bitstring = np.loadtxt("min_energy_bitstring.txt").astype(int)
-solution_histogram = np.loadtxt("min_energy_solution.txt").astype(int)
-upper_bounds = np.loadtxt("upper_bounds.txt")
+directory = "exponential"
+
+a_vector = np.loadtxt(f"{directory}/a_vector.txt")
+B_matrix = np.loadtxt(f"{directory}/B_matrix.txt")
+solution_bitstring = np.loadtxt(f"{directory}/min_energy_bitstring.txt").astype(int)
+solution_histogram = np.loadtxt(f"{directory}/min_energy_solution.txt").astype(int)
+upper_bounds = np.loadtxt(f"{directory}/upper_bounds.txt")
 
 print("Upper bounds =", upper_bounds)
 
