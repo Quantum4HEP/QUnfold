@@ -55,7 +55,7 @@ if __name__ == "__main__":
         unfolded=unfolded[1:-1],
         error=error[1:-1],
         binning=bins,
-        chi2=compute_chi2(unfolded, truth, cov_matrix),
+        chi2=compute_chi2(unfolded[1:-1], truth[1:-1], cov_matrix[1:-1, 1:-1]),
     )
     plotter.saveResponse("examples/simneal_response.png")
     plotter.savePlot("examples/simneal_result.png", method="SA")
