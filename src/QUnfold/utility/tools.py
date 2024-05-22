@@ -29,14 +29,21 @@ def compute_chi2(unfolded, truth, covariance=None):
     Returns:
         float: chi-square statistic.
     """
+
+    # Handle zero entries in the truth histogram
     null_indices = truth == 0
     truth[null_indices] += 1
     unfolded[null_indices] += 1
+
     if covariance is None:
-        chi2, _ = sp.stats.chisquare(unfolded, truth)
+        chi2, _ = sp.stats.chisquare(
+            unfolded,
+            np.sum(unfolded) / np.sum(truth) * truth,
+        )
     else:
         residuals = unfolded - truth
         inv_covariance = np.linalg.inv(covariance)
         chi2 = residuals.T @ inv_covariance @ residuals
-    dof = len(unfolded)
+
+    dof = len(unfolded) - 1  # Degrees of freedom
     return chi2 / dof
