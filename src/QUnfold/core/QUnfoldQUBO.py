@@ -2,12 +2,13 @@ import os
 import numpy as np
 from tqdm import tqdm
 import gurobipy as gp
+import minorminer
 from gurobipy import GRB
 from concurrent.futures import ThreadPoolExecutor
 from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
-from dwave.system import DWaveSampler, EmbeddingComposite
+from dwave.system import DWaveSampler, FixedEmbeddingComposite
 
 
 class QUnfoldQUBO:
@@ -178,9 +179,11 @@ class QUnfoldQUBO:
             smeared_d = np.random.poisson(self.d)
             unfolder = QUnfoldQUBO(self.R, smeared_d, lam=self.lam)
             unfolder.initialize_qubo_model()
+            unfolder.initialize_dwave_system()
             unfolded_results[i] = solver(unfolder)
 
-        num_cores = num_cores if num_cores is not None else os.cpu_count() - 2
+        if num_cores is None:
+            num_cores = os.cpu_count() - 2
         if num_toys == 1:
             return np.sqrt(solution), None, None
         else:
@@ -208,6 +211,23 @@ class QUnfoldQUBO:
         self._model = self._hamiltonian.compile()
         self._bqm = self._model.to_bqm()
         self._define_qubo_matrix()
+        self.num_logical_qubits = len(self._bqm.variables)
+
+    def initialize_dwave_system(self, dwave_system=None):
+        """
+        Define the D-Wave System sampler and find the graph embedding on the QPU.
+
+        Args:
+            dwave_system (str): name of the D-Wave System solver (e.g. "Advantage_system4.1")
+        """
+        self._sampler = DWaveSampler(solver=dwave_system)
+        target_edgelist = self._sampler.edgelist
+        source_edgelist = list(self._bqm.quadratic) + [(v, v) for v in self._bqm.linear]
+        embedding = minorminer.find_embedding(
+            S=source_edgelist, T=target_edgelist, threads=1
+        )
+        self.embedding = embedding
+        self.num_physical_qubits = sum(len(qubits) for qubits in embedding.values())
 
     def solve_gurobi_integer(self):
         """
@@ -324,7 +344,9 @@ class QUnfoldQUBO:
         """
 
         def solver(unfolder):
-            sampler = EmbeddingComposite(DWaveSampler())
+            sampler = FixedEmbeddingComposite(
+                child_sampler=self._sampler, embedding=self.embedding
+            )
             sampleset = sampler.sample(unfolder._bqm, num_reads=num_reads)
             return unfolder._post_process_sampleset(sampleset)
 
