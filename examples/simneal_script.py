@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
     # Run simulated annealing to solve QUBO problem
     unfolder = QUnfoldQUBO(response, measured, lam=0.1)
-    unfolder.initialize_qubo_model()
     unfolded, error, cov_matrix, corr_matrix = unfolder.solve_simulated_annealing(
         num_reads=10, num_toys=100, seed=seed
     )

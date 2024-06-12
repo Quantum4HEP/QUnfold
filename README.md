@@ -103,7 +103,6 @@ binning = ... # binning of the distributions
 
 # Run unfolding
 unfolder = QUnfoldQUBO(response, measured, lam=0.1)
-unfolder.initialize_qubo_model()
 unfolded_SA, error_SA, cov_matrix_SA, corr_matrix_SA = unfolder.solve_simulated_annealing(num_reads=10, num_toys=100)
 
 # Plot results

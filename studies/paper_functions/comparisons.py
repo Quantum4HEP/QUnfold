@@ -236,7 +236,6 @@ def make_comparisons(reco, particle):
         elif var == "eta_lep2":
             lam = 0.00001
         unfolder = QUnfoldQUBO(measured=measured, response=response, lam=lam)
-        unfolder.initialize_qubo_model()
 
         # Simulated annealing
         unfolded_SA, error_SA, cov_SA, _ = unfolder.solve_simulated_annealing(

@@ -1,4 +1,5 @@
 from QUnfold import QUnfoldQUBO
+from dwave.system import DWaveSampler
 
 
 def QUnfold_unfolder(unf_type, response, measured, distr, n_toys):
@@ -17,7 +18,6 @@ def QUnfold_unfolder(unf_type, response, measured, distr, n_toys):
     elif distr == "breit-wigner":
         lam = 0.0001
     unfolder = QUnfoldQUBO(response, measured, lam=lam)
-    unfolder.initialize_qubo_model()
 
     if unf_type == "SA":
         unfolded, error, cov_matrix, _ = unfolder.solve_simulated_annealing(
@@ -26,8 +26,9 @@ def QUnfold_unfolder(unf_type, response, measured, distr, n_toys):
     elif unf_type == "HYB":
         unfolded, error, cov_matrix, _ = unfolder.solve_hybrid_sampler(num_toys=n_toys)
     elif unf_type == "QA":
+        dwave_sampler = DWaveSampler()
         unfolded, error, cov_matrix, _ = unfolder.solve_quantum_annealing(
-            num_reads=n_reads, num_toys=n_toys
+            dwave_sampler=dwave_sampler, num_reads=n_reads, num_toys=n_toys
         )
 
     return unfolded, error, cov_matrix
