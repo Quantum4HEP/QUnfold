@@ -69,10 +69,12 @@ class QUnfoldQUBO:
         B = self.quadratic_coeffs
         hamiltonian = 0
         for i in range(self.num_bins):
-            hamiltonian += a[i] * x[i]
+            if a[i] != 0:
+                hamiltonian += a[i] * x[i]
         for i in range(self.num_bins):
             for j in range(self.num_bins):
-                hamiltonian += B[i, j] * x[i] * x[j]
+                if B[i, j] != 0:
+                    hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
     @property
