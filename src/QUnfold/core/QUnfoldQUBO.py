@@ -110,11 +110,14 @@ class QUnfoldQUBO:
         return minorminer.find_embedding(S=source_edgelist, T=target_edgelist)
 
     def _post_process_sampleset(self, sampleset):
-        best_bitstr = sampleset.first.sample
-        best_sample = self.pyqubo_model.decode_sample(best_bitstr, vartype="BINARY")
-        solution = np.array(
-            [best_sample.subh[var.label] for var in self.pyqubo_variables]
-        )
+        all_samples = self.pyqubo_model.decode_sampleset(sampleset)
+        solutions, energies = [], []
+        for sample in all_samples:
+            solutions.append([sample.subh[var.label] for var in self.pyqubo_variables])
+            energies.append(sample.energy)
+        min_energy = min(energies)
+        weights = np.exp(-np.abs(np.array(energies) - min_energy) / abs(min_energy))
+        solution = np.average(solutions, weights=weights, axis=0)
         return solution
 
     def _run_montecarlo_toys(self, num_toys, num_cores, **kwargs):
