@@ -8,6 +8,7 @@ from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, FixedEmbeddingComposite
+from functools import cached_property
 
 
 class QUnfoldQUBO:
@@ -25,15 +26,19 @@ class QUnfoldQUBO:
         D += np.diag(diag1, k=1) + np.diag(diag1, k=-1)
         return D
 
-    @property
+    @cached_property
     def num_bins(self):
         return len(self.d)
 
-    @property
+    @cached_property
     def num_logical_qubits(self):
         return self.dwave_bqm.num_variables
 
-    @property
+    @cached_property
+    def num_physical_qubits(self):
+        return sum(len(chain) for chain in self.graph_embedding.values())
+
+    @cached_property
     def upper_bounds(self):
         efficiency = np.sum(self.R, axis=0)
         efficiency[efficiency == 0] = 1
@@ -43,7 +48,7 @@ class QUnfoldQUBO:
             for bin in range(self.num_bins)
         ]
 
-    @property
+    @cached_property
     def pyqubo_variables(self):
         n = len(str(self.num_bins - 1))
         labels = ["x" + str(bin).zfill(n) for bin in range(self.num_bins)]
@@ -53,16 +58,16 @@ class QUnfoldQUBO:
             for bin in range(self.num_bins)
         ]
 
-    @property
+    @cached_property
     def linear_coeffs(self):
         return -2 * (self.R.T @ self.d)
 
-    @property
+    @cached_property
     def quadratic_coeffs(self):
         G = self._get_laplacian(dim=self.num_bins)
         return (self.R.T @ self.R) + self.lam * (G.T @ G)
 
-    @property
+    @cached_property
     def pyqybo_hamiltonian(self):
         x = self.pyqubo_variables
         a = self.linear_coeffs
@@ -77,30 +82,39 @@ class QUnfoldQUBO:
                     hamiltonian += B[i, j] * x[i] * x[j]
         return hamiltonian
 
-    @property
+    @cached_property
     def pyqubo_model(self):
         return self.pyqybo_hamiltonian.compile()
 
-    @property
+    @cached_property
     def dwave_bqm(self):
         return self.pyqubo_model.to_bqm()
 
-    @property
+    @cached_property
     def qubo_matrix(self):
-        bqm = self.dwave_bqm
-        vars = sorted(bqm.variables)
-        qubo_dict, _ = bqm.to_qubo()
-        Q = np.zeros(shape=(len(vars), len(vars)))
+        vars = sorted(self.dwave_bqm.variables)
+        qubo_dict, _ = self.dwave_bqm.to_qubo()
+        Q = np.empty(shape=(len(vars), len(vars)))
         for i, u in enumerate(vars):
             for j, v in enumerate(vars):
                 Q[i, j] = qubo_dict.get((u, v), 0)
+        Q = 0.5 * (Q + Q.T)
         return Q
 
+    @cached_property
+    def graph_embedding(self):
+        target_edgelist = self._sampler.edgelist
+        source_edgelist = list(self.dwave_bqm.quadratic) + [
+            (v, v) for v in self.dwave_bqm.linear
+        ]
+        return minorminer.find_embedding(S=source_edgelist, T=target_edgelist)
+
     def _post_process_sampleset(self, sampleset):
-        vars = self.pyqubo_variables
         best_bitstr = sampleset.first.sample
         best_sample = self.pyqubo_model.decode_sample(best_bitstr, vartype="BINARY")
-        solution = np.array([best_sample.subh[var.label] for var in vars])
+        solution = np.array(
+            [best_sample.subh[var.label] for var in self.pyqubo_variables]
+        )
         return solution
 
     def _run_montecarlo_toys(self, num_toys, num_cores, **kwargs):
@@ -108,8 +122,9 @@ class QUnfoldQUBO:
             smeared_d = np.random.poisson(self.d)
             unfolder = QUnfoldQUBO(self.R, smeared_d, self.lam)
             if isinstance(self._sampler, DWaveSampler):
-                embedding = unfolder.get_graph_embedding(self._sampler)
-                sampler = FixedEmbeddingComposite(self._sampler, embedding=embedding)
+                sampler = FixedEmbeddingComposite(
+                    self._sampler, embedding=unfolder.graph_embedding
+                )
             else:
                 sampler = self._sampler
             sampleset = sampler.sample(unfolder.dwave_bqm, **kwargs)
@@ -131,54 +146,40 @@ class QUnfoldQUBO:
         corr = np.corrcoef(solutions, rowvar=False)
         return error, cov, corr
 
-    def get_graph_embedding(self, dwave_sampler, **kwargs):
-        target_edgelist = dwave_sampler.edgelist
-        bqm = self.dwave_bqm
-        source_edgelist = list(bqm.quadratic) + [(v, v) for v in bqm.linear]
-        return minorminer.find_embedding(S=source_edgelist, T=target_edgelist, **kwargs)
-
-    def get_num_physical_qubits(self, dwave_sampler):
-        embedding = self.get_graph_embedding(dwave_sampler)
-        return sum(len(chain) for chain in embedding.values())
-
     def solve_simulated_annealing(
         self, num_reads, num_toys=None, num_cores=None, seed=None
     ):
-        sampler = SimulatedAnnealingSampler()
-        sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
+        self._sampler = SimulatedAnnealingSampler()
+        sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
         solution = self._post_process_sampleset(sampleset)
         if num_toys is None:
             error, cov, corr = np.sqrt(solution), None, None
         else:
-            self._sampler = sampler
             error, cov, corr = self._run_montecarlo_toys(
                 num_toys, num_cores, num_reads=num_reads, seed=seed
             )
         return solution, error, cov, corr
 
     def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
-        sampler = LeapHybridSampler()
-        sampleset = sampler.sample(self.dwave_bqm)
+        self._sampler = LeapHybridSampler()
+        sampleset = self._sampler.sample(self.dwave_bqm)
         solution = self._post_process_sampleset(sampleset)
         if num_toys is None:
             error, cov, corr = np.sqrt(solution), None, None
         else:
-            self._sampler = sampler
             error, cov, corr = self._run_montecarlo_toys(num_toys, num_cores)
         return solution, error, cov, corr
 
-    def solve_quantum_annealing(
-        self, dwave_sampler, num_reads, embedding=None, num_toys=None, num_cores=None
-    ):
-        if embedding is None:
-            embedding = self.get_graph_embedding(dwave_sampler)
-        sampler = FixedEmbeddingComposite(dwave_sampler, embedding=embedding)
+    def set_quantum_device(self, device_name):
+        self._sampler = DWaveSampler(solver=device_name)
+
+    def solve_quantum_annealing(self, num_reads, num_toys=None, num_cores=None):
+        sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
         solution = self._post_process_sampleset(sampleset)
         if num_toys is None:
             error, cov, corr = np.sqrt(solution), None, None
         else:
-            self._sampler = dwave_sampler
             error, cov, corr = self._run_montecarlo_toys(
                 num_toys, num_cores, num_reads=num_reads
             )
@@ -186,9 +187,8 @@ class QUnfoldQUBO:
 
     def compute_energy(self, x):
         x_binary = {}
-        bounds = self.upper_bounds
         for bin in range(self.num_bins):
-            num_bits = int(np.log2(bounds[bin] + 1))
+            num_bits = int(np.log2(self.upper_bounds[bin] + 1))
             bitstr = np.binary_repr(int(x[bin]), width=num_bits)
             for idx, bit in enumerate(bitstr[::-1]):
                 x_binary[f"x{bin}[{idx}]"] = int(bit)
@@ -198,8 +198,10 @@ class QUnfoldQUBO:
     def solve_gurobi_integer(self):
         model = gurobipy.Model()
         model.setParam("OutputFlag", 0)
-        bounds = self.upper_bounds
-        x = [model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=ub) for ub in bounds]
+        x = [
+            model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=ub)
+            for ub in self.upper_bounds
+        ]
         a = self.linear_coeffs
         B = self.quadratic_coeffs
         model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
@@ -211,8 +213,7 @@ class QUnfoldQUBO:
     def solve_gurobi_binary(self):
         model = gurobipy.Model()
         model.setParam("OutputFlag", 0)
-        bounds = self.upper_bounds
-        num_bits = [int(np.log2(ub + 1)) for ub in bounds]
+        num_bits = [int(np.log2(ub + 1)) for ub in self.upper_bounds]
         x = [
             model.addVar(vtype=gurobipy.GRB.BINARY)
             for bin in range(self.num_bins)
