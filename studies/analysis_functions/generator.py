@@ -1,10 +1,9 @@
-# Main modules
-import ROOT as r
+import ROOT
 import numpy as np
 from array import array
 
-# Settings
-r.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
+ROOT.gRandom.SetSeed(12345)
 
 
 def smear(xt, bias, smearing, eff=1):
@@ -18,10 +17,10 @@ def smear(xt, bias, smearing, eff=1):
     Returns:
         float or None: The resulting value after applying the smearing. Returns None if the value is filtered based on efficiency.
     """
-    x = r.gRandom.Rndm()
+    x = ROOT.gRandom.Rndm()
     if x > eff:
         return None
-    xsmear = r.gRandom.Gaus(bias, smearing)
+    xsmear = ROOT.gRandom.Gaus(bias, smearing)
     return xt + xsmear
 
 
@@ -47,18 +46,16 @@ def generate_standard(
         ROOT.TH1F: the filled measured histogram.
         ROOT.TH2F: the filled response matrix.
     """
-
     # Data generation
     if type == "data":
-        r.gRandom.SetSeed(12345)
-        for i in range(samples):
+        for _ in range(samples):
             xt = 0
             if distr == "breit-wigner":
-                xt = r.gRandom.BreitWigner(5.3, 2.1)
+                xt = ROOT.gRandom.BreitWigner(5.3, 2.1)
             elif distr == "normal":
-                xt = r.gRandom.Gaus(5.3, 1.4)
+                xt = ROOT.gRandom.Gaus(5.3, 1.4)
             elif distr == "exponential":
-                xt = r.gRandom.Exp(2.5)
+                xt = ROOT.gRandom.Exp(2.5)
             elif distr == "gamma":
                 xt = np.random.gamma(5, 1)
             truth.Fill(xt)
@@ -70,15 +67,14 @@ def generate_standard(
 
     # Response generation
     elif type == "response":
-        r.gRandom.SetSeed(556)
-        for i in range(samples):
+        for _ in range(samples):
             xt = 0
             if distr == "breit-wigner":
-                xt = r.gRandom.BreitWigner(5.3, 2.1)
+                xt = ROOT.gRandom.BreitWigner(5.3, 2.1)
             elif distr == "normal":
-                xt = r.gRandom.Gaus(5.3, 1.4)
+                xt = ROOT.gRandom.Gaus(5.3, 1.4)
             elif distr == "exponential":
-                xt = r.gRandom.Exp(2.5)
+                xt = ROOT.gRandom.Exp(2.5)
             elif distr == "gamma":
                 xt = np.random.gamma(5, 1)
             x = smear(xt, bias, smearing, eff)
@@ -111,18 +107,16 @@ def generate_double_peaked(
         ROOT.TH1F: the filled measured histogram.
         ROOT.TH2F: the filled response matrix.
     """
-
     # Data generation
     if type == "data":
-        r.gRandom.SetSeed(12345)
-        for i in range(samples):
-            xt = r.gRandom.Gaus(3.3, 0.9)
+        for _ in range(samples):
+            xt = ROOT.gRandom.Gaus(3.3, 0.9)
             truth.Fill(xt)
             x = smear(xt, bias, smearing, eff)
             if x != None:
                 measured.Fill(x)
-        for i in range(samples):
-            xt = r.gRandom.Gaus(6.4, 1.2)
+        for _ in range(samples):
+            xt = ROOT.gRandom.Gaus(6.4, 1.2)
             truth.Fill(xt)
             x = smear(xt, bias, smearing, eff)
             if x != None:
@@ -132,16 +126,15 @@ def generate_double_peaked(
 
     # Response generation
     elif type == "response":
-        r.gRandom.SetSeed(556)
-        for i in range(samples):
-            xt = r.gRandom.Gaus(3.3, 0.9)
+        for _ in range(samples):
+            xt = ROOT.gRandom.Gaus(3.3, 0.9)
             x = smear(xt, bias, smearing, eff)
             if x != None:
                 response.Fill(x, xt)
             else:
                 response.Miss(xt)
-        for i in range(samples):
-            xt = r.gRandom.Gaus(6.4, 1.2)
+        for _ in range(samples):
+            xt = ROOT.gRandom.Gaus(6.4, 1.2)
             x = smear(xt, bias, smearing, eff)
             if x != None:
                 response.Fill(x, xt)
@@ -170,24 +163,11 @@ def generate(distr, binning, samples, bias, smearing, eff):
         ROOT.TH1F: The histogram representing the measured distribution.
         ROOT.RooUnfoldResponse: The response object used for unfolding.
     """
-
-    # Initialize variables
     bins = len(binning) - 1
-    truth = r.TH1F(
-        "Truth",
-        "",
-        bins,
-        array("d", binning),
-    )
-    measured = r.TH1F(
-        "Measured",
-        "",
-        bins,
-        array("d", binning),
-    )
-    response = r.RooUnfoldResponse(bins, binning[0], binning[-1])
+    truth = ROOT.TH1F(f"Truth_{distr}", "", bins, array("d", binning))
+    measured = ROOT.TH1F(f"Measured_{distr}", "", bins, array("d", binning))
+    response = ROOT.RooUnfoldResponse(bins, binning[0], binning[-1])
 
-    # Fill histograms
     if any(d in distr for d in ["normal", "breit-wigner", "exponential", "gamma"]):
         truth, measured = generate_standard(
             truth, measured, response, "data", distr, samples, bias, smearing, eff

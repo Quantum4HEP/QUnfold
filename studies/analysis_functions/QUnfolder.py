@@ -1,34 +1,25 @@
 from QUnfold import QUnfoldQUBO
-from dwave.system import DWaveSampler
 
 
-def QUnfold_unfolder(unf_type, response, measured, distr, n_toys):
-    unfolded = None
-    error = None
-    cov_matrix = None
-    n_reads = 100  # 1000
-    lam = 0.05
+def run_QUnfold(method, response, measured, lam, num_reads=None, num_toys=None):
+    unfolder = QUnfoldQUBO(response=response, measured=measured, lam=lam)
+    unfolder.initialize_qubo_model()
 
-    if distr == "normal":
-        lam = 0.03
-    elif distr == "gamma":
-        lam = 0.055
-    elif distr == "exponential":
-        lam = 0.001
-    elif distr == "breit-wigner":
-        lam = 0.0001
-    unfolder = QUnfoldQUBO(response, measured, lam=lam)
-
-    if unf_type == "SA":
-        unfolded, error, cov_matrix, _ = unfolder.solve_simulated_annealing(
-            num_reads=n_reads, num_toys=n_toys
+    if method == "SA":
+        sol, err, cov = unfolder.solve_simulated_annealing(
+            num_reads=num_reads,
+            num_toys=num_toys,
         )
-    elif unf_type == "HYB":
-        unfolded, error, cov_matrix, _ = unfolder.solve_hybrid_sampler(num_toys=n_toys)
-    elif unf_type == "QA":
-        dwave_sampler = DWaveSampler()
-        unfolded, error, cov_matrix, _ = unfolder.solve_quantum_annealing(
-            dwave_sampler=dwave_sampler, num_reads=n_reads, num_toys=n_toys
+    elif method == "HYB":
+        sol, err, cov = unfolder.solve_hybrid_sampler(
+            num_toys=num_toys,
+        )
+    elif method == "QA":
+        unfolder.set_quantum_device()
+        unfolder.set_graph_embedding()
+        sol, err, cov, _ = unfolder.solve_quantum_annealing(
+            num_reads=num_reads,
+            num_toys=num_toys,
         )
 
-    return unfolded, error, cov_matrix
+    return sol, err, cov

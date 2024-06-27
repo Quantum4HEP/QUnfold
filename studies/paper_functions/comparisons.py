@@ -1,7 +1,7 @@
 import sys, os
 import ROOT
 import numpy as np
-import matplotlib.pyplot as plt
+import pylab as plt
 from QUnfold import QUnfoldQUBO
 from QUnfold.utility import (
     TH1_to_array,
@@ -192,7 +192,7 @@ def make_comparisons(reco, particle):
         # "eta_lep1",
         # "eta_lep2",
     ]
-    n_toys = 50
+    num_toys = 50
     quantum = False
 
     # RUnning over variables
@@ -239,27 +239,25 @@ def make_comparisons(reco, particle):
 
         # Simulated annealing
         unfolded_SA, error_SA, cov_SA, _ = unfolder.solve_simulated_annealing(
-            num_reads=num_reads, num_toys=n_toys
+            num_reads=num_reads, num_toys=num_toys
         )
         chi2_SA = None
         if cov_SA is None:
-            chi2_SA = compute_chi2(unfolded_SA[1:-1], truth[1:-1])
+            chi2_SA = compute_chi2(unfolded_SA, truth)
         else:
-            chi2_SA = compute_chi2(unfolded_SA[1:-1], truth[1:-1], cov_SA[1:-1, 1:-1])
+            chi2_SA = compute_chi2(unfolded_SA, truth, cov_SA)
 
         # Hybrid solver
         unfolded_HYB, error_HYB, chi2_HYB = None, None, None
         if quantum == True:
             unfolded_HYB, error_HYB, cov_HYB, _ = unfolder.solve_hybrid_sampler(
-                num_toys=n_toys
+                num_toys=num_toys
             )
             chi2_HYB = None
             if cov_HYB is None:
-                chi2_HYB = compute_chi2(unfolded_HYB[1:-1], truth[1:-1])
+                chi2_HYB = compute_chi2(unfolded_HYB, truth)
             else:
-                chi2_HYB = compute_chi2(
-                    unfolded_HYB[1:-1], truth[1:-1], cov_HYB[1:-1, 1:-1]
-                )
+                chi2_HYB = compute_chi2(unfolded_HYB, truth, cov_HYB)
 
         # Make RooUnfold response
         m_response = ROOT.RooUnfoldResponse(h_mc_measured, h_mc_truth, m_response)
@@ -273,24 +271,22 @@ def make_comparisons(reco, particle):
         unfolder.SetResponse(m_response)
         unfolder.SetMeasured(h_measured)
         unfolded_IBU_histo = None
-        if n_toys == 1:
+        if num_toys == 1:
             unfolded_IBU_histo = unfolder.Hunfold(unfolder.kErrors)
-        elif n_toys > 1:
-            unfolder.SetNToys(n_toys)
+        elif num_toys > 1:
+            unfolder.SetNToys(num_toys)
             unfolded_IBU_histo = unfolder.Hunfold(unfolder.kCovToys)
-        unfolded_IBU = TH1_to_array(unfolded_IBU_histo, overflow=True)
+        unfolded_IBU = TH1_to_array(unfolded_IBU_histo)
         start, stop = 0, unfolded_IBU_histo.GetNbinsX() + 2
         error_IBU = np.array(
             [unfolded_IBU_histo.GetBinError(i) for i in range(start, stop)]
         )
         chi2_IBU = None
-        if n_toys == 1:
-            chi2_IBU = compute_chi2(unfolded_IBU[1:-1], truth[1:-1])
-        elif n_toys > 1:
+        if num_toys == 1:
+            chi2_IBU = compute_chi2(unfolded_IBU, truth)
+        elif num_toys > 1:
             cov_IBU = unfolder.Eunfold(unfolder.kCovToys)
-            chi2_IBU = compute_chi2(
-                unfolded_IBU[1:-1], truth[1:-1], TMatrix_to_array(cov_IBU)[1:-1, 1:-1]
-            )
+            chi2_IBU = compute_chi2(unfolded_IBU, truth, TMatrix_to_array(cov_IBU))
 
         # Unfold with RooUnfold Matrix Inversion
         unfolder = ROOT.RooUnfoldInvert("MI", "Matrix Inversion")
@@ -298,29 +294,27 @@ def make_comparisons(reco, particle):
         unfolder.SetResponse(m_response)
         unfolder.SetMeasured(h_measured)
         unfolded_MI_histo = None
-        if n_toys == 1:
+        if num_toys == 1:
             unfolded_MI_histo = unfolder.Hunfold(unfolder.kErrors)
-        elif n_toys > 1:
-            unfolder.SetNToys(n_toys)
+        elif num_toys > 1:
+            unfolder.SetNToys(num_toys)
             unfolded_MI_histo = unfolder.Hunfold(unfolder.kCovToys)
-        unfolded_MI = TH1_to_array(unfolded_MI_histo, overflow=True)
+        unfolded_MI = TH1_to_array(unfolded_MI_histo)
         start, stop = 0, unfolded_MI_histo.GetNbinsX() + 2
         error_MI = np.array(
             [unfolded_MI_histo.GetBinError(i) for i in range(start, stop)]
         )
         chi2_MI = None
-        if n_toys == 1:
-            chi2_MI = compute_chi2(unfolded_MI[1:-1], truth[1:-1])
-        elif n_toys > 1:
+        if num_toys == 1:
+            chi2_MI = compute_chi2(unfolded_MI, truth)
+        elif num_toys > 1:
             cov_MI = unfolder.Eunfold(unfolder.kCovToys)
-            chi2_MI = compute_chi2(
-                unfolded_MI[1:-1], truth[1:-1], TMatrix_to_array(cov_MI)[1:-1, 1:-1]
-            )
+            chi2_MI = compute_chi2(unfolded_MI, truth, TMatrix_to_array(cov_MI))
 
         # SA results
         SA_info = {
-            "mean": unfolded_SA[1:-1],
-            "std": error_SA[1:-1],
+            "mean": unfolded_SA,
+            "std": error_SA,
             "chi2": np.round(chi2_SA, 4),
         }
 
@@ -328,22 +322,22 @@ def make_comparisons(reco, particle):
         HYB_info = None
         if quantum == True:
             HYB_info = {
-                "mean": unfolded_HYB[1:-1],
-                "std": error_HYB[1:-1],
+                "mean": unfolded_HYB,
+                "std": error_HYB,
                 "chi2": np.round(chi2_HYB, 4),
             }
 
         # IBU results
         IBU_info = {
-            "mean": unfolded_IBU[1:-1],
-            "std": error_IBU[1:-1],
+            "mean": unfolded_IBU,
+            "std": error_IBU,
             "chi2": np.round(chi2_IBU, 4),
         }
 
         # MI results
         MI_info = {
-            "mean": unfolded_MI[1:-1],
-            "std": error_MI[1:-1],
+            "mean": unfolded_MI,
+            "std": error_MI,
             "chi2": np.round(chi2_MI, 4),
         }
 
@@ -353,8 +347,8 @@ def make_comparisons(reco, particle):
             HYB_info,
             IBU_info,
             MI_info,
-            truth[1:-1],
-            measured[1:-1],
+            truth,
+            measured,
             binning,
             var,
             quantum,

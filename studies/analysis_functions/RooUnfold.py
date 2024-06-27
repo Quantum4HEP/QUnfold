@@ -1,35 +1,46 @@
-import ROOT as r
+import sys
+import ROOT
 import numpy as np
+from analysis_functions.custom_logger import get_custom_logger
+from QUnfold.utility import TH1_to_array, TMatrix_to_array
 
 
-def RooUnfold_unfolder(type, m_response, h_measured, n_toys):
-    unfolder = ""
-    if type == "MI":
-        unfolder = r.RooUnfoldInvert("MI", "Matrix Inversion")
-    elif type == "SVD":
-        unfolder = r.RooUnfoldSvd("SVD", "SVD Tikhonov")
+log = get_custom_logger(__name__)
+
+loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
+if not loaded_RooUnfold == 0:
+    log.error("RooUnfold not found!")
+    sys.exit(0)
+
+
+def run_RooUnfold(method, response, measured, num_toys=None):
+    if method == "MI":
+        unfolder = ROOT.RooUnfoldInvert("MI", "Matrix Inversion")
+    elif method == "B2B":
+        unfolder = ROOT.RooUnfoldBinByBin("B2B", "Bin-by-Bin")
+    elif method == "SVD":
+        unfolder = ROOT.RooUnfoldSvd("SVD", "SVD Tikhonov")
         unfolder.SetKterm(2)
-    elif type == "IBU":
-        unfolder = r.RooUnfoldBayes("IBU", "Iterative Bayesian")
+    elif method == "IBU":
+        unfolder = ROOT.RooUnfoldBayes("IBU", "Iterative Bayes")
         unfolder.SetIterations(4)
         unfolder.SetSmoothing(0)
-    elif type == "B2B":
-        unfolder = r.RooUnfoldBinByBin("B2B", "Bin-y-Bin")
 
     unfolder.SetVerbose(0)
-    unfolder.SetResponse(m_response)
-    unfolder.SetMeasured(h_measured)
+    unfolder.SetResponse(response)
+    unfolder.SetMeasured(measured)
 
-    histo = None
-    cov_matrix = None
-    if n_toys == 1:
-        histo = unfolder.Hunfold(unfolder.kErrors)
-    elif n_toys > 1:
-        unfolder.SetNToys(n_toys)
-        histo = unfolder.Hunfold(unfolder.kCovToys)
+    if num_toys is None:
+        sol_histo = unfolder.Hunfold(unfolder.kErrors)
+        cov_matrix = unfolder.Eunfold(unfolder.kErrors)
+    else:
+        unfolder.SetNToys(num_toys)
+        sol_histo = unfolder.Hunfold(unfolder.kCovToys)
         cov_matrix = unfolder.Eunfold(unfolder.kCovToys)
-    histo.SetName("unfolded_{}".format(type))
-    start, stop = 1, histo.GetNbinsX() + 1
-    error = np.array([histo.GetBinError(i) for i in range(start, stop)])
 
-    return histo, error, cov_matrix
+    sol = TH1_to_array(sol_histo)
+    num_bins = sol_histo.GetNbinsX()
+    err = np.array([sol_histo.GetBinError(i) for i in range(1, num_bins + 1)])
+    cov = TMatrix_to_array(cov_matrix)
+
+    return sol, err, cov

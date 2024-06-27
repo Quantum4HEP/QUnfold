@@ -71,15 +71,15 @@ def hist_resp_builder(
     reco = reco[mask].astype(float)
 
     binning = np.array([-np.inf] + binning.tolist() + [np.inf])
-    hist_reco, _ = np.histogram(reco, binning)
-    hist_particle, _ = np.histogram(ak.to_numpy(particle), binning)
+    hist_reco = np.histogram(reco, binning)[0]
+    hist_particle = np.histogram(ak.to_numpy(particle), binning)[0]
 
     if do_response:
-        response, _, _ = np.histogram2d(
+        response = np.histogram2d(
             ak.to_numpy(reco),
             ak.to_numpy(particle[mask]).astype(float),
             binning,
-        )
+        )[0]
         response = response.T
         return name, hist_reco, hist_particle, binning, response
     else:

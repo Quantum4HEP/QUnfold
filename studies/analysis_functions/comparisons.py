@@ -1,6 +1,6 @@
 import os
-import matplotlib.pyplot as plt
 import numpy as np
+import pylab as plt
 from QUnfold.utility import compute_chi2
 
 
@@ -31,10 +31,9 @@ def plot_errorbar(
 
 
 def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
-    # Binning
-    bin_edges = binning
-    binwidths = np.diff(bin_edges)
-    bin_midpoints = bin_edges[:-1] + binwidths / 2
+    truth = truth
+    binwidths = np.diff(binning)
+    bin_midpoints = binning[:-1] + binwidths / 2
 
     # Divide into subplots
     fig = plt.figure(figsize=(8.6, 7.0))
@@ -45,25 +44,25 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
     # Plot truth
     truth_steps = np.append(truth, [truth[-1]])
     ax1.step(
-        bin_edges,
+        binning,
         truth_steps,
         label="Truth",
         where="post",
         color="tab:blue",
     )
-    ax1.fill_between(bin_edges, truth_steps, step="post", alpha=0.3, color="tab:blue")
+    ax1.fill_between(binning, truth_steps, step="post", alpha=0.3, color="tab:blue")
     ax2.axhline(y=1, color="tab:blue")
 
     # Plot measured
     meas_steps = np.append(measured, [measured[-1]])
     ax1.step(
-        bin_edges,
+        binning,
         meas_steps,
         label="Measured",
         where="post",
         color="tab:orange",
     )
-    ax1.fill_between(bin_edges, meas_steps, step="post", alpha=0.3, color="tab:orange")
+    ax1.fill_between(binning, meas_steps, step="post", alpha=0.3, color="tab:orange")
 
     # Iterate over the unfolding methods
     for method, unfolded in data.items():
@@ -82,7 +81,7 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
                 chi2_dof,
                 truth,
             )
-        elif method == "IBU4":
+        elif method == "IBU":
             plot_errorbar(
                 ax1,
                 ax2,
@@ -125,7 +124,7 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
         # Plot settings
         ax1.tick_params(axis="x", which="both", bottom=True, top=False, direction="in")
         ax2.tick_params(axis="x", which="both", bottom=True, top=True, direction="in")
-        ax1.set_xlim(bin_edges[0], bin_edges[-1])
+        ax1.set_xlim(binning[0], binning[-1])
         ax1.set_ylim(0, ax1.get_ylim()[1])
         ax2.set_yticks([0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75])
         ax2.set_yticklabels(["", "0.5", "", "1.0", "", "1.5", ""])
@@ -142,7 +141,7 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
         if not os.path.exists("studies/img/analysis"):
             os.makedirs("studies/img/analysis/png")
             os.makedirs("studies/img/analysis/pdf")
-        plt.savefig("studies/img/analysis/png/{}.png".format(distr))
-        plt.savefig("studies/img/analysis/pdf/{}.pdf".format(distr))
+        plt.savefig(f"studies/img/analysis/png/{distr}.png")
+        plt.savefig(f"studies/img/analysis/pdf/{distr}.pdf")
 
     plt.close()
