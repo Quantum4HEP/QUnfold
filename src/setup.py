@@ -10,9 +10,11 @@ if __name__ == "__main__":
         url="https://github.com/JustWhit3/QUnfold/tree/main/src/QUnfold",
         python_requires=">=3.8",
         install_requires=[
-            "dwave-ocean-sdk",
-            "pyqubo",
-            "matplotlib",
+            "numpy",
             "scipy",
+            "matplotlib",
+            "dwave-ocean-sdk",
+            "gurobipy",
+            "tqdm",
         ],
     )

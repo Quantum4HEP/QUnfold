@@ -1,14 +1,14 @@
 import os
-import tqdm
-import gurobipy
-import minorminer
 import numpy as np
+import scipy as sp
+import dimod
+import minorminer
+import gurobipy
+from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
-from pyqubo import LogEncInteger
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, FixedEmbeddingComposite
-from functools import cached_property
 
 
 class QUnfoldQUBO:
@@ -20,182 +20,173 @@ class QUnfoldQUBO:
 
     @staticmethod
     def _get_laplacian(dim):
-        diag = np.array([-1] + [-2] * (dim - 2) + [-1])
-        D = np.diag(diag).astype(float)
-        diag1 = np.ones(dim - 1)
-        D += np.diag(diag1, k=1) + np.diag(diag1, k=-1)
+        diagonal = np.array([-1] + [-2] * (dim - 2) + [-1])
+        ones = np.ones(dim - 1)
+        D = np.diag(diagonal) + np.diag(ones, k=1) + np.diag(ones, k=-1)
         return D
 
-    @cached_property
+    @property
     def num_bins(self):
         return len(self.d)
 
-    @cached_property
+    @property
     def num_logical_qubits(self):
         return self.dwave_bqm.num_variables
 
-    @cached_property
+    @property
     def num_physical_qubits(self):
         return sum(len(chain) for chain in self.graph_embedding.values())
 
-    @cached_property
+    @property
     def upper_bounds(self):
         efficiency = np.sum(self.R, axis=0)
         efficiency[efficiency == 0] = 1
         num_entries = self.d / efficiency
         return [
-            int(2 ** np.ceil(np.log2((num_entries[bin] + 1) * 1.2))) - 1
-            for bin in range(self.num_bins)
+            int(2 ** np.ceil(np.log2(num_entries[i] * 1.2 + 2))) - 1
+            for i in range(self.num_bins)
         ]
 
-    @cached_property
-    def pyqubo_variables(self):
-        n = len(str(self.num_bins - 1))
-        labels = ["x" + str(bin).zfill(n) for bin in range(self.num_bins)]
-        bounds = self.upper_bounds
+    @property
+    def num_bits(self):
+        upper_bounds = self.upper_bounds
+        return [int(np.ceil(np.log2(ub))) for ub in upper_bounds]
+
+    @property
+    def precision_vectors(self):
+        num_bits = self.num_bits
         return [
-            LogEncInteger(label=labels[bin], value_range=(0, bounds[bin]))
-            for bin in range(self.num_bins)
+            np.array([2**b for b in range(num_bits[i])]) for i in range(self.num_bins)
         ]
 
-    @cached_property
+    @property
     def linear_coeffs(self):
         return -2 * (self.R.T @ self.d)
 
-    @cached_property
+    @property
     def quadratic_coeffs(self):
         G = self._get_laplacian(dim=self.num_bins)
         return (self.R.T @ self.R) + self.lam * (G.T @ G)
 
-    @cached_property
-    def pyqybo_hamiltonian(self):
-        x = self.pyqubo_variables
+    def _get_qubo_matrix(self):
+        dim = self.num_bins
         a = self.linear_coeffs
         B = self.quadratic_coeffs
-        hamiltonian = 0
-        for i in range(self.num_bins):
-            if a[i] != 0:
-                hamiltonian += a[i] * x[i]
-        for i in range(self.num_bins):
-            for j in range(self.num_bins):
-                if B[i, j] != 0:
-                    hamiltonian += B[i, j] * x[i] * x[j]
-        return hamiltonian
-
-    @cached_property
-    def pyqubo_model(self):
-        return self.pyqybo_hamiltonian.compile()
-
-    @cached_property
-    def dwave_bqm(self):
-        return self.pyqubo_model.to_bqm()
-
-    @cached_property
-    def qubo_matrix(self):
-        vars = sorted(self.dwave_bqm.variables)
-        qubo_dict, _ = self.dwave_bqm.to_qubo()
-        Q = np.empty(shape=(len(vars), len(vars)))
-        for i, u in enumerate(vars):
-            for j, v in enumerate(vars):
-                Q[i, j] = qubo_dict.get((u, v), 0)
-        Q = 0.5 * (Q + Q.T)
-        return Q
-
-    @cached_property
-    def graph_embedding(self):
-        target_edgelist = self._sampler.edgelist
-        source_edgelist = list(self.dwave_bqm.quadratic) + [
-            (v, v) for v in self.dwave_bqm.linear
+        pvecs = self.precision_vectors
+        linear_blocks = [a[i] * np.diag(pvecs[i]) for i in range(dim)]
+        quadratic_blocks = [
+            [B[i, j] * np.outer(pvecs[i], pvecs[j]) for j in range(dim)]
+            for i in range(dim)
         ]
-        return minorminer.find_embedding(S=source_edgelist, T=target_edgelist)
+        return sp.linalg.block_diag(*linear_blocks) + np.block(quadratic_blocks)
+
+    def _get_dwave_bqm(self):
+        Q = self.qubo_matrix
+        size = len(Q)
+        linear = {i: Q[i, i] for i in range(size)}
+        quadratic = {
+            (i, j): 2 * Q[i, j] for i in range(size) for j in range(i + 1, size)
+        }
+        return dimod.BinaryQuadraticModel(linear, quadratic, vartype=dimod.BINARY)
 
     def _post_process_sampleset(self, sampleset):
-        all_samples = self.pyqubo_model.decode_sampleset(sampleset)
-        solutions, energies = [], []
-        for sample in all_samples:
-            solutions.append([sample.subh[var.label] for var in self.pyqubo_variables])
-            energies.append(sample.energy)
+        pvecs = self.precision_vectors
+        indices = np.cumsum([0] + [len(pvec) for pvec in pvecs[:-1]])
+        solutions = [
+            np.add.reduceat(rec.sample * np.concatenate(pvecs), indices=indices)
+            for rec in sampleset.record
+        ]
+        energies = [rec.energy for rec in sampleset.record]
         min_energy = min(energies)
         weights = np.exp(-np.abs(np.array(energies) - min_energy) / abs(min_energy))
-        solution = np.average(solutions, weights=weights, axis=0)
-        return solution
+        return np.average(solutions, weights=weights, axis=0)
+
+    def _get_graph_embedding(self, **kwargs):
+        source_edgelist = list(self.dwave_bqm.quadratic) + list(
+            (v, v) for v in self.dwave_bqm.linear
+        )
+        target_edgelist = self._sampler.edgelist
+        return minorminer.find_embedding(S=source_edgelist, T=target_edgelist, **kwargs)
 
     def _run_montecarlo_toys(self, num_toys, num_cores, **kwargs):
-        def run_mc_toy(i):
-            smeared_d = np.random.poisson(self.d)
-            unfolder = QUnfoldQUBO(self.R, smeared_d, self.lam)
+        def run_toy(toy):
+            toy.initialize_qubo_model()
             if isinstance(self._sampler, DWaveSampler):
-                sampler = FixedEmbeddingComposite(
-                    self._sampler, embedding=unfolder.graph_embedding
-                )
+                embedding = toy._get_graph_embedding()
+                sampler = FixedEmbeddingComposite(self._sampler, embedding=embedding)
             else:
                 sampler = self._sampler
-            sampleset = sampler.sample(unfolder.dwave_bqm, **kwargs)
-            solutions[i] = unfolder._post_process_sampleset(sampleset)
+            sampleset = sampler.sample(toy.dwave_bqm, **kwargs)
+            solution = toy._post_process_sampleset(sampleset)
+            return solution
 
+        smeared_d = np.random.poisson(self.d, size=(num_toys, self.num_bins))
+        toys_gen = (QUnfoldQUBO(self.R, d, self.lam) for d in smeared_d)
         if num_cores is None:
             num_cores = os.cpu_count() - 2
-        solutions = np.empty(shape=(num_toys, self.num_bins))
+        desc = "Running MC toys"
         with ThreadPoolExecutor(num_cores) as executor:
-            list(
-                tqdm.tqdm(
-                    executor.map(run_mc_toy, range(num_toys)),
-                    total=num_toys,
-                    desc="Running MC toys",
-                )
-            )
-        cov = np.cov(solutions, rowvar=False)
-        error = np.sqrt(np.diag(cov))
-        corr = np.corrcoef(solutions, rowvar=False)
-        return error, cov, corr
+            res = list(tqdm(executor.map(run_toy, toys_gen), total=num_toys, desc=desc))
+        cov = np.cov(res, rowvar=False)
+        err = np.sqrt(np.diag(cov))
+        return err, cov
+
+    def initialize_qubo_model(self):
+        self.qubo_matrix = self._get_qubo_matrix()
+        self.dwave_bqm = self._get_dwave_bqm()
 
     def solve_simulated_annealing(
         self, num_reads, num_toys=None, num_cores=None, seed=None
     ):
         self._sampler = SimulatedAnnealingSampler()
         sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
-        solution = self._post_process_sampleset(sampleset)
+        sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
-            error, cov, corr = np.sqrt(solution), None, None
+            err = np.sqrt(sol)
+            cov = np.diag(sol)
         else:
-            error, cov, corr = self._run_montecarlo_toys(
+            err, cov = self._run_montecarlo_toys(
                 num_toys, num_cores, num_reads=num_reads, seed=seed
             )
-        return solution, error, cov, corr
+        return sol, err, cov
 
     def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
         self._sampler = LeapHybridSampler()
         sampleset = self._sampler.sample(self.dwave_bqm)
-        solution = self._post_process_sampleset(sampleset)
+        sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
-            error, cov, corr = np.sqrt(solution), None, None
+            err = np.sqrt(sol)
+            cov = np.diag(sol)
         else:
-            error, cov, corr = self._run_montecarlo_toys(num_toys, num_cores)
-        return solution, error, cov, corr
+            err, cov = self._run_montecarlo_toys(num_toys, num_cores)
+        return sol, err, cov
 
-    def set_quantum_device(self, device_name):
-        self._sampler = DWaveSampler(solver=device_name)
+    def set_quantum_device(self, device_name=None, dwave_token=None):
+        self._sampler = DWaveSampler(solver=device_name, token=dwave_token)
+
+    def set_graph_embedding(self, **kwargs):
+        self.graph_embedding = self._get_graph_embedding(**kwargs)
 
     def solve_quantum_annealing(self, num_reads, num_toys=None, num_cores=None):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
-        solution = self._post_process_sampleset(sampleset)
+        sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
-            error, cov, corr = np.sqrt(solution), None, None
+            err = np.sqrt(sol)
+            cov = np.diag(sol)
         else:
-            error, cov, corr = self._run_montecarlo_toys(
+            err, cov = self._run_montecarlo_toys(
                 num_toys, num_cores, num_reads=num_reads
             )
-        return solution, error, cov, corr
+        return sol, err, cov
 
     def compute_energy(self, x):
-        x_binary = {}
-        for bin in range(self.num_bins):
-            num_bits = int(np.log2(self.upper_bounds[bin] + 1))
-            bitstr = np.binary_repr(int(x[bin]), width=num_bits)
-            for idx, bit in enumerate(bitstr[::-1]):
-                x_binary[f"x{bin}[{idx}]"] = int(bit)
-        energy = self.dwave_bqm.energy(sample=x_binary)
+        xbin = []
+        num_bits = self.num_bits
+        for i in range(self.num_bins):
+            bitstr = bin(int(x[i]))[2:].zfill(num_bits[i])
+            xbin.extend(map(int, bitstr[::-1]))
+        energy = self.dwave_bqm.energy(sample=xbin)
         return energy
 
     def solve_gurobi_integer(self):
@@ -209,26 +200,28 @@ class QUnfoldQUBO:
         B = self.quadratic_coeffs
         model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
         model.optimize()
-        solution = np.array([var.x for var in x])
-        error = np.sqrt(solution)
-        return solution, error
+        sol = np.array([var.x for var in x])
+        err = np.sqrt(sol)
+        cov = np.diag(sol)
+        return sol, err, cov
 
     def solve_gurobi_binary(self):
         model = gurobipy.Model()
         model.setParam("OutputFlag", 0)
-        num_bits = [int(np.log2(ub + 1)) for ub in self.upper_bounds]
+        num_bits = self.num_bits
         x = [
             model.addVar(vtype=gurobipy.GRB.BINARY)
-            for bin in range(self.num_bins)
-            for _ in range(num_bits[bin])
+            for i in range(self.num_bins)
+            for _ in range(num_bits[i])
         ]
         Q = self.qubo_matrix
         model.setObjective(x @ Q @ x, sense=gurobipy.GRB.MINIMIZE)
         model.optimize()
         bitstr = np.array([var.x for var in x], dtype=int)
         arrays = np.split(bitstr, np.cumsum(num_bits[:-1]))
-        solution = np.array(
+        sol = np.array(
             [int("".join(arr.astype(str))[::-1], base=2) for arr in arrays], dtype=float
         )
-        error = np.sqrt(solution)
-        return solution, error
+        err = np.sqrt(sol)
+        cov = np.diag(sol)
+        return sol, err, cov
