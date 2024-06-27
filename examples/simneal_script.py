@@ -9,23 +9,22 @@ if __name__ == "__main__":
     num_bins = 15
     min_bin = -7.0
     max_bin = 7.0
-    bins = np.linspace(min_bin, max_bin, num_bins + 1)
-
-    seed = 42
-    np.random.seed(seed)
+    binning = np.linspace(min_bin, max_bin, num_bins + 1)
     mean = 0.0
     std = 2.6
     mean_smear = -0.3
     std_smear = 0.5
+
+    seed = 42
+    np.random.seed(seed)
 
     # Generate and normalize response matrix
     mc_data = np.random.normal(loc=mean, scale=std, size=num_entries)
     reco_data = mc_data + np.random.normal(
         loc=mean_smear, scale=std_smear, size=num_entries
     )
-    binning = np.array([-np.inf] + bins.tolist() + [np.inf])
-    response, _, _ = np.histogram2d(reco_data, mc_data, bins=binning)
-    mc_truth, _ = np.histogram(mc_data, bins=binning)
+    response = np.histogram2d(reco_data, mc_data, bins=binning)[0]
+    mc_truth = np.histogram(mc_data, bins=binning)[0]
     response = normalize_response(response, mc_truth)
 
     # Generate random true data
@@ -37,24 +36,38 @@ if __name__ == "__main__":
     )
 
     # Generate truth and measured histograms
-    truth, _ = np.histogram(true_data, bins=binning)
-    measured, _ = np.histogram(meas_data, bins=binning)
+    truth = np.histogram(true_data, bins=binning)[0]
+    measured = np.histogram(meas_data, bins=binning)[0]
 
     # Run simulated annealing to solve QUBO problem
     unfolder = QUnfoldQUBO(response, measured, lam=0.1)
-    unfolded, error, cov_matrix, corr_matrix = unfolder.solve_simulated_annealing(
+    unfolder.initialize_qubo_model()
+    sol, err, cov = unfolder.solve_simulated_annealing(
         num_reads=10, num_toys=100, seed=seed
     )
 
-    # Plot unfolding result
+    ################## Quantum Annealing solver ##################
+    """
+    unfolder.set_quantum_device(
+        device_name="Advantage_system6.4",
+        dwave_token="<your_dwave_token>",
+    )
+    unfolder.set_graph_embedding()
+    print("DWave_device =", unfolder._sampler.solver)
+    print("num_logical_qubits =", unfolder.num_logical_qubits)
+    print("num_physical_qubits =", unfolder.num_physical_qubits)
+    sol, err, cov = unfolder.solve_quantum_annealing(num_reads=4000)
+    """
+
+    chi2 = compute_chi2(observed=sol, expected=truth, covariance=cov)
     plotter = QUnfoldPlotter(
-        response=response[1:-1, 1:-1],
-        measured=measured[1:-1],
-        truth=truth[1:-1],
-        unfolded=unfolded[1:-1],
-        error=error[1:-1],
-        binning=bins,
-        chi2=compute_chi2(unfolded[1:-1], truth[1:-1], cov_matrix[1:-1, 1:-1]),
+        response=response,
+        measured=measured,
+        truth=truth,
+        unfolded=sol,
+        error=err,
+        binning=binning,
+        chi2=chi2,
     )
     plotter.saveResponse("examples/simneal_response.png")
     plotter.savePlot("examples/simneal_result.png", method="SA")

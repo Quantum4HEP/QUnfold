@@ -91,31 +91,21 @@ pip install QUnfold
 To run QUnfold on a dataset you can do the following steps:
 
 ```python
-# Import QUnfold base class and plotter
-from QUnfold import QUnfoldQUBO
-from QUnfold import QUnfoldPlotter
+from QUnfold import QUnfoldQUBO, QUnfoldPlotter
 
-# Read numpy data from a file or sample them
-truth = ... # truth distribution
-measured = ... # measured distribution
-response = ... # response matrix
-binning = ... # binning of the distributions
-
-# Run unfolding
 unfolder = QUnfoldQUBO(response, measured, lam=0.1)
-unfolded_SA, error_SA, cov_matrix_SA, corr_matrix_SA = unfolder.solve_simulated_annealing(num_reads=10, num_toys=100)
+unfolder.initialize_qubo_model()
 
-# Plot results
+unfolded_SA, error_SA = unfolder.solve_simulated_annealing(num_reads=100)
+
 plotter = QUnfoldPlotter(
     response=response,
     measured=measured,
     truth=truth,
     unfolded=unfolded_SA,
     error=error_SA,
-    binning=binning,
-    chi2=compute_chi2(unfolded, truth, cov_matrix),
+    binning=binning
 )
-plotter.plotResponse()
 plotter.plot()
 ```
 
@@ -135,16 +125,14 @@ which will produce a similar result to this unfolded normal distribution:
 To use `ROOT` data add the following steps at the beginning of the code:
 
 ```python
-# Import ROOT converters
 from QUnfold.utility import TH1_to_array, TH2_to_array
 
-# Read data as before...
 # Convert data from ROOT to numpy
 truth = TH1_to_array(truth)
 measured = TH1_to_array(measured)
 response = TH2_to_array(response.Hresponse())
 
-# Run analysis as before...
+# Run unfolding as in the NumPy case above...
 ```
 
 ## Tests
