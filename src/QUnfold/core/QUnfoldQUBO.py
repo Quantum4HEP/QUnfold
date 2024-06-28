@@ -40,7 +40,8 @@ class QUnfoldQUBO:
     @property
     def num_bits(self):
         eff = np.sum(self.R, axis=0)
-        exp = np.ceil(np.where(eff, self.d / eff, self.d))
+        eff[np.isclose(eff, 0)] = 1
+        exp = np.ceil(self.d / eff)
         return [int(np.ceil(np.log2(x * 1.2))) if x else 1 for x in exp]
 
     @property
@@ -88,8 +89,8 @@ class QUnfoldQUBO:
         ]
         energies = [rec.energy for rec in sampleset.record]
         min_energy = min(energies)
-        beta = 1e12
-        weights = np.exp(-beta * abs(np.array(energies) - min_energy) / abs(min_energy))
+        beta_boltzmann = 100
+        weights = np.exp(-beta_boltzmann * np.abs(np.array(energies) - min_energy))
         return np.average(solutions, weights=weights, axis=0)
 
     def _get_graph_embedding(self, **kwargs):

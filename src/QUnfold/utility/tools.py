@@ -12,7 +12,7 @@ def normalize_response(response, truth_mc):
     Returns:
         numpy.ndarray: normalized response matrix.
     """
-    return response / (truth_mc + 1e-6)
+    return response / (truth_mc + 1e-12)
 
 
 def compute_chi2(observed, expected, covariance):
@@ -28,6 +28,6 @@ def compute_chi2(observed, expected, covariance):
         float: reduced chi-square.
     """
     residuals = observed - expected
-    chi2 = residuals.T @ np.linalg.inv(covariance) @ residuals
+    chi2 = residuals.T @ np.linalg.pinv(covariance) @ residuals
     chi2_red = chi2 / len(expected)
     return chi2_red
