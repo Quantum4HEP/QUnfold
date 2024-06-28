@@ -3,7 +3,7 @@ Utility
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.utility.FromROOT
+.. automodule:: QUnfold.utility.root2numpy
    :members:
 
 .. automodule:: QUnfold.utility.tools
