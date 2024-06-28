@@ -38,26 +38,16 @@ class QUnfoldQUBO:
         return sum(len(chain) for chain in self.graph_embedding.values())
 
     @property
-    def upper_bounds(self):
-        efficiency = np.sum(self.R, axis=0)
-        efficiency[efficiency == 0] = 1
-        num_entries = self.d / efficiency
-        return [
-            int(2 ** np.ceil(np.log2(num_entries[i] * 1.2 + 2))) - 1
-            for i in range(self.num_bins)
-        ]
-
-    @property
     def num_bits(self):
-        upper_bounds = self.upper_bounds
-        return [int(np.ceil(np.log2(ub))) for ub in upper_bounds]
+        eff = np.sum(self.R, axis=0)
+        exp = np.ceil(np.where(eff, self.d / eff, self.d))
+        return [int(np.ceil(np.log2(x * 1.2))) if x else 1 for x in exp]
 
     @property
     def precision_vectors(self):
         num_bits = self.num_bits
-        return [
-            np.array([2**b for b in range(num_bits[i])]) for i in range(self.num_bins)
-        ]
+        pvecs = [2 ** np.arange(num_bits[i]) for i in range(self.num_bins)]
+        return pvecs
 
     @property
     def linear_coeffs(self):
@@ -193,8 +183,8 @@ class QUnfoldQUBO:
         model = gurobipy.Model()
         model.setParam("OutputFlag", 0)
         x = [
-            model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=ub)
-            for ub in self.upper_bounds
+            model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1)
+            for b in self.num_bits
         ]
         a = self.linear_coeffs
         B = self.quadratic_coeffs
