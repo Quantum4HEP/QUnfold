@@ -1,8 +1,7 @@
 import sys
 import ROOT
-import numpy as np
 from analysis_functions.custom_logger import get_custom_logger
-from QUnfold.utility import TH1_to_array, TMatrix_to_array
+from QUnfold.utility import TH1_to_numpy, TMatrix_to_numpy
 
 
 log = get_custom_logger(__name__)
@@ -38,9 +37,8 @@ def run_RooUnfold(method, response, measured, num_toys=None):
         sol_histo = unfolder.Hunfold(unfolder.kCovToys)
         cov_matrix = unfolder.Eunfold(unfolder.kCovToys)
 
-    sol = TH1_to_array(sol_histo)
-    num_bins = sol_histo.GetNbinsX()
-    err = np.array([sol_histo.GetBinError(i) for i in range(1, num_bins + 1)])
-    cov = TMatrix_to_array(cov_matrix)
+    sol = TH1_to_numpy(sol_histo, overflow=True)
+    err = TH1_to_numpy(sol_histo, error=True, overflow=True)
+    cov = TMatrix_to_numpy(cov_matrix)
 
     return sol, err, cov

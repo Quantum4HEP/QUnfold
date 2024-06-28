@@ -9,7 +9,8 @@ if __name__ == "__main__":
     num_bins = 15
     min_bin = -7.0
     max_bin = 7.0
-    binning = np.linspace(min_bin, max_bin, num_bins + 1)
+    bins = np.linspace(min_bin, max_bin, num_bins + 1)
+    binning = np.array([-np.inf] + bins.tolist() + [np.inf])
     mean = 0.0
     std = 2.6
     mean_smear = -0.3

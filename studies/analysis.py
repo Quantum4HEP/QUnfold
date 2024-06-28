@@ -4,25 +4,31 @@ from analysis_functions.generator import generate
 from analysis_functions.RooUnfold import run_RooUnfold
 from analysis_functions.QUnfolder import run_QUnfold
 from analysis_functions.comparisons import plot_comparisons
-from QUnfold.utility import TH1_to_array, TH2_to_array, normalize_response
+from QUnfold.utility import TH1_to_numpy, TH2_to_numpy, normalize_response
 
 
 log = get_custom_logger(__name__)
 
-samples = 100000
+samples = 1000000
 bins = 20
 min_bin = 0.0
 max_bin = 10.0
 binning = np.linspace(min_bin, max_bin, bins + 1)
 
-distributions = ["normal", "gamma", "exponential", "breit-wigner"]
+distributions = ["normal", "gamma", "exponential", "breit-wigner", "double-peaked"]
 bias = -0.13
 smearing = 0.21
 eff = 0.7
 
-lambdas = {"normal": 0.002, "gamma": 0.002, "exponential": 0.002, "breit-wigner": 0.002}
-num_reads = 10
-num_toys = 100
+lambdas = {
+    "normal": 0.0,
+    "gamma": 0.0,
+    "exponential": 0.0,
+    "breit-wigner": 0.0,
+    "double-peaked": 0.0,
+}
+num_reads = 100
+num_toys = None
 
 enable_hybrid = False
 enable_quantum = False
@@ -43,6 +49,8 @@ if __name__ == "__main__":
         )
 
         ######################### RooUnfold #########################
+        roounfold_response.UseOverflow(True)
+
         sol_IBU, err_IBU, cov_IBU = run_RooUnfold(
             method="IBU",
             response=roounfold_response,
@@ -58,11 +66,11 @@ if __name__ == "__main__":
         )
 
         ########################## QUnfold ##########################
-        truth = TH1_to_array(th1_truth)
-        measured = TH1_to_array(th1_measured)
+        truth = TH1_to_numpy(th1_truth, overflow=True)
+        measured = TH1_to_numpy(th1_measured, overflow=True)
         response = normalize_response(
-            response=TH2_to_array(roounfold_response.Hresponse()),
-            truth_mc=TH1_to_array(roounfold_response.Htruth()),
+            response=TH2_to_numpy(roounfold_response.Hresponse(), overflow=True),
+            truth_mc=TH1_to_numpy(roounfold_response.Htruth(), overflow=True),
         )
         sol_SA, err_SA, cov_SA = run_QUnfold(
             method="SA",

@@ -7,16 +7,6 @@ ROOT.gRandom.SetSeed(12345)
 
 
 def smear(xt, bias, smearing, eff=1):
-    """
-    Applies a Gaussian smearing effect to a given input value, xt.
-
-    Args:
-        xt (float): The input value to apply the smearing to.
-        eff (float): smearing efficiency.
-
-    Returns:
-        float or None: The resulting value after applying the smearing. Returns None if the value is filtered based on efficiency.
-    """
     x = ROOT.gRandom.Rndm()
     if x > eff:
         return None
@@ -27,25 +17,6 @@ def smear(xt, bias, smearing, eff=1):
 def generate_standard(
     truth, measured, response, type, distr, samples, bias, smearing, eff
 ):
-    """
-    Generate data for standard distributions.
-
-    Args:
-        truth (ROOT.TH1F): truth histogram.
-        measured (ROOT.TH1F): measured histogram.
-        response (ROOT.TH2F): response matrix.
-        type (str): type of data generation (data or response).
-        distr (distr): the distribution to be generated.
-        samples (int): number of samples to be generated.
-        bias (float): bias of the distortion.
-        smearing (float): smearing of the distortion.
-        eff (float): reconstruction efficiency.
-
-    Returns:
-        ROOT.TH1F: the filled truth histogram.
-        ROOT.TH1F: the filled measured histogram.
-        ROOT.TH2F: the filled response matrix.
-    """
     # Data generation
     if type == "data":
         for _ in range(samples):
@@ -89,24 +60,6 @@ def generate_standard(
 def generate_double_peaked(
     truth, measured, response, type, samples, bias, smearing, eff
 ):
-    """
-    Generate data for the double peaked distributions.
-
-    Args:
-        truth (ROOT.TH1F): truth histogram.
-        measured (ROOT.TH1F): measured histogram.
-        response (ROOT.TH2F): response matrix.
-        type (str): type of data generation (data or response).
-        samples (int): number of samples to be generated.
-        bias (float): bias of the distortion.
-        smearing (float): smearing of the distortion.
-        eff (float): reconstruction efficiency.
-
-    Returns:
-        ROOT.TH1F: the filled truth histogram.
-        ROOT.TH1F: the filled measured histogram.
-        ROOT.TH2F: the filled response matrix.
-    """
     # Data generation
     if type == "data":
         for _ in range(samples):
@@ -145,24 +98,6 @@ def generate_double_peaked(
 
 
 def generate(distr, binning, samples, bias, smearing, eff):
-    """
-    Generate simulated data and response for a given distribution.
-
-    Args:
-        distr (str): The name of the distribution to generate data from.
-        bins (int): The number of bins in the histograms.
-        min_bin (float): The minimum value of the histogram range.
-        max_bin (float): The maximum value of the histogram range.
-        samples (int): The number of data samples to generate.
-        bias (float): Bias introduced in the measured distribution.
-        smearing (float): Smearing introduced in the measured distribution.
-        eff (float): Reconstruction efficiency for the measured distribution.
-
-    Returns:
-        ROOT.TH1F: The histogram representing the truth distribution.
-        ROOT.TH1F: The histogram representing the measured distribution.
-        ROOT.RooUnfoldResponse: The response object used for unfolding.
-    """
     bins = len(binning) - 1
     truth = ROOT.TH1F(f"Truth_{distr}", "", bins, array("d", binning))
     measured = ROOT.TH1F(f"Measured_{distr}", "", bins, array("d", binning))

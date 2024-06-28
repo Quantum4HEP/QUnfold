@@ -31,7 +31,9 @@ def plot_errorbar(
 
 
 def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
-    truth = truth
+    truth = truth[1:-1]
+    measured = measured[1:-1]
+
     binwidths = np.diff(binning)
     bin_midpoints = binning[:-1] + binwidths / 2
 
@@ -66,15 +68,16 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
 
     # Iterate over the unfolding methods
     for method, unfolded in data.items():
+        unfolded = unfolded[1:-1]
         # Plot each unfolding method
-        chi2_dof = round(compute_chi2(unfolded, truth, cov[method]), 4)
+        chi2_dof = round(compute_chi2(unfolded, truth, cov[method][1:-1, 1:-1]), 4)
         if method == "MI":
             plot_errorbar(
                 ax1,
                 ax2,
                 bin_midpoints,
                 unfolded,
-                errors[method],
+                errors[method][1:-1],
                 "green",
                 "s",
                 r"$\mathtt{RooUnfold}$ (MI)",
@@ -87,7 +90,7 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
                 ax2,
                 bin_midpoints,
                 unfolded,
-                errors[method],
+                errors[method][1:-1],
                 "red",
                 "o",
                 r"$\mathtt{RooUnfold}$ (IBU)",
@@ -100,7 +103,7 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
                 ax2,
                 bin_midpoints,
                 unfolded,
-                errors[method],
+                errors[method][1:-1],
                 "orange",
                 "*",
                 r"$\mathtt{QUnfold}$ (HYB)",
@@ -113,7 +116,7 @@ def plot_comparisons(data, errors, cov, distr, truth, measured, binning):
                 ax2,
                 bin_midpoints,
                 unfolded,
-                errors[method],
+                errors[method][1:-1],
                 "purple",
                 "*",
                 r"$\mathtt{QUnfold}$ (SIM)",

@@ -20,12 +20,12 @@ class QUnfoldPlotter:
             binning (numpy.ndarray): binning of the histograms.
             chi2 (float): chi2 to show on the plot.
         """
-        self.response = response
-        self.measured = measured
-        self.truth = truth
-        self.unfolded = unfolded
-        self.error = error
-        self.binning = binning
+        self.response = response[1:-1, 1:-1]
+        self.measured = measured[1:-1]
+        self.truth = truth[1:-1]
+        self.unfolded = unfolded[1:-1]
+        self.error = error[1:-1]
+        self.binning = binning[1:-1]
         self.chi2 = chi2
 
     def _plotResponseSetup(self):
