@@ -88,7 +88,8 @@ class QUnfoldQUBO:
         ]
         energies = [rec.energy for rec in sampleset.record]
         min_energy = min(energies)
-        weights = np.exp(-np.abs(np.array(energies) - min_energy) / abs(min_energy))
+        beta = 1e12
+        weights = np.exp(-beta * abs(np.array(energies) - min_energy) / abs(min_energy))
         return np.average(solutions, weights=weights, axis=0)
 
     def _get_graph_embedding(self, **kwargs):
