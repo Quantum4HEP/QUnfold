@@ -9,7 +9,7 @@ from QUnfold.utility import TH1_to_numpy, TH2_to_numpy, normalize_response
 
 log = get_custom_logger(__name__)
 
-samples = 1000000
+samples = 100000
 bins = 20
 min_bin = 0.0
 max_bin = 10.0
@@ -21,13 +21,13 @@ smearing = 0.21
 eff = 0.7
 
 lambdas = {
-    "normal": 0.0,
-    "gamma": 0.0,
-    "exponential": 0.0,
-    "breit-wigner": 0.0,
-    "double-peaked": 0.0,
+    "normal": 0.03,
+    "gamma": 0.003,
+    "exponential": 0.0007,
+    "breit-wigner": 0.0001,
+    "double-peaked": 0.02,
 }
-num_reads = 100
+num_reads = 1000
 num_toys = None
 
 enable_hybrid = False
