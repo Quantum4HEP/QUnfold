@@ -18,12 +18,10 @@ class QUnfoldQUBO:
         self.d = measured
         self.lam = lam
 
-    @staticmethod
-    def _get_laplacian(dim):
-        diagonal = np.array([-1] + [-2] * (dim - 2) + [-1])
-        ones = np.ones(dim - 1)
-        D = np.diag(diagonal) + np.diag(ones, k=1) + np.diag(ones, k=-1)
-        return D
+        dim = len(measured)
+        main_d = np.array([0, -1] + [-2] * (dim - 4) + [-1, 0])
+        sup_sub_d = np.array([0] + [1] * (dim - 3) + [0])
+        self.D = np.diag(main_d) + np.diag(sup_sub_d, k=1) + np.diag(sup_sub_d, k=-1)
 
     @property
     def num_bins(self):
@@ -56,8 +54,7 @@ class QUnfoldQUBO:
 
     @property
     def quadratic_coeffs(self):
-        G = self._get_laplacian(dim=self.num_bins)
-        return (self.R.T @ self.R) + self.lam * (G.T @ G)
+        return (self.R.T @ self.R) + self.lam * (self.D.T @ self.D)
 
     def _get_qubo_matrix(self):
         dim = self.num_bins
