@@ -1,16 +1,6 @@
-# Source
 numpy
 scipy
 matplotlib
 dwave-ocean-sdk
 gurobipy
 tqdm
-
-# Tests
-pytest
-
-# Studies
-uproot
-
-# Formatter
-black==23.11.0

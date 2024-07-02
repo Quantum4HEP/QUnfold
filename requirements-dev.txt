@@ -1,0 +1,3 @@
+uproot
+pytest
+black==23.11.0
