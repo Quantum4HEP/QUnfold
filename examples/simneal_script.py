@@ -1,6 +1,6 @@
 import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
-from QUnfold.utility import normalize_response, compute_chi2
+from QUnfold.utils import normalize_response, compute_chi2
 
 
 if __name__ == "__main__":

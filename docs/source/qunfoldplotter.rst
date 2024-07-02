@@ -3,5 +3,5 @@ QUnfoldPlotter
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.plot.QUnfoldPlotter
+.. automodule:: QUnfold.QUnfoldPlotter
    :members:

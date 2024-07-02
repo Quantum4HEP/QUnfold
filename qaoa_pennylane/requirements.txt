@@ -1,4 +1,0 @@
-pennylane
-jax
-optax
-tqdm

@@ -8,7 +8,8 @@ Welcome to QUnfold's documentation!
    introduction
    qunfoldqubo
    qunfoldplotter
-   utility
+   utils
+   root2numpy
 
 
 Indices and tables

@@ -19,7 +19,7 @@ if __name__ == "__main__":
         packages=find_packages(),
         install_requires=get_requirements(),
         license="MIT",
-        license_files="LICENSE",
+        license_files="../LICENSE",
         long_description_content_type="text/markdown",
-        long_description="README.md",
+        long_description="../README.md",
     )

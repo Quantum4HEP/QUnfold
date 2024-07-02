@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pylab as plt
-from QUnfold.utility import compute_chi2
+from QUnfold.utils import compute_chi2
 
 
 def plot_errorbar(

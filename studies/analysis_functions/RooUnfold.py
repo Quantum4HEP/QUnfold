@@ -1,7 +1,7 @@
 import sys
 import ROOT
 from analysis_functions.custom_logger import get_custom_logger
-from QUnfold.utility import TH1_to_numpy, TMatrix_to_numpy
+from QUnfold.root2numpy import TH1_to_numpy, TMatrix_to_numpy
 
 
 log = get_custom_logger(__name__)

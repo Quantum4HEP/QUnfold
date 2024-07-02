@@ -3,5 +3,5 @@ QUnfoldQUBO
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.core.QUnfoldQUBO
+.. automodule:: QUnfold.QUnfoldQUBO
    :members:

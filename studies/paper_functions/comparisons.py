@@ -3,13 +3,8 @@ import ROOT
 import numpy as np
 import pylab as plt
 from QUnfold import QUnfoldQUBO
-from QUnfold.utility import (
-    TH1_to_numpy,
-    TH2_to_numpy,
-    normalize_response,
-    compute_chi2,
-    TMatrix_to_numpy,
-)
+from QUnfold.root2numpy import TH1_to_numpy, TH2_to_numpy, TMatrix_to_numpy
+from QUnfold.utils import normalize_response, compute_chi2
 
 # RooUnfold settings
 loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")

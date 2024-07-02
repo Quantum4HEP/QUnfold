@@ -4,7 +4,8 @@ from analysis_functions.generator import generate
 from analysis_functions.RooUnfold import run_RooUnfold
 from analysis_functions.QUnfolder import run_QUnfold
 from analysis_functions.comparisons import plot_comparisons
-from QUnfold.utility import TH1_to_numpy, TH2_to_numpy, normalize_response
+from QUnfold.root2numpy import TH1_to_numpy, TH2_to_numpy
+from QUnfold.utils import normalize_response
 
 
 log = get_custom_logger(__name__)

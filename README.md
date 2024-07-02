@@ -85,9 +85,9 @@ sol, err, cov = unfolder.solve_simulated_annealing(num_reads=100)
 :warning: The response matrix must be normalized (see [here](https://github.com/JustWhit3/QUnfold/wiki/How-to-use#:~:text=The%20response%20matrix%20must%20be%20normalized)).
 
 If you are working in High-Energy Physics, your response matrix might be a `RooUnfoldResponse` object and your measured histogram is probably stored as a `ROOT.TH1` object.
-The `QUnfold.utility` module provides some simple functions to convert these objects to standard numpy arrays:
+The `QUnfold.utils` module provides some simple functions to convert these objects to standard numpy arrays:
 ```python
-from QUnfold.utility import TH1_to_numpy, TH2_to_numpy
+from QUnfold.utils import TH1_to_numpy, TH2_to_numpy
 
 # Convert ROOT.TH1 measured histogram to numpy array
 measured = TH1_to_numpy(measured)
