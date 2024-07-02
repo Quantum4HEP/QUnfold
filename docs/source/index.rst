@@ -10,10 +10,3 @@ Welcome to QUnfold's documentation!
    qunfoldplotter
    utils
    root2numpy
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
