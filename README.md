@@ -58,7 +58,7 @@ conda activate qunfold-dev
 git clone https://github.com/JustWhit3/QUnfold.git
 cd QUnfold
 pip install -r requirements-dev.txt
-pip install -e src/
+pip install -e .
 ```
 
 ## Usage example

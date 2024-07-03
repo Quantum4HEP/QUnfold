@@ -1,18 +1,21 @@
-name: Docker Image CI
+name: Publish Docker image
 
 on:
   release
 
 jobs:
-  build:
-    name: Publish Docker
+
+  publish:
+
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Build the Docker image
+    - name: Build Docker image
       run: docker build . --file Dockerfile --tag marcolorusso/qunfold
 
-    - name: Push image to DockerHub
-      run: docker login -u marcolorusso -p ${{ secrets.DOCKER_TOKEN }} && docker push marcolorusso/qunfold
+    - name: Push to DockerHub
+      run: |
+        docker login -u marcolorusso -p ${{ secrets.DOCKER_TOKEN }}
+        docker push marcolorusso/qunfold

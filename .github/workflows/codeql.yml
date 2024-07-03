@@ -1,4 +1,4 @@
-name: CodeQL
+name: Analyze CodeQL
 
 on:
   push:
@@ -7,8 +7,9 @@ on:
     branches: [main]
 
 jobs:
+
   analyze:
-    name: Analyze (python)
+
     runs-on: ${{ matrix.os }}
     permissions:
       security-events: write
@@ -25,5 +26,5 @@ jobs:
       with:
         languages: python
 
-    - name: Perform CodeQL analysis
+    - name: Run CodeQL analysis
       uses: github/codeql-action/analyze@v3
