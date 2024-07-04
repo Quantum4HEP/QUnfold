@@ -12,7 +12,6 @@ from dwave.system import DWaveSampler, FixedEmbeddingComposite
 
 
 class QUnfoldQUBO:
-
     def __init__(self, response, measured, lam=0.0):
         self.R = response
         self.d = measured

@@ -36,9 +36,7 @@ enable_quantum = False
 
 
 if __name__ == "__main__":
-
     for distr in distributions:
-
         log.info(f"Unfolding the {distr} distribution")
         th1_truth, th1_measured, roounfold_response = generate(
             distr=distr,

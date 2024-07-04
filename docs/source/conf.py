@@ -9,7 +9,7 @@
 project = "QUnfold"
 copyright = "2024, Gianluca Bianco, Simone Gasperini"
 author = "Gianluca Bianco, Simone Gasperini"
-release = "0.3.2"  # version
+release = "0.3.3"  # version
 master_doc = "index"
 
 
