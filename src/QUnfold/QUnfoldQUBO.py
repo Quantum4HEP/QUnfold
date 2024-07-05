@@ -3,7 +3,10 @@ import numpy as np
 import scipy as sp
 import dimod
 import minorminer
-import gurobipy
+try:
+	import gurobipy
+except ImportError:
+	pass
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from dwave.samplers import SimulatedAnnealingSampler
@@ -178,7 +181,14 @@ class QUnfoldQUBO:
         return energy
 
     def solve_gurobi_integer(self):
-        model = gurobipy.Model()
+        try:
+            model = gurobipy.Model()
+        except Exception as e:    
+            import traceback
+            import sys
+            print(traceback.format_exc())
+            print("\n\nGurobi not installed in this env, to install use pip install QUnfold[guro]\n\n")
+            sys.exit(1)
         model.setParam("OutputFlag", 0)
         x = [
             model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1)
@@ -194,7 +204,14 @@ class QUnfoldQUBO:
         return sol, err, cov
 
     def solve_gurobi_binary(self):
-        model = gurobipy.Model()
+        try:
+            model = gurobipy.Model()
+        except Exception as e:    
+            import traceback
+            import sys
+            print(traceback.format_exc())
+            print("\n\nGurobi not installed in this env, to install use pip install QUnfold[guro]\n\n")
+            sys.exit(1)
         model.setParam("OutputFlag", 0)
         num_bits = self.num_bits
         x = [
