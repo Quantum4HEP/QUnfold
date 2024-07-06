@@ -50,6 +50,11 @@ To install the `QUnfold` latest version released on [PyPI](https://pypi.org/proj
 pip install QUnfold
 ```
 
+If you also want to enable the classical [Gurobi](https://www.gurobi.com/) solver ([Python API](https://www.gurobi.com/documentation/current/refman/py_python_api_details.html)) both for the integer optimization and QUBO problem, you need to install `QUnfold` including extra requirements:
+```shell
+pip install QUnfold[gurobi]
+```
+
 ### *Developer-mode*
 To create a dedicated [`conda`](https://docs.conda.io/en/latest/) environment and install `QUnfold` in developer-mode you can do:
 ```shell
@@ -58,7 +63,7 @@ conda activate qunfold-dev
 git clone https://github.com/JustWhit3/QUnfold.git
 cd QUnfold
 pip install -r requirements-dev.txt
-pip install -e .
+pip install -e .[gurobi]
 ```
 
 ## Usage example

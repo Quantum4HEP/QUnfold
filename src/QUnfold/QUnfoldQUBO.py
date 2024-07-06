@@ -1,17 +1,19 @@
 import os
+import sys
 import numpy as np
 import scipy as sp
 import dimod
 import minorminer
-try:
-	import gurobipy
-except ImportError:
-	pass
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, FixedEmbeddingComposite
+
+try:
+    import gurobipy
+except ImportError:
+    pass
 
 
 class QUnfoldQUBO:
@@ -180,53 +182,42 @@ class QUnfoldQUBO:
         energy = self.dwave_bqm.energy(sample=xbin)
         return energy
 
-    def solve_gurobi_integer(self):
-        try:
-            model = gurobipy.Model()
-        except Exception as e:    
-            import traceback
-            import sys
-            print(traceback.format_exc())
-            print("\n\nGurobi not installed in this env, to install use pip install QUnfold[guro]\n\n")
-            sys.exit(1)
-        model.setParam("OutputFlag", 0)
-        x = [
-            model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1)
-            for b in self.num_bits
-        ]
-        a = self.linear_coeffs
-        B = self.quadratic_coeffs
-        model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
-        model.optimize()
-        sol = np.array([var.x for var in x])
-        err = np.sqrt(sol)
-        cov = np.diag(sol)
-        return sol, err, cov
+    if "gurobipy" in sys.modules:
 
-    def solve_gurobi_binary(self):
-        try:
+        def solve_gurobi_integer(self):
             model = gurobipy.Model()
-        except Exception as e:    
-            import traceback
-            import sys
-            print(traceback.format_exc())
-            print("\n\nGurobi not installed in this env, to install use pip install QUnfold[guro]\n\n")
-            sys.exit(1)
-        model.setParam("OutputFlag", 0)
-        num_bits = self.num_bits
-        x = [
-            model.addVar(vtype=gurobipy.GRB.BINARY)
-            for i in range(self.num_bins)
-            for _ in range(num_bits[i])
-        ]
-        Q = self.qubo_matrix
-        model.setObjective(x @ Q @ x, sense=gurobipy.GRB.MINIMIZE)
-        model.optimize()
-        bitstr = np.array([var.x for var in x], dtype=int)
-        arrays = np.split(bitstr, np.cumsum(num_bits[:-1]))
-        sol = np.array(
-            [int("".join(arr.astype(str))[::-1], base=2) for arr in arrays], dtype=float
-        )
-        err = np.sqrt(sol)
-        cov = np.diag(sol)
-        return sol, err, cov
+            model.setParam("OutputFlag", 0)
+            x = [
+                model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1)
+                for b in self.num_bits
+            ]
+            a = self.linear_coeffs
+            B = self.quadratic_coeffs
+            model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
+            model.optimize()
+            sol = np.array([var.x for var in x])
+            err = np.sqrt(sol)
+            cov = np.diag(sol)
+            return sol, err, cov
+
+        def solve_gurobi_binary(self):
+            model = gurobipy.Model()
+            model.setParam("OutputFlag", 0)
+            num_bits = self.num_bits
+            x = [
+                model.addVar(vtype=gurobipy.GRB.BINARY)
+                for i in range(self.num_bins)
+                for _ in range(num_bits[i])
+            ]
+            Q = self.qubo_matrix
+            model.setObjective(x @ Q @ x, sense=gurobipy.GRB.MINIMIZE)
+            model.optimize()
+            bitstr = np.array([var.x for var in x], dtype=int)
+            arrays = np.split(bitstr, np.cumsum(num_bits[:-1]))
+            sol = np.array(
+                [int("".join(arr.astype(str))[::-1], base=2) for arr in arrays],
+                dtype=float,
+            )
+            err = np.sqrt(sol)
+            cov = np.diag(sol)
+            return sol, err, cov

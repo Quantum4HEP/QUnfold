@@ -1,4 +1,6 @@
 import numpy as np
+import scipy as sp
+from QUnfold import QUnfoldQUBO
 
 
 def normalize_response(response, truth_mc):
@@ -31,20 +33,25 @@ def compute_chi2(observed, expected, covariance):
     chi2 = residuals.T @ np.linalg.pinv(covariance) @ residuals
     chi2_red = chi2 / len(expected)
     return chi2_red
-    
 
-from QUnfold import QUnfoldQUBO
-from QUnfold.utils import compute_chi2
-from scipy.optimize import minimize_scalar
-from scipy.optimize import minimize_scalar
 
-def lambda_optimizer(response, measured, truth, maxlam = 1, minlam = 0):
-    def lamba_func(lam = .1):
+def lambda_optimizer(
+    response, measured, truth, min_lam=0.0, max_lam=1.0, verbose=False
+):
+    def lambda_func(lam):
         unfolder = QUnfoldQUBO(response, measured, lam=lam)
         unfolder.initialize_qubo_model()
-        sol, err, cov = unfolder.solve_gurobi_integer()
+        sol, _, cov = unfolder.solve_gurobi_integer()
         chi2 = compute_chi2(observed=sol, expected=truth, covariance=cov)
         return chi2
 
-    minimizer = minimize_scalar(lamba_func,bracket=(minlam,maxlam),method='brent' ,options={'disp':3})
+    try:
+        options = {"disp": 3 if verbose else 0}
+        minimizer = sp.optimize.minimize_scalar(
+            lambda_func, bracket=(min_lam, max_lam), method="brent", options=options
+        )
+    except AttributeError:
+        raise ModuleNotFoundError(
+            "Function 'lambda_optimizer' requires Gurobi solver: 'pip install gurobipy'"
+        )
     return minimizer.x
