@@ -35,9 +35,7 @@ def compute_chi2(observed, expected, covariance):
     return chi2_red
 
 
-def lambda_optimizer(
-    response, measured, truth, min_lam=0.0, max_lam=1.0, verbose=False
-):
+def lambda_optimizer(response, measured, truth, verbose=False):
     def lambda_func(lam):
         unfolder = QUnfoldQUBO(response, measured, lam=lam)
         unfolder.initialize_qubo_model()
@@ -46,9 +44,9 @@ def lambda_optimizer(
         return chi2
 
     try:
-        options = {"disp": 3 if verbose else 0}
+        options = {"maxiter": 100, "disp": 3 if verbose else 0}
         minimizer = sp.optimize.minimize_scalar(
-            lambda_func, bracket=(min_lam, max_lam), method="brent", options=options
+            lambda_func, bounds=(0.0, 10.0), method="bounded", options=options
         )
     except AttributeError:
         raise ModuleNotFoundError(
