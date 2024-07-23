@@ -101,8 +101,10 @@ class QUnfoldQUBO:
         target_edgelist = self._sampler.edgelist
         return minorminer.find_embedding(S=source_edgelist, T=target_edgelist, **kwargs)
 
-    def _run_montecarlo_toys(self, num_toys, num_cores, **kwargs):
-        def run_toy(toy):
+    def _run_montecarlo_toys(self, num_toys, prog_bar, num_cores, **kwargs):
+        def run_toy(_):
+            smeared_d = np.random.poisson(self.d)
+            toy = QUnfoldQUBO(self.R, smeared_d, lam=self.lam)
             toy.initialize_qubo_model()
             if isinstance(self._sampler, DWaveSampler):
                 embedding = toy._get_graph_embedding()
@@ -110,17 +112,16 @@ class QUnfoldQUBO:
             else:
                 sampler = self._sampler
             sampleset = sampler.sample(toy.dwave_bqm, **kwargs)
-            solution = toy._post_process_sampleset(sampleset)
-            return solution
+            sol = toy._post_process_sampleset(sampleset)
+            return sol
 
-        smeared_d = np.random.poisson(self.d, size=(num_toys, self.num_bins))
-        toys_gen = (QUnfoldQUBO(self.R, d, self.lam) for d in smeared_d)
-        if num_cores is None:
-            num_cores = os.cpu_count() - 2
-        desc = "Running MC toys"
-        with ThreadPoolExecutor(num_cores) as executor:
-            res = list(tqdm(executor.map(run_toy, toys_gen), total=num_toys, desc=desc))
-        cov = np.cov(res, rowvar=False)
+        max_workers = num_cores if num_cores is not None else os.cpu_count()
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            jobs = executor.map(run_toy, range(num_toys))
+            if prog_bar:
+                jobs = tqdm(jobs, total=num_toys, desc="Running MC toys")
+            results = list(jobs)
+        cov = np.cov(results, rowvar=False)
         err = np.sqrt(np.diag(cov))
         return err, cov
 
@@ -129,7 +130,7 @@ class QUnfoldQUBO:
         self.dwave_bqm = self._get_dwave_bqm()
 
     def solve_simulated_annealing(
-        self, num_reads, num_toys=None, num_cores=None, seed=None
+        self, num_reads, num_toys=None, prog_bar=True, num_cores=None, seed=None
     ):
         self._sampler = SimulatedAnnealingSampler()
         sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
@@ -139,11 +140,11 @@ class QUnfoldQUBO:
             cov = np.diag(sol)
         else:
             err, cov = self._run_montecarlo_toys(
-                num_toys, num_cores, num_reads=num_reads, seed=seed
+                num_toys, prog_bar, num_cores, num_reads=num_reads, seed=seed
             )
         return sol, err, cov
 
-    def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
+    def solve_hybrid_sampler(self, num_toys=None, prog_bar=True, num_cores=None):
         self._sampler = LeapHybridSampler()
         sampleset = self._sampler.sample(self.dwave_bqm)
         sol = self._post_process_sampleset(sampleset)
@@ -151,7 +152,7 @@ class QUnfoldQUBO:
             err = np.sqrt(sol)
             cov = np.diag(sol)
         else:
-            err, cov = self._run_montecarlo_toys(num_toys, num_cores)
+            err, cov = self._run_montecarlo_toys(num_toys, prog_bar, num_cores)
         return sol, err, cov
 
     def set_quantum_device(self, device_name=None, dwave_token=None):
@@ -160,7 +161,9 @@ class QUnfoldQUBO:
     def set_graph_embedding(self, **kwargs):
         self.graph_embedding = self._get_graph_embedding(**kwargs)
 
-    def solve_quantum_annealing(self, num_reads, num_toys=None, num_cores=None):
+    def solve_quantum_annealing(
+        self, num_reads, num_toys=None, prog_bar=True, num_cores=None
+    ):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
         sol = self._post_process_sampleset(sampleset)
@@ -169,7 +172,7 @@ class QUnfoldQUBO:
             cov = np.diag(sol)
         else:
             err, cov = self._run_montecarlo_toys(
-                num_toys, num_cores, num_reads=num_reads
+                num_toys, prog_bar, num_cores, num_reads=num_reads
             )
         return sol, err, cov
 
