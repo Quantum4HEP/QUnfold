@@ -31,9 +31,9 @@ def run_RooUnfold(method, m_response, h_measured, truth, num_toys=1):
     unfolded_histo = None
 
     # Compute solution
-    if num_toys == 1:
+    if num_toys is None:
         unfolded_histo = unfolder.Hunfold(unfolder.kErrors)
-    elif num_toys > 1:
+    else:
         unfolder.SetNToys(num_toys)
         unfolded_histo = unfolder.Hunfold(unfolder.kCovToys)
     unfolded = TH1_to_numpy(unfolded_histo)
@@ -42,11 +42,8 @@ def run_RooUnfold(method, m_response, h_measured, truth, num_toys=1):
 
     # Compute chi2
     chi2 = None
-    if num_toys == 1:
-        chi2 = compute_chi2(unfolded, truth)
-    elif num_toys > 1:
-        cov = unfolder.Eunfold(unfolder.kCovToys)
-        chi2 = compute_chi2(unfolded, truth, TMatrix_to_numpy(cov)[1:-1, 1:-1])
+    cov = unfolder.Eunfold(unfolder.kCovToys)
+    chi2 = compute_chi2(unfolded, truth, TMatrix_to_numpy(cov)[1:-1, 1:-1])
 
     return unfolded, error, chi2
 
@@ -246,8 +243,8 @@ def make_comparisons(reco, particle):
         "eta_lep1",
         "eta_lep2",
     ]
-    num_toys = 1000
-    num_reads = 300
+    num_toys = 100
+    num_reads = 200
     hybrid = False
 
     # RUnning over variables
@@ -276,9 +273,8 @@ def make_comparisons(reco, particle):
         )
 
         # Unfold with QUnfold (basic settings)
-        lam = 0.0
         if var == "pT_lep1":
-            lam = 0.0001  # 0.00001
+            lam = 0.00001  # 0.00001
         elif var == "pT_lep2":
             lam = 0.0  # 0.0001
         elif var == "m_l1l2":
