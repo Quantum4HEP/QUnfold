@@ -1,6 +1,6 @@
 import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
-from QUnfold.utils import normalize_response, compute_chi2
+from QUnfold.utils import normalize_response, lambda_optimizer, compute_chi2
 
 
 if __name__ == "__main__":
@@ -40,8 +40,11 @@ if __name__ == "__main__":
     truth = np.histogram(true_data, bins=binning)[0]
     measured = np.histogram(meas_data, bins=binning)[0]
 
+    # Find optimal value for regularization parameter
+    lam = lambda_optimizer(response, measured, truth, num_reps=20, seed=seed)
+
     # Run simulated annealing to solve QUBO problem
-    unfolder = QUnfoldQUBO(response, measured, lam=0.1)
+    unfolder = QUnfoldQUBO(response, measured, lam=lam)
     unfolder.initialize_qubo_model()
     sol, err, cov = unfolder.solve_simulated_annealing(
         num_reads=10, num_toys=100, seed=seed
