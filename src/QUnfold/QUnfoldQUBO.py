@@ -118,9 +118,9 @@ class QUnfoldQUBO:
         max_workers = num_cores if num_cores is not None else os.cpu_count()
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             jobs = executor.map(run_toy, range(num_toys))
-            if prog_bar:
-                jobs = tqdm(jobs, total=num_toys, desc="Running MC toys")
-            results = list(jobs)
+            desc = "Running MC toys"
+            disable = not prog_bar
+            results = list(tqdm(jobs, total=num_toys, desc=desc, disable=disable))
         cov = np.cov(results, rowvar=False)
         err = np.sqrt(np.diag(cov))
         return err, cov
