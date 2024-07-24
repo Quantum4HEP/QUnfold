@@ -1,6 +1,6 @@
 import numpy as np
 from QUnfold import QUnfoldQUBO, QUnfoldPlotter
-from QUnfold.utils import normalize_response, lambda_optimizer, compute_chi2
+from QUnfold.utils import normalize_response, lambda_optimizer
 
 
 if __name__ == "__main__":
@@ -63,15 +63,15 @@ if __name__ == "__main__":
     sol, err, cov = unfolder.solve_quantum_annealing(num_reads=4000)
     """
 
-    chi2 = compute_chi2(observed=sol, expected=truth, covariance=cov)
     plotter = QUnfoldPlotter(
         response=response,
         measured=measured,
         truth=truth,
         unfolded=sol,
         error=err,
+        covariance=cov,
         binning=binning,
-        chi2=chi2,
+        chi2=True,
     )
     plotter.saveResponse("examples/simneal_response.png")
     plotter.savePlot("examples/simneal_result.png", method="SA")

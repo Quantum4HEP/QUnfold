@@ -1,5 +1,6 @@
 import numpy as np
 import pylab as plt
+from QUnfold.utils import compute_chi2
 
 
 class QUnfoldPlotter:
@@ -7,7 +8,9 @@ class QUnfoldPlotter:
     Class used to plot QUnfold data and results.
     """
 
-    def __init__(self, response, measured, truth, unfolded, error, binning, chi2):
+    def __init__(
+        self, response, measured, truth, unfolded, error, covariance, binning, chi2=True
+    ):
         """
         Constructs a QUnfoldPlotter class for visualizing unfolding results.
 
@@ -17,14 +20,16 @@ class QUnfoldPlotter:
             truth (numpy.ndarray): truth histogram.
             unfolded (numpy.ndarray): unfolded histogram.
             error (numpy.ndarray): errors on the unfolded histogram.
+            covariance (numpy.array): covariance matrix of the unfolding.
             binning (numpy.ndarray): binning of the histograms.
-            chi2 (float): chi2 to show on the plot.
+            chi2 (bool): if True, it shows the chi2 on the plot.
         """
         self.response = response[1:-1, 1:-1]
         self.measured = measured[1:-1]
         self.truth = truth[1:-1]
         self.unfolded = unfolded[1:-1]
         self.error = error[1:-1]
+        self.covariance = covariance[1:-1, 1:-1]
         self.binning = binning[1:-1]
         self.chi2 = chi2
 
@@ -100,7 +105,7 @@ class QUnfoldPlotter:
         # Plot unfolded histogram with chi2 test
         binwidths = np.diff(self.binning)
         bin_midpoints = self.binning[:-1] + binwidths / 2
-        chi2 = round(self.chi2, 2)
+        chi2 = round(compute_chi2(self.unfolded, self.truth, self.covariance), 2)
         label = rf"Unfolded {method} ($\chi^2 = {chi2}$)"
         ax1.errorbar(
             x=bin_midpoints,
