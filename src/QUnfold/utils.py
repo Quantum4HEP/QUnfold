@@ -53,9 +53,8 @@ def lambda_optimizer(response, measured, truth, num_reps=50, verbose=False, seed
         sol, _, _ = unfolder.solve_gurobi_integer()
         pk = truth[1:-1] / np.sum(truth[1:-1])
         qk = sol[1:-1] / np.sum(sol[1:-1])
-        rmse = np.sqrt(np.mean(np.square(pk - qk)))
-        kl_div = sp.stats.entropy(pk, qk)
-        return rmse + 100 * kl_div
+        mae = np.mean(np.abs(pk - qk))
+        return mae
 
     best_lam = 0
     min_fun = objective_fun(best_lam)

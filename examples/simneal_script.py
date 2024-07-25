@@ -46,9 +46,8 @@ if __name__ == "__main__":
     # Run simulated annealing to solve QUBO problem
     unfolder = QUnfoldQUBO(response, measured, lam=lam)
     unfolder.initialize_qubo_model()
-    sol, err, cov = unfolder.solve_simulated_annealing(
-        num_reads=10, num_toys=100, seed=seed
-    )
+    # sol, err, cov = unfolder.solve_gurobi_integer()
+    sol, err, cov = unfolder.solve_simulated_annealing(num_reads=300, seed=seed)
 
     ################## Quantum Annealing solver ##################
     """
