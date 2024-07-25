@@ -5,7 +5,7 @@ from analysis_functions.RooUnfold import run_RooUnfold
 from analysis_functions.QUnfolder import run_QUnfold
 from analysis_functions.comparisons import plot_comparisons
 from QUnfold.root2numpy import TH1_to_numpy, TH2_to_numpy
-from QUnfold.utils import normalize_response
+from QUnfold.utils import normalize_response, lambda_optimizer
 
 
 log = get_custom_logger(__name__)
@@ -21,16 +21,8 @@ bias = -0.13
 smearing = 0.21
 eff = 0.7
 
-lambdas = {
-    "normal": 0.03,
-    "gamma": 0.003,
-    "exponential": 0.0007,
-    "breit-wigner": 0.0001,
-    "double-peaked": 0.02,
-}
-num_reads = 1000
+num_reads = 300
 num_toys = None
-
 enable_hybrid = False
 enable_quantum = False
 
@@ -71,11 +63,15 @@ if __name__ == "__main__":
             response=TH2_to_numpy(roounfold_response.Hresponse(), overflow=True),
             truth_mc=TH1_to_numpy(roounfold_response.Htruth(), overflow=True),
         )
+        lam = lambda_optimizer(
+            response=response, measured=measured, truth=truth, num_reps=20
+        )
+
         sol_SA, err_SA, cov_SA = run_QUnfold(
             method="SA",
             response=response,
             measured=measured,
-            lam=lambdas[distr],
+            lam=lam,
             num_reads=num_reads,
             num_toys=num_toys,
         )
@@ -85,15 +81,16 @@ if __name__ == "__main__":
                 method="HYB",
                 response=response,
                 measured=measured,
-                lam=lambdas[distr],
+                lam=lam,
                 num_toys=num_toys,
             )
+
         if enable_quantum:
             sol_QA, err_QA, cov_QA = run_QUnfold(
                 method="QA",
                 response=response,
                 measured=measured,
-                lam=lambdas[distr],
+                lam=lam,
                 num_reads=num_reads,
                 num_toys=num_toys,
             )
