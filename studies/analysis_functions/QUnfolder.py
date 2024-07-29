@@ -5,7 +5,9 @@ def run_QUnfold(method, response, measured, lam, num_reads=None, num_toys=None):
     unfolder = QUnfoldQUBO(response=response, measured=measured, lam=lam)
     unfolder.initialize_qubo_model()
 
-    if method == "SA":
+    if method == "GRB":
+        sol, err, cov = unfolder.solve_gurobi_integer()
+    elif method == "SA":
         sol, err, cov = unfolder.solve_simulated_annealing(
             num_reads=num_reads,
             num_toys=num_toys,
@@ -21,5 +23,4 @@ def run_QUnfold(method, response, measured, lam, num_reads=None, num_toys=None):
             num_reads=num_reads,
             num_toys=num_toys,
         )
-
     return sol, err, cov

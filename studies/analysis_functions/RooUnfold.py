@@ -40,5 +40,4 @@ def run_RooUnfold(method, response, measured, num_toys=None):
     sol = TH1_to_numpy(sol_histo, overflow=True)
     err = TH1_to_numpy(sol_histo, error=True, overflow=True)
     cov = TMatrix_to_numpy(cov_matrix)
-
     return sol, err, cov

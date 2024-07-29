@@ -22,7 +22,7 @@ smearing = 0.21
 eff = 0.7
 
 num_reads = 300
-num_toys = None
+num_toys = 70
 enable_hybrid = False
 enable_quantum = False
 
@@ -109,4 +109,12 @@ if __name__ == "__main__":
             error.update({"QA": err_QA})
             covariance.update({"QA": cov_QA})
 
-        plot_comparisons(solution, error, covariance, distr, truth, measured, binning)
+        plot_comparisons(
+            solution,
+            error,
+            covariance,
+            truth=truth,
+            measured=measured,
+            binning=binning,
+            distr=distr,
+        )
