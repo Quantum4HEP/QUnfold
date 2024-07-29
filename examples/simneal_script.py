@@ -72,5 +72,5 @@ if __name__ == "__main__":
         binning=binning,
         chi2=True,
     )
-    plotter.saveResponse("examples/simneal_response.png")
-    plotter.savePlot("examples/simneal_result.png", method="SA")
+    plotter.save_response("examples/simneal_response.png")
+    plotter.save_histograms("examples/simneal_result.png", method="SA")
