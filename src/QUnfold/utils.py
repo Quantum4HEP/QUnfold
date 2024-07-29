@@ -24,25 +24,32 @@ def normalize_response(response, truth_mc):
     return response / (truth_mc + 1e-12)
 
 
-def compute_chi2(observed, expected, covariance):
-    """
-    Compute the reduced chi-square between the observed and the expected histogram.
+def compute_chi2(observed, expected, covariance=None):
+    nonzero = expected != 0
+    observed = observed[nonzero]
+    expected = expected[nonzero]
+    residuals = observed - expected
+    if covariance is None:
+        chi2 = np.sum(np.square(residuals) / expected)
+    else:
+        covariance = covariance[nonzero, :][:, nonzero]
+        chi2 = residuals.T @ np.linalg.pinv(covariance) @ residuals
+    chi2_red = chi2 / len(expected)
+    return chi2_red
 
-    Args:
-        observed (numpy.ndarray): observed histogram.
-        expected (numpy.ndarray): expected histogram.
-        covariance (numpy.ndarray): covariance matrix.
 
-    Returns:
-        float: reduced chi-square.
-    """
+def compute_chi2_toys(observed, expected, covariance):
+    nonzero = expected != 0
+    observed = observed[nonzero]
+    expected = expected[nonzero]
+    covariance = covariance[nonzero, :][:, nonzero]
     residuals = observed - expected
     chi2 = residuals.T @ np.linalg.pinv(covariance) @ residuals
     chi2_red = chi2 / len(expected)
     return chi2_red
 
 
-def lambda_optimizer(response, measured, truth, num_reps=50, verbose=False, seed=None):
+def lambda_optimizer(response, measured, truth, num_reps=30, verbose=False, seed=None):
     if "gurobipy" not in sys.modules:
         raise ModuleNotFoundError("Function 'lambda_optimizer' requires Gurobi solver")
     np.random.seed(seed)
