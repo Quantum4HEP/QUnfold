@@ -74,9 +74,10 @@ from QUnfold import QUnfoldQUBO
 # Define your input response matrix and measured histogram as numpy arrays
 response = ...
 measured = ...
+binning = ...
 
 # Create the QUnfoldQUBO object and initialize the QUBO model
-unfolder = QUnfoldQUBO(response, measured, lam=0.1)
+unfolder = QUnfoldQUBO(response, measured, binning, lam=0.1)
 unfolder.initialize_qubo_model()
 
 # Run one of the available solvers to get the unfolding result

@@ -17,15 +17,11 @@ except ImportError:
 
 
 class QUnfoldQUBO:
-    def __init__(self, response, measured, lam=0.0):
+    def __init__(self, response, measured, binning, lam=0.0):
         self.R = response
         self.d = measured
+        self.binning = binning
         self.lam = lam
-
-        dim = len(measured)
-        main_d = np.array([0, -1] + [-2] * (dim - 4) + [-1, 0])
-        sup_sub_d = np.array([0] + [1] * (dim - 3) + [0])
-        self.D = np.diag(main_d) + np.diag(sup_sub_d, k=1) + np.diag(sup_sub_d, k=-1)
 
     @property
     def num_bins(self):
@@ -58,7 +54,26 @@ class QUnfoldQUBO:
 
     @property
     def quadratic_coeffs(self):
-        return (self.R.T @ self.R) + self.lam * (self.D.T @ self.D)
+        L = self._get_laplacian()
+        return (self.R.T @ self.R) + self.lam * (L.T @ L)
+
+    def _get_laplacian(self):
+        hs = np.diff(self.binning)
+        n = len(hs)
+        L = np.zeros(shape=(n, n))
+        L[0, 0] = -1 / (hs[0] * hs[1])
+        L[-1, -1] = -1 / (hs[-2] * hs[-1])
+        for i in range(1, n - 1):
+            h_minus = hs[i - 1]
+            h = hs[i]
+            h_plus = hs[i + 1]
+            L[i, i] += -1 / (h_minus * h) - 1 / (h * h_plus)
+            L[i, i + 1] += 1 / (h * (h + h_plus))
+            L[i + 1, i] += 1 / (h_plus * (h + h_plus))
+            L[i, i - 1] += 1 / (h * (h_minus + h))
+            L[i - 1, i] += 1 / (h_minus * (h_minus + h))
+        norm = 2 / np.max(np.abs(L))
+        return norm * L
 
     def _get_qubo_matrix(self):
         dim = self.num_bins
@@ -104,7 +119,7 @@ class QUnfoldQUBO:
     def _run_montecarlo_toys(self, num_toys, prog_bar, num_cores, **kwargs):
         def run_toy(_):
             smeared_d = np.random.poisson(self.d)
-            toy = QUnfoldQUBO(self.R, smeared_d, lam=self.lam)
+            toy = QUnfoldQUBO(self.R, smeared_d, binning=self.binning, lam=self.lam)
             toy.initialize_qubo_model()
             if isinstance(self._sampler, DWaveSampler):
                 embedding = toy._get_graph_embedding()
