@@ -98,6 +98,10 @@ def generate_double_peaked(
 
 
 def generate(distr, binning, samples, bias, smearing, eff):
+    if binning[0] == -np.inf:
+        binning = binning[1:]
+    if binning[-1] == np.inf:
+        binning = binning[:-1]
     bins = len(binning) - 1
     truth = ROOT.TH1F(f"Truth_{distr}", "", bins, array("d", binning))
     measured = ROOT.TH1F(f"Measured_{distr}", "", bins, array("d", binning))

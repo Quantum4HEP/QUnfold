@@ -1,13 +1,13 @@
-import os
 import numpy as np
 import pylab as plt
-from QUnfold.utils import compute_chi2_toys
+from QUnfold.utils import compute_chi2
 from QUnfold.QUnfoldPlotter import histogram_plot, errorbar_plot, ratio_plot
 
 
-def plot_comparisons(
-    method2sol, method2err, method2cov, truth, measured, binning, distr
+def plot_comparison(
+    method2sol, method2err, method2cov, truth, measured, binning, xlabel
 ):
+
     fig = plt.figure(figsize=(9, 7))
     gs = fig.add_gridspec(nrows=2, ncols=1, height_ratios=[3, 1], hspace=0)
     ax1 = fig.add_subplot(gs[0])
@@ -15,6 +15,7 @@ def plot_comparisons(
 
     truth = truth[1:-1]
     measured = measured[1:-1]
+    binning = binning[1:-1]
     histogram_plot(ax=ax1, x=binning, y=truth, label="Truth")
     histogram_plot(ax=ax1, x=binning, y=measured, label="Measured")
 
@@ -26,7 +27,7 @@ def plot_comparisons(
         sol = method2sol[method][1:-1]
         err = method2err[method][1:-1]
         cov = method2cov[method][1:-1, 1:-1]
-        chi2 = compute_chi2_toys(sol, truth, cov)
+        chi2 = compute_chi2(sol, truth, cov)
         errorbar_plot(
             ax=ax1,
             x=x,
@@ -46,12 +47,6 @@ def plot_comparisons(
             yerr=ratio_err,
             method=method,
             binning=binning,
+            xlabel=xlabel,
         )
-
-        for ext in ["pdf"]:
-            dirpath = f"studies/img/analysis/{ext}"
-            if not os.path.exists(dirpath):
-                os.makedirs(dirpath)
-            fig.tight_layout()
-            fig.savefig(f"{dirpath}/{distr}.{ext}")
-        plt.close()
+    return fig

@@ -3,7 +3,7 @@ import uproot
 import awkward as ak
 import numpy as np
 from array import array
-from paper_functions.physics import (
+from studies.utils.physics import (
     compute_invariant_mass_reco,
     compute_invariant_mass_particle,
     compute_energy,
