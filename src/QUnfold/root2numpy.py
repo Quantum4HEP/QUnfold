@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def TH1_to_numpy(histo, error=False, overflow=False, dtype=np.float64):
+def TH1_to_numpy(histo, error=False, overflow=True, dtype=np.float64):
     """
     Convert a ROOT.TH1 object into a 1D numpy array.
 
@@ -23,7 +23,7 @@ def TH1_to_numpy(histo, error=False, overflow=False, dtype=np.float64):
     return array.astype(dtype=dtype)
 
 
-def TH2_to_numpy(histo, overflow=False, dtype=np.float64):
+def TH2_to_numpy(histo, overflow=True, dtype=np.float64):
     """
     Convert a ROOT.TH2 object into a 2D numpy array.
 

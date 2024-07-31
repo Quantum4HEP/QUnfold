@@ -66,7 +66,7 @@ def errorbar_plot(ax, x, y, yerr, method, chi2, binning):
     ax.spines["right"].set_visible(False)
 
 
-def ratio_plot(ax, x, y, yerr, method, binning, xlabel):
+def ratio_plot(ax, x, y, yerr, method, binning, xlabel=None):
     ax.axhline(y=1, color=label2color["Truth"])
     color = label2color[method]
     ax.errorbar(
