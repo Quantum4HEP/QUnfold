@@ -16,11 +16,11 @@ label2color = {
 }
 figsize = (12, 9)
 chi2_ndigits = 2
-alpha = 0.2
+alpha = 0.3
 marker = "o"
-markersize = 3
-ticks_fontsize = 10
-labels_fontsize = 15
+markersize = 3.5
+ticks_fontsize = 8
+labels_fontsize = 14
 legend_fontsize = 12
 #################################################
 
@@ -55,6 +55,10 @@ def errorbar_plot(ax, x, y, yerr, method, chi2, binning):
         right=False,
         labelbottom=False,
     )
+    yticks = [-np.inf, -np.inf] + ax.get_yticks().tolist()[2:]
+    yticklabels = ["", ""] + ax.get_yticklabels()[2:]
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels)
     ax.set_ylabel(ylabel="Entries", fontsize=labels_fontsize)
     ax.set_ylim(bottom=0)
     ax.legend(fontsize=legend_fontsize)
@@ -62,7 +66,7 @@ def errorbar_plot(ax, x, y, yerr, method, chi2, binning):
     ax.spines["right"].set_visible(False)
 
 
-def ratio_plot(ax, x, y, yerr, method, binning):
+def ratio_plot(ax, x, y, yerr, method, binning, xlabel):
     ax.axhline(y=1, color=label2color["Truth"])
     color = label2color[method]
     ax.errorbar(
@@ -80,10 +84,8 @@ def ratio_plot(ax, x, y, yerr, method, binning):
         labelsize=ticks_fontsize,
         right=False,
     )
-    ax.set_xticks(np.linspace(binning[0], binning[-1], num=len(binning)))
-    ax.set_yticks([0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75])
-    ax.set_yticklabels(["", "0.5", "", "1.0", "", "1.5", ""])
-    ax.set_xlabel(xlabel="Bins", fontsize=labels_fontsize)
+    ax.set_xticks(binning)
+    ax.set_xlabel(xlabel=xlabel, fontsize=labels_fontsize)
     ax.set_ylabel(ylabel="Ratio to\nTruth", fontsize=labels_fontsize)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -137,7 +139,7 @@ class QUnfoldPlotter:
 
         binning = self.binning
         bin_midpoints = binning[:-1] + np.diff(binning) / 2
-        chi2 = compute_chi2(self.unfolded, self.truth)
+        chi2 = compute_chi2(self.unfolded, self.truth, self.covariance)
         errorbar_plot(
             ax=ax1,
             x=bin_midpoints,

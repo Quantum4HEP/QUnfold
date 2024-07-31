@@ -24,44 +24,36 @@ def normalize_response(response, truth_mc):
     return response / (truth_mc + 1e-12)
 
 
-def compute_chi2(observed, expected, covariance=None):
+def compute_chi2(observed, expected, covariance, toys=False):
     nonzero = expected != 0
     observed = observed[nonzero]
     expected = expected[nonzero]
-    residuals = observed - expected
-    if covariance is None:
-        chi2 = np.sum(np.square(residuals) / expected)
+    if toys:
+        cov = covariance[nonzero, :][:, nonzero]
     else:
-        covariance = covariance[nonzero, :][:, nonzero]
-        chi2 = residuals.T @ np.linalg.pinv(covariance) @ residuals
-    chi2_red = chi2 / len(expected)
-    return chi2_red
-
-
-def compute_chi2_toys(observed, expected, covariance):
-    nonzero = expected != 0
-    observed = observed[nonzero]
-    expected = expected[nonzero]
-    covariance = covariance[nonzero, :][:, nonzero]
+        cov = np.diag(expected)
     residuals = observed - expected
-    chi2 = residuals.T @ np.linalg.pinv(covariance) @ residuals
+    chi2 = residuals.T @ np.linalg.pinv(cov) @ residuals
     chi2_red = chi2 / len(expected)
     return chi2_red
 
 
-def lambda_optimizer(response, measured, truth, num_reps=30, verbose=False, seed=None):
+def lambda_optimizer(
+    response, measured, truth, binning, num_reps=30, verbose=False, seed=None
+):
     if "gurobipy" not in sys.modules:
         raise ModuleNotFoundError("Function 'lambda_optimizer' requires Gurobi solver")
     np.random.seed(seed)
 
     def objective_fun(lam):
-        unfolder = QUnfoldQUBO(response, measured, lam=lam)
+        unfolder = QUnfoldQUBO(response, measured, binning=binning, lam=lam)
         unfolder.initialize_qubo_model()
         sol, _, _ = unfolder.solve_gurobi_integer()
-        pk = truth[1:-1] / np.sum(truth[1:-1])
-        qk = sol[1:-1] / np.sum(sol[1:-1])
-        mae = np.mean(np.abs(pk - qk))
-        return mae
+        obs = sol[1:-1]
+        exp = truth[1:-1]
+        cov = np.diag(exp)
+        chi2 = compute_chi2(observed=obs, expected=exp, covariance=cov)
+        return chi2
 
     best_lam = 0
     min_fun = objective_fun(best_lam)
