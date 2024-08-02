@@ -21,17 +21,16 @@ def run_RooUnfold(method, response, measured, num_toys=None):
     unfolder.SetMeasured(measured)
 
     if num_toys is None:
-        sol_histo = unfolder.Hunfold(unfolder.kErrors)
-        cov_matrix = unfolder.Eunfold(unfolder.kErrors)
+        sol_histo = unfolder.Hunfold()
+        cov_matrix = unfolder.Eunfold()
     else:
         unfolder.SetNToys(num_toys)
         sol_histo = unfolder.Hunfold(unfolder.kCovToys)
         cov_matrix = unfolder.Eunfold(unfolder.kCovToys)
 
     sol = TH1_to_numpy(sol_histo, overflow=True)
-    err = TH1_to_numpy(sol_histo, error=True, overflow=True)
     cov = TMatrix_to_numpy(cov_matrix)
-    return sol, err, cov
+    return sol, cov
 
 
 def run_QUnfold(
@@ -41,21 +40,19 @@ def run_QUnfold(
     unfolder.initialize_qubo_model()
 
     if method == "GRB":
-        sol, err, cov = unfolder.solve_gurobi_integer()
+        sol, cov = unfolder.solve_gurobi_integer()
     elif method == "SA":
-        sol, err, cov = unfolder.solve_simulated_annealing(
-            num_reads=num_reads,
-            num_toys=num_toys,
+        sol, cov = unfolder.solve_simulated_annealing(
+            num_reads=num_reads, num_toys=num_toys
         )
     elif method == "HYB":
-        sol, err, cov = unfolder.solve_hybrid_sampler(
+        sol, cov = unfolder.solve_hybrid_sampler(
             num_toys=num_toys,
         )
     elif method == "QA":
         unfolder.set_quantum_device()
         unfolder.set_graph_embedding()
-        sol, err, cov, _ = unfolder.solve_quantum_annealing(
-            num_reads=num_reads,
-            num_toys=num_toys,
+        sol, cov, _ = unfolder.solve_quantum_annealing(
+            num_reads=num_reads, num_toys=num_toys
         )
-    return sol, err, cov
+    return sol, cov

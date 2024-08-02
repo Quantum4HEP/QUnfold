@@ -81,7 +81,7 @@ unfolder = QUnfoldQUBO(response, measured, binning, lam=0.1)
 unfolder.initialize_qubo_model()
 
 # Run one of the available solvers to get the unfolding result
-sol, err, cov = unfolder.solve_simulated_annealing(num_reads=100)
+sol, cov = unfolder.solve_simulated_annealing(num_reads=100)
 ```
 <p align="center">
     <img src="https://github.com/JustWhit3/QUnfold/blob/main/examples/simneal_response.png" style="width: 45%;">

@@ -16,11 +16,11 @@ label2color = {
 }
 figsize = (12, 9)
 chi2_ndigits = 2
-alpha = 0.3
+alpha = 0.25
 marker = "o"
-markersize = 3.5
-ticks_fontsize = 8
-labels_fontsize = 14
+markersize = 4
+ticks_fontsize = 9
+labels_fontsize = 15
 legend_fontsize = 12
 #################################################
 
@@ -32,9 +32,9 @@ def histogram_plot(ax, x, y, label):
     ax.fill_between(x, y, color=color, alpha=alpha, step="post")
 
 
-def errorbar_plot(ax, x, y, yerr, method, chi2, binning):
-    rounded_chi2 = round(chi2, ndigits=chi2_ndigits)
-    label = rf"{method} ($\chi^2 = {rounded_chi2}$)"
+def errorbar_plot(ax, x, y, yerr, binning, method, chi2):
+    rchi2 = round(chi2, ndigits=chi2_ndigits)
+    label = rf"Unfolded {method} ($\chi^2 = {rchi2}$)"
     color = label2color[method]
     ax.errorbar(
         x=x,
@@ -66,7 +66,9 @@ def errorbar_plot(ax, x, y, yerr, method, chi2, binning):
     ax.spines["right"].set_visible(False)
 
 
-def ratio_plot(ax, x, y, yerr, method, binning, xlabel=None):
+def ratio_plot(ax, x, y, yerr, binning, method, xlabel=None):
+    if xlabel is None:
+        xlabel = "Bins"
     ax.axhline(y=1, color=label2color["Truth"])
     color = label2color[method]
     ax.errorbar(
@@ -93,22 +95,20 @@ def ratio_plot(ax, x, y, yerr, method, binning, xlabel=None):
 
 class QUnfoldPlotter:
     def __init__(
-        self, response, measured, truth, unfolded, error, covariance, binning, chi2=True
+        self, response, measured, truth, unfolded, covariance, binning, method
     ):
         self.response = response[1:-1, 1:-1]
         self.measured = measured[1:-1]
         self.truth = truth[1:-1]
         self.unfolded = unfolded[1:-1]
-        self.error = error[1:-1]
         self.covariance = covariance[1:-1, 1:-1]
         self.binning = binning[1:-1]
-        self.chi2 = chi2
+        self.qunfold_method = method
 
     def _plot_response(self):
         fig, ax = plt.subplots(figsize=figsize)
-        ax.imshow(
+        heatmap = ax.imshow(
             np.transpose(self.response),
-            cmap="viridis",
             extent=[
                 self.binning[0],
                 self.binning[-1],
@@ -124,11 +124,12 @@ class QUnfoldPlotter:
             top=False,
             right=False,
         )
-        ax.set_xlabel("Truth", fontsize=labels_fontsize)
-        ax.set_ylabel("Measured", fontsize=labels_fontsize)
+        ax.set_xlabel("Measured", fontsize=labels_fontsize)
+        ax.set_ylabel("Truth", fontsize=labels_fontsize)
+        fig.colorbar(heatmap, ax=ax)
         fig.tight_layout()
 
-    def _plot_histograms(self, method):
+    def _plot_histograms(self):
         fig = plt.figure(figsize=figsize)
         gs = fig.add_gridspec(nrows=2, ncols=1, height_ratios=[3, 1], hspace=0)
         ax1 = fig.add_subplot(gs[0])
@@ -138,27 +139,18 @@ class QUnfoldPlotter:
         histogram_plot(ax=ax1, x=self.binning, y=self.measured, label="Measured")
 
         binning = self.binning
-        bin_midpoints = binning[:-1] + np.diff(binning) / 2
-        chi2 = compute_chi2(self.unfolded, self.truth, self.covariance)
+        method = self.qunfold_method
+        xmid = binning[:-1] + np.diff(binning) / 2
+        obs, exp, cov = self.unfolded, self.truth, self.covariance
+        err = np.sqrt(np.diag(cov))
+        chi2 = compute_chi2(obs, exp, cov)
         errorbar_plot(
-            ax=ax1,
-            x=bin_midpoints,
-            y=self.unfolded,
-            yerr=self.error,
-            method=method,
-            chi2=chi2,
-            binning=binning,
+            ax=ax1, x=xmid, y=obs, yerr=err, method=method, binning=binning, chi2=chi2
         )
-
-        ratio_sol = self.unfolded / self.truth
-        ratio_err = self.error / self.truth
+        ratio_sol = obs / self.truth
+        ratio_err = err / self.truth
         ratio_plot(
-            ax=ax2,
-            x=bin_midpoints,
-            y=ratio_sol,
-            yerr=ratio_err,
-            method=method,
-            binning=binning,
+            ax=ax2, x=xmid, y=ratio_sol, yerr=ratio_err, method=method, binning=binning
         )
         fig.tight_layout()
 
@@ -172,12 +164,12 @@ class QUnfoldPlotter:
         plt.savefig(path)
         plt.close()
 
-    def show_histograms(self, method):
-        self._plot_histograms(method)
+    def show_histograms(self):
+        self._plot_histograms()
         plt.show()
         plt.close()
 
-    def save_histograms(self, path, method):
-        self._plot_histograms(method)
+    def save_histograms(self, path):
+        self._plot_histograms()
         plt.savefig(path)
         plt.close()

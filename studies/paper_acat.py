@@ -59,14 +59,14 @@ if __name__ == "__main__":
         )
         roounfold_response.UseOverflow(True)
 
-        sol_MI, err_MI, cov_MI = run_RooUnfold(
+        sol_MI, cov_MI = run_RooUnfold(
             method="MI",
             response=roounfold_response,
             measured=th1_measured,
             num_toys=num_toys,
         )
 
-        sol_IBU, err_IBU, cov_IBU = run_RooUnfold(
+        sol_IBU, cov_IBU = run_RooUnfold(
             method="IBU",
             response=roounfold_response,
             measured=th1_measured,
@@ -84,7 +84,7 @@ if __name__ == "__main__":
             response=response, measured=measured, truth=truth, binning=binning
         )
 
-        sol_SA, err_SA, cov_SA = run_QUnfold(
+        sol_SA, cov_SA = run_QUnfold(
             method="SA",
             response=response,
             measured=measured,
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         )
 
         if enable_hybrid:
-            sol_HYB, err_HYB, cov_HYB = run_QUnfold(
+            sol_HYB, cov_HYB = run_QUnfold(
                 method="HYB",
                 response=response,
                 measured=measured,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             )
 
         if enable_quantum:
-            sol_QA, err_QA, cov_QA = run_QUnfold(
+            sol_QA, cov_QA = run_QUnfold(
                 method="QA",
                 response=response,
                 measured=measured,
@@ -117,21 +117,17 @@ if __name__ == "__main__":
 
         ######################### Comparison #########################
         solution = {"MI": sol_MI, "IBU": sol_IBU, "SA": sol_SA}
-        error = {"MI": err_MI, "IBU": err_IBU, "SA": err_SA}
         covariance = {"MI": cov_MI, "IBU": cov_IBU, "SA": cov_SA}
 
         if enable_hybrid:
             solution.update({"HYB": sol_HYB})
-            error.update({"HYB": err_HYB})
             covariance.update({"HYB": cov_HYB})
         if enable_quantum:
             solution.update({"QA": sol_QA})
-            error.update({"QA": err_QA})
             covariance.update({"QA": cov_QA})
 
         fig = plot_comparison(
             solution,
-            error,
             covariance,
             truth=truth,
             measured=measured,

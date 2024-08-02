@@ -48,7 +48,7 @@ def lambda_optimizer(
     def objective_fun(lam):
         unfolder = QUnfoldQUBO(response, measured, binning=binning, lam=lam)
         unfolder.initialize_qubo_model()
-        sol, _, _ = unfolder.solve_gurobi_integer()
+        sol, _ = unfolder.solve_gurobi_integer()
         obs = sol[1:-1]
         exp = truth[1:-1]
         cov = np.diag(exp)

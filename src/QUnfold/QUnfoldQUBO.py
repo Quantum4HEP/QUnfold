@@ -137,38 +137,35 @@ class QUnfoldQUBO:
             disable = not prog_bar
             results = list(tqdm(jobs, total=num_toys, desc=desc, disable=disable))
         cov = np.cov(results, rowvar=False)
-        err = np.sqrt(np.diag(cov))
-        return err, cov
+        return cov
 
     def initialize_qubo_model(self):
         self.qubo_matrix = self._get_qubo_matrix()
         self.dwave_bqm = self._get_dwave_bqm()
 
     def solve_simulated_annealing(
-        self, num_reads, num_toys=None, prog_bar=True, num_cores=None, seed=None
+        self, num_reads, num_toys=None, num_cores=None, seed=None
     ):
         self._sampler = SimulatedAnnealingSampler()
         sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
         sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
-            err = np.sqrt(sol)
             cov = np.diag(sol)
         else:
-            err, cov = self._run_montecarlo_toys(
-                num_toys, prog_bar, num_cores, num_reads=num_reads, seed=seed
+            cov = self._run_montecarlo_toys(
+                num_toys, num_cores, num_reads=num_reads, seed=seed
             )
-        return sol, err, cov
+        return sol, cov
 
-    def solve_hybrid_sampler(self, num_toys=None, prog_bar=True, num_cores=None):
+    def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
         self._sampler = LeapHybridSampler()
         sampleset = self._sampler.sample(self.dwave_bqm)
         sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
-            err = np.sqrt(sol)
             cov = np.diag(sol)
         else:
-            err, cov = self._run_montecarlo_toys(num_toys, prog_bar, num_cores)
-        return sol, err, cov
+            cov = self._run_montecarlo_toys(num_toys, num_cores)
+        return sol, cov
 
     def set_quantum_device(self, device_name=None, dwave_token=None):
         self._sampler = DWaveSampler(solver=device_name, token=dwave_token)
@@ -183,13 +180,12 @@ class QUnfoldQUBO:
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
         sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
-            err = np.sqrt(sol)
             cov = np.diag(sol)
         else:
-            err, cov = self._run_montecarlo_toys(
+            cov = self._run_montecarlo_toys(
                 num_toys, prog_bar, num_cores, num_reads=num_reads
             )
-        return sol, err, cov
+        return sol, cov
 
     def compute_energy(self, x):
         xbin = []
@@ -214,9 +210,8 @@ class QUnfoldQUBO:
             model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
             model.optimize()
             sol = np.array([var.x for var in x])
-            err = np.sqrt(sol)
             cov = np.diag(sol)
-            return sol, err, cov
+            return sol, cov
 
         def solve_gurobi_binary(self):
             model = gurobipy.Model()
@@ -236,6 +231,5 @@ class QUnfoldQUBO:
                 [int("".join(arr.astype(str))[::-1], base=2) for arr in arrays],
                 dtype=float,
             )
-            err = np.sqrt(sol)
             cov = np.diag(sol)
-            return sol, err, cov
+            return sol, cov
