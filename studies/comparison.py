@@ -1,7 +1,7 @@
 import numpy as np
 import pylab as plt
-from QUnfold.utils import compute_chi2
-from QUnfold.QUnfoldPlotter import histogram_plot, errorbar_plot, ratio_plot
+from qunfold.utils import compute_chi2
+from qunfold.qplotter import histogram_plot, errorbar_plot, ratio_plot
 
 
 def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel=None):

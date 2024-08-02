@@ -1,6 +1,6 @@
 import ROOT
-from QUnfold.root2numpy import TH1_to_numpy, TMatrix_to_numpy
-from QUnfold import QUnfoldQUBO
+from qunfold.root2numpy import TH1_to_numpy, TMatrix_to_numpy
+from qunfold import QUnfolder
 
 
 def run_RooUnfold(method, response, measured, num_toys=None):
@@ -36,7 +36,7 @@ def run_RooUnfold(method, response, measured, num_toys=None):
 def run_QUnfold(
     method, response, measured, binning, lam, num_reads=None, num_toys=None
 ):
-    unfolder = QUnfoldQUBO(response, measured, binning=binning, lam=lam)
+    unfolder = QUnfolder(response, measured, binning=binning, lam=lam)
     unfolder.initialize_qubo_model()
 
     if method == "GRB":

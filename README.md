@@ -69,15 +69,15 @@ pip install -e .[gurobi]
 ## Usage example
 Here is a simple code example showing how to use `QUnfold`:
 ```python
-from QUnfold import QUnfoldQUBO
+from qunfold import QUnfolder
 
 # Define your input response matrix and measured histogram as numpy arrays
 response = ...
 measured = ...
 binning = ...
 
-# Create the QUnfoldQUBO object and initialize the QUBO model
-unfolder = QUnfoldQUBO(response, measured, binning, lam=0.1)
+# Create the QUnfolder object and initialize the QUBO model
+unfolder = QUnfolder(response, measured, binning, lam=0.1)
 unfolder.initialize_qubo_model()
 
 # Run one of the available solvers to get the unfolding result
@@ -91,9 +91,9 @@ sol, cov = unfolder.solve_simulated_annealing(num_reads=100)
 :warning: The response matrix must be normalized (see [here](https://github.com/JustWhit3/QUnfold/wiki/How-to-use#:~:text=The%20response%20matrix%20must%20be%20normalized)).
 
 If you are working in High-Energy Physics, your response matrix might be a `RooUnfoldResponse` object and your measured histogram is probably stored as a `ROOT.TH1` object.
-The `QUnfold.utils` module provides some simple functions to convert these objects to standard numpy arrays:
+The `qunfold.utils` module provides some simple functions to convert these objects to standard numpy arrays:
 ```python
-from QUnfold.utils import TH1_to_numpy, TH2_to_numpy
+from qunfold.utils import TH1_to_numpy, TH2_to_numpy
 
 # Convert ROOT.TH1 measured histogram to numpy array
 measured = TH1_to_numpy(measured)

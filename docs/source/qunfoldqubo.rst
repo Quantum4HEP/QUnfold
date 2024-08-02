@@ -1,7 +1,7 @@
-QUnfoldQUBO
+QUnfolder
 -----------
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.QUnfoldQUBO
+.. automodule:: qunfold.qunfolder
    :members:

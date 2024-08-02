@@ -1,7 +1,7 @@
-QUnfoldPlotter
+QPlotter
 --------------
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.QUnfoldPlotter
+.. automodule:: qunfold.qplotter
    :members:

@@ -8,6 +8,6 @@ def test_zeros(size):
 
 
 def test_import():
-    from QUnfold import QUnfoldQUBO
+    from qunfold import QUnfolder
 
-    assert isinstance(QUnfoldQUBO, type)
+    assert isinstance(QUnfolder, type)

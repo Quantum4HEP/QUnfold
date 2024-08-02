@@ -36,4 +36,4 @@ jobs:
       run: python -m black .
 
     - name: Test with pytest
-      run: python -m pytest . --cov=QUnfold
+      run: python -m pytest . --cov=qunfold

@@ -6,7 +6,7 @@ Welcome to QUnfold's documentation!
    :caption: Contents:
 
    introduction
-   qunfoldqubo
-   qunfoldplotter
+   qunfolder
+   qplotter
    utils
    root2numpy

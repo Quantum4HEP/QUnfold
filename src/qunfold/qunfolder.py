@@ -16,7 +16,7 @@ except ImportError:
     pass
 
 
-class QUnfoldQUBO:
+class QUnfolder:
     def __init__(self, response, measured, binning, lam=0.0):
         self.R = response
         self.d = measured
@@ -119,7 +119,7 @@ class QUnfoldQUBO:
     def _run_montecarlo_toys(self, num_toys, prog_bar, num_cores, **kwargs):
         def run_toy(_):
             smeared_d = np.random.poisson(self.d)
-            toy = QUnfoldQUBO(self.R, smeared_d, binning=self.binning, lam=self.lam)
+            toy = QUnfolder(self.R, smeared_d, binning=self.binning, lam=self.lam)
             toy.initialize_qubo_model()
             if isinstance(self._sampler, DWaveSampler):
                 embedding = toy._get_graph_embedding()

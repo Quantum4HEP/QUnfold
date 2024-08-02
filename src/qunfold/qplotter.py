@@ -1,6 +1,6 @@
 import numpy as np
 import pylab as plt
-from QUnfold.utils import compute_chi2
+from qunfold.utils import compute_chi2
 
 
 ############ PLOTTING CONFIGURATIONS ############
@@ -93,7 +93,7 @@ def ratio_plot(ax, x, y, yerr, binning, method, xlabel=None):
     ax.spines["right"].set_visible(False)
 
 
-class QUnfoldPlotter:
+class QPlotter:
     def __init__(
         self, response, measured, truth, unfolded, covariance, binning, method
     ):

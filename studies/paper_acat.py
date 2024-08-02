@@ -1,8 +1,8 @@
 import os
 import ROOT
 import numpy as np
-from QUnfold.root2numpy import TH1_to_numpy, TH2_to_numpy
-from QUnfold.utils import normalize_response, lambda_optimizer
+from qunfold.root2numpy import TH1_to_numpy, TH2_to_numpy
+from qunfold.utils import normalize_response, lambda_optimizer
 from unfolder import run_RooUnfold, run_QUnfold
 from comparison import plot_comparison
 

@@ -3,5 +3,5 @@ Utils
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.utils
+.. automodule:: qunfold.utils
    :members:

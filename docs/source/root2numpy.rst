@@ -3,5 +3,5 @@ Root2numpy
 
 WORK IN PROGRESS
 
-.. automodule:: QUnfold.root2numpy
+.. automodule:: qunfold.root2numpy
    :members:

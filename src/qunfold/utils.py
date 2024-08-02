@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import scipy as sp
 from tqdm import tqdm
-from QUnfold import QUnfoldQUBO
+from qunfold import QUnfolder
 
 try:
     import gurobipy
@@ -46,7 +46,7 @@ def lambda_optimizer(
     np.random.seed(seed)
 
     def objective_fun(lam):
-        unfolder = QUnfoldQUBO(response, measured, binning=binning, lam=lam)
+        unfolder = QUnfolder(response, measured, binning=binning, lam=lam)
         unfolder.initialize_qubo_model()
         sol, _ = unfolder.solve_gurobi_integer()
         obs = sol[1:-1]
