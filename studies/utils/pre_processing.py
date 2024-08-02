@@ -446,13 +446,13 @@ def process(
 
 if __name__ == "__main__":
     # Input
-    reco_file = "data/simulated_final/input/reco_ATLAS.root"
-    particle_file = "data/simulated_final/input/particle_ATLAS.root"
-    reco_response_file = "data/simulated_final/input/reco_ATLAS_response.root"
-    particle_response_file = "data/simulated_final/input/particle_ATLAS_response.root"
+    reco_file = "data/reco_ATLAS.root"
+    particle_file = "data/particle_ATLAS.root"
+    reco_response_file = "data/reco_ATLAS_response.root"
+    particle_response_file = "data/particle_ATLAS_response.root"
 
     # Output
-    outname = "data/simulated_final/output/unfolding_input.root"
+    outname = "data/unfolding_input.root"
 
     # Reco variables
     list_recovars = [

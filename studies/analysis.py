@@ -1,20 +1,17 @@
-import sys
 import os
 import ROOT
 import numpy as np
 from QUnfold.root2numpy import TH1_to_numpy, TH2_to_numpy
 from QUnfold.utils import normalize_response, lambda_optimizer
-from utils.custom_logger import get_custom_logger
 from generator import generate
 from unfolder import run_RooUnfold, run_QUnfold
 from comparison import plot_comparison
 
-log = get_custom_logger(__name__)
 
-loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
-if not loaded_RooUnfold == 0:
-    log.error("RooUnfold not found!")
-    sys.exit(0)
+roounfold_lib_path = "./HEP_deps/RooUnfold/libRooUnfold.so"
+roounfold_error = ROOT.gSystem.Load(roounfold_lib_path)
+if roounfold_error:
+    raise ImportError("RooUnfold was not loaded successfully!")
 
 
 samples = 100000
@@ -34,9 +31,8 @@ enable_quantum = False
 
 
 if __name__ == "__main__":
-
     for distr in distributions:
-        log.info(f"Unfolding '{distr}' distribution...")
+        print(f"Unfolding '{distr}' distribution...")
 
         th1_truth, th1_measured, roounfold_response = generate(
             distr=distr,

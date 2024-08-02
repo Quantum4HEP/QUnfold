@@ -7,7 +7,6 @@ from QUnfold.QUnfoldPlotter import histogram_plot, errorbar_plot, ratio_plot
 def plot_comparison(
     method2sol, method2err, method2cov, truth, measured, binning, xlabel
 ):
-
     fig = plt.figure(figsize=(9, 7))
     gs = fig.add_gridspec(nrows=2, ncols=1, height_ratios=[3, 1], hspace=0)
     ax1 = fig.add_subplot(gs[0])

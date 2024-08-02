@@ -1,19 +1,16 @@
-import sys
 import os
 import ROOT
 import numpy as np
 from QUnfold.root2numpy import TH1_to_numpy, TH2_to_numpy
 from QUnfold.utils import normalize_response, lambda_optimizer
-from utils.custom_logger import get_custom_logger
 from unfolder import run_RooUnfold, run_QUnfold
 from comparison import plot_comparison
 
-log = get_custom_logger(__name__)
 
-loaded_RooUnfold = ROOT.gSystem.Load("HEP_deps/RooUnfold/libRooUnfold.so")
-if not loaded_RooUnfold == 0:
-    log.error("RooUnfold not found!")
-    sys.exit(0)
+roounfold_lib_path = "./HEP_deps/RooUnfold/libRooUnfold.so"
+roounfold_error = ROOT.gSystem.Load(roounfold_lib_path)
+if roounfold_error:
+    raise ImportError("RooUnfold was not loaded successfully!")
 
 
 dirpath = "studies/data/"
@@ -38,13 +35,12 @@ enable_quantum = False
 
 
 if __name__ == "__main__":
-
     file = ROOT.TFile(f"{dirpath}{rootfile}", "READ")
     reco = file.Get(reco_tree)
     particle = file.Get(particle_tree)
 
     for var in var2label:
-        log.info(f"Unfolding '{var}' variable...")
+        print(f"Unfolding '{var}' variable...")
 
         th1_measured_mc = reco.Get(f"mc_{var}")
         th1_truth_mc = particle.Get(f"mc_particle_{var}")
