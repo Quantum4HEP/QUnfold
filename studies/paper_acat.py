@@ -23,9 +23,9 @@ var2label = {
     "pT_lep2": r"$P_T^{lep_2}$ [GeV]",
     "m_l1l2": r"$M_{lep_1lep_2}$ [GeV]",
     "m_b1b2": r"$M_{b_1b_2}$ [GeV]",
-    # "DR_b1b2": r"$\Delta R_{b_1b_2}$",
-    # "eta_lep1": r"$\eta^{lep_1}$",
-    # "eta_lep2": r"$\eta^{lep_2}$",
+    "DR_b1b2": r"$\Delta R_{b_1b_2}$",
+    "eta_lep1": r"$\eta^{lep_1}$",
+    "eta_lep2": r"$\eta^{lep_2}$",
 }
 
 num_reads = 5000

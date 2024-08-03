@@ -118,7 +118,12 @@ if __name__ == "__main__":
             covariance.update({"QA": cov_QA})
 
         fig = plot_comparison(
-            solution, covariance, truth=truth, measured=measured, binning=binning
+            solution,
+            covariance,
+            truth=truth,
+            measured=measured,
+            binning=binning,
+            xlabel="Bins",
         )
 
         for ext in ["png", "pdf"]:

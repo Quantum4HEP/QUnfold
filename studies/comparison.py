@@ -1,10 +1,10 @@
 import numpy as np
 import pylab as plt
+from qunfold import QPlotter
 from qunfold.utils import compute_chi2
-from qunfold.qplotter import histogram_plot, errorbar_plot, ratio_plot
 
 
-def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel=None):
+def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel):
     fig = plt.figure(figsize=(9, 7))
     gs = fig.add_gridspec(nrows=2, ncols=1, height_ratios=[3, 1], hspace=0)
     ax1 = fig.add_subplot(gs[0])
@@ -13,37 +13,54 @@ def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel=Non
     truth = truth[1:-1]
     measured = measured[1:-1]
     binning = binning[1:-1]
-    histogram_plot(ax=ax1, x=binning, y=truth, label="Truth")
-    histogram_plot(ax=ax1, x=binning, y=measured, label="Measured")
+    widths = np.diff(binning)
+    norm = np.sum(truth)
+    QPlotter.histogram_plot(
+        ax=ax1,
+        xedges=binning,
+        hist=truth,
+        label="Truth",
+        ylabel="Frequency",
+        norm=norm,
+    )
+    QPlotter.histogram_plot(
+        ax=ax1,
+        xedges=binning,
+        hist=measured,
+        label="Measured",
+        ylabel="Frequency",
+        norm=norm,
+    )
 
     num_points = len(method2sol)
-    x_shifts = np.diff(binning) / (num_points + 7)
-    unfolding_methods = method2sol.keys()
-    for i, method in enumerate(unfolding_methods):
-        xbin = binning[:-1] + (i + 4) * x_shifts
+    xshift = widths / (num_points + 7)
+    xlims = (binning[0], binning[-1])
+    for i, method in enumerate(method2sol):
+        xpt = binning[:-1] + (i + 4) * xshift
         sol = method2sol[method][1:-1]
         cov = method2cov[method][1:-1, 1:-1]
         err = np.sqrt(np.diag(cov))
-        chi2 = compute_chi2(sol, truth, cov)
-        errorbar_plot(
+        chi2 = compute_chi2(sol, truth, covariance=cov)
+        QPlotter.errorbar_plot(
             ax=ax1,
-            x=xbin,
-            y=sol,
-            yerr=err,
-            binning=binning,
-            method=method,
+            xmid=xpt,
+            hist=sol,
+            err=err,
+            xlims=xlims,
+            label=method,
             chi2=chi2,
+            norm=norm,
         )
-        ratio_sol = sol / truth
-        ratio_err = err / truth
-        xmid = binning[:-1] + (np.diff(binning) / 2)
-        ratio_plot(
+        sol_ratio = sol / truth
+        err_ratio = err / truth
+        xmid = binning[:-1] + 0.5 * widths
+        QPlotter.ratio_plot(
             ax=ax2,
-            x=xmid,
-            y=ratio_sol,
-            yerr=ratio_err,
-            method=method,
-            binning=binning,
+            xmid=xmid,
+            ratio=sol_ratio,
+            err=err_ratio,
+            label=method,
+            xticks=binning,
             xlabel=xlabel,
         )
     return fig
