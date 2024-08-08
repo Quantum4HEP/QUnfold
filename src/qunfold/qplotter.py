@@ -36,6 +36,7 @@ class QPlotter:
         covariance,
         binning,
         method,
+        ybottom=0.0,
         normed=True,
     ):
         self.response = response[1:-1, 1:-1]
@@ -45,6 +46,7 @@ class QPlotter:
         self.covariance = covariance[1:-1, 1:-1]
         self.binning = binning[1:-1]
         self.method = method
+        self.ybottom = ybottom
         self.normed = normed
 
     @staticmethod
@@ -82,13 +84,12 @@ class QPlotter:
             labelbottom=False,
             reset=True,
         )
-        yticks = [-np.inf, -np.inf] + ax.get_yticks().tolist()[2:]
+        yticks = [-1, -1] + ax.get_yticks().tolist()[2:]
         yticklabels = ["", ""] + ax.get_yticklabels()[2:]
         ax.set_yticks(yticks)
         ax.set_yticklabels(yticklabels)
         ax.legend(fontsize=legend_fontsize)
         ax.set_xlim(left=xlims[0], right=xlims[1])
-        ax.set_ylim(bottom=0)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
 
@@ -179,6 +180,7 @@ class QPlotter:
             xticks=self.binning,
             xlabel="Bins",
         )
+        ax1.set_ylim(bottom=self.ybottom)
         fig.tight_layout()
 
     def show_response(self):
