@@ -62,7 +62,7 @@ conda create --name qunfold-dev python==3.10
 conda activate qunfold-dev
 git clone https://github.com/JustWhit3/QUnfold.git
 cd QUnfold
-pip install -r requirements-dev.txt
+pip install --upgrade -r requirements-dev.txt
 pip install -e .[gurobi]
 ```
 

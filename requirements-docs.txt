@@ -1,2 +1,2 @@
-sphinx
+sphinx==7.4.7
 pydata-sphinx-theme
