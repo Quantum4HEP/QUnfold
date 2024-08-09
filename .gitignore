@@ -129,7 +129,6 @@ dmypy.json
 .pyre/
 
 .vscode/
-HEP_deps/
 data/
-studies/img/
-ATLAS/
+studies/analysis
+studies/paper_acat

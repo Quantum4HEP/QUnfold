@@ -7,11 +7,8 @@ from unfolder import run_RooUnfold, run_QUnfold
 from comparison import plot_comparison
 
 
-roounfold_lib_path = "./HEP_deps/RooUnfold/libRooUnfold.so"
-roounfold_error = ROOT.gSystem.Load(roounfold_lib_path)
-if roounfold_error:
+if ROOT.gSystem.Load("libRooUnfold"):
     raise ImportError("RooUnfold was not loaded successfully!")
-
 
 dirpath = "studies/data/"
 rootfile = "unfolding_input.root"
@@ -135,9 +132,8 @@ if __name__ == "__main__":
             xlabel=var2label[var],
         )
 
-        for ext in ["png", "pdf"]:
-            dirpath = f"studies/img/paper_acat/{ext}"
-            if not os.path.exists(dirpath):
-                os.makedirs(dirpath)
-            fig.tight_layout()
-            fig.savefig(f"{dirpath}/{var}.{ext}")
+        dirpath = "studies/paper_acat"
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+        fig.tight_layout()
+        fig.savefig(f"{dirpath}/{var}.pdf")
