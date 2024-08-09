@@ -105,19 +105,12 @@ response = TH2_to_numpy(response.Hresponse())
 For a complete example on how to run the `QUnfold` solvers and plot the final results, you can take a look at the [examples](https://github.com/JustWhit3/QUnfold/tree/main/examples) directory in the repository.
 
 ## Unfolding studies
-This section contains instructions to solve the unfolding problem by standard classical algotihms (widely used in HEP data analysis) as well as the `QUnfold` quantum-based method. It also provides several tools and examples to compare the results of the two different approached.
-Check out the [studies](https://github.com/JustWhit3/QUnfold/tree/main/studies) directory in this repository to learn more.
+This section contains instructions to solve the unfolding problem by classical methods (widely used in HEP data analysis) as well as the `QUnfold` quantum-based method. It also provides several tools and examples to compare the results of the two different approaches.
 
-### HEP dependencies
-To run the code you need to install the following HEP frameworks:
-- `ROOT v6.28/10` (see documentation [here](https://root.cern/doc/v628/))
-- `RooUnfold v3.0.0` (see documentation [here](http://roounfold.web.cern.ch/index.html))
-
-In your Ubuntu system, this can be done automatically by executing the following commands from the root directory of the repository:
+To run the classical unfolding algorithms you need to install the `ROOT` framework developed by CERN (see documentation [here](https://root.cern/doc/v628/)) and the specialized `RooUnfold` library (see documentation [here](http://roounfold.web.cern.ch/index.html)).
+On Linux or Mac OS this can be easily done by running the following script in the root directory of the repository:
 ```shell
-./scripts/fetchROOT.sh
-source HEP_deps/root/bin/thisroot.sh
-./scripts/fetchRooUnfold.sh
+./install_roounfold.sh
 ```
 
 ### Performance analysis
