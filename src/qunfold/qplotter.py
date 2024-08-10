@@ -27,7 +27,7 @@ legend_fontsize = 10
 
 
 class QPlotter:
-    def __init__(self, response, measured, truth, unfolded, covariance, binning, method, ybottom=0.0, normed=True):
+    def __init__(self, response, measured, truth, unfolded, covariance, binning, method, ybottom=0.0, norm=False):
         self.response = response[1:-1, 1:-1]
         self.measured = measured[1:-1]
         self.truth = truth[1:-1]
@@ -36,39 +36,37 @@ class QPlotter:
         self.binning = binning[1:-1]
         self.method = method
         self.ybottom = ybottom
-        self.normed = normed
+        self.norm = norm
 
     @staticmethod
-    def histogram_plot(ax, xedges, hist, label, ylabel, norm=None):
-        if norm is not None:
-            hist = hist / norm
+    def histogram_plot(ax, xedges, hist, label, ylabel="Entries", ybottom=0.0, norm=False):
+        if norm:
+            hist = hist / np.sum(hist)
+            ylabel = "Frequency"
         hist = np.append(hist, [hist[-1]])
         color = label2color.get(label, default_color)
         ax.step(xedges, hist, label=label, color=color, where="post")
         ax.fill_between(xedges, hist, color=color, alpha=alpha, step="post")
         ax.set_ylabel(ylabel, fontsize=labels_fontsize)
+        ax.set_ylim(ybottom)
 
     @staticmethod
-    def errorbar_plot(ax, xmid, hist, err, xlims, label, chi2, norm=None):
-        if norm is not None:
-            hist = hist / norm
-            err = err / norm
+    def errorbar_plot(ax, xmid, hist, err, xlims, label, chi2, norm=False):
+        if norm:
+            err = err / np.sum(hist)
+            hist = hist / np.sum(hist)
         color = label2color.get(label, default_color)
         rchi2 = round(chi2, ndigits=chi2_ndigits)
         label = rf"Unfolded {label} ($\chi^2 = {rchi2}$)"
         ax.errorbar(x=xmid, y=hist, yerr=err, label=label, color=color, marker=marker, ms=markersize, linestyle="None")
         ax.tick_params(labelsize=ticks_fontsize, top=False, right=False, labelbottom=False, reset=True)
-        yticks = [-1, -1] + ax.get_yticks().tolist()[2:]
-        yticklabels = ["", ""] + ax.get_yticklabels()[2:]
-        ax.set_yticks(yticks)
-        ax.set_yticklabels(yticklabels)
         ax.legend(fontsize=legend_fontsize)
         ax.set_xlim(left=xlims[0], right=xlims[1])
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
 
     @staticmethod
-    def ratio_plot(ax, xmid, ratio, err, label, xticks, xlabel):
+    def ratio_plot(ax, xmid, ratio, err, label, xticks, xlabel="Bins"):
         ax.axhline(y=1, color=label2color["Truth"])
         color = label2color.get(label, default_color)
         ax.errorbar(x=xmid, y=ratio, yerr=err, color=color, marker=marker, ms=markersize, linestyle="None")
@@ -107,17 +105,16 @@ class QPlotter:
         widths = np.diff(self.binning)
         xmid = self.binning[:-1] + 0.5 * widths
         xlims = (self.binning[0], self.binning[-1])
-        ylabel = "Frequency" if self.normed else "Entries"
         chi2 = compute_chi2(sol, truth, covariance=cov)
-        norm = np.sum(truth) if self.normed else None
 
-        self.histogram_plot(ax=ax1, xedges=self.binning, hist=truth, label="Truth", ylabel=ylabel, norm=norm)
-        self.histogram_plot(ax=ax1, xedges=self.binning, hist=measured, label="Measured", ylabel=ylabel, norm=norm)
-        self.errorbar_plot(ax=ax1, xmid=xmid, hist=sol, err=err, xlims=xlims, label=label, chi2=chi2, norm=norm)
-        self.ratio_plot(
-            ax=ax2, xmid=xmid, ratio=sol_ratio, err=err_ratio, label=label, xticks=self.binning, xlabel="Bins"
+        self.histogram_plot(
+            ax=ax1, xedges=self.binning, hist=truth, label="Truth", ybottom=self.ybottom, norm=self.norm
         )
-        ax1.set_ylim(bottom=self.ybottom)
+        self.histogram_plot(
+            ax=ax1, xedges=self.binning, hist=measured, label="Measured", ybottom=self.ybottom, norm=self.norm
+        )
+        self.errorbar_plot(ax=ax1, xmid=xmid, hist=sol, err=err, xlims=xlims, label=label, chi2=chi2, norm=self.norm)
+        self.ratio_plot(ax=ax2, xmid=xmid, ratio=sol_ratio, err=err_ratio, label=label, xticks=self.binning)
         fig.tight_layout()
 
     def show_response(self):
