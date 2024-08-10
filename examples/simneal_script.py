@@ -41,14 +41,7 @@ response = normalize_response(response, truth_mc=truth_mc)
 measured, _ = np.histogram(measured_data, bins=binning)
 
 # Find optimal value for regularization parameter
-lam = lambda_optimizer(
-    response=response,
-    measured=measured,
-    truth=truth_mc,
-    binning=binning,
-    num_reps=10,
-    seed=seed,
-)
+lam = lambda_optimizer(response=response, measured=measured, truth=truth_mc, binning=binning, num_reps=10, seed=seed)
 
 # Run simulated annealing to solve unfolding problem as QUBO
 unfolder = QUnfolder(response=response, measured=measured, binning=binning, lam=lam)
@@ -57,14 +50,7 @@ sol, cov = unfolder.solve_simulated_annealing(num_reads=400, seed=seed)
 
 # Plot response and unfolding result and save figures
 plotter = QPlotter(
-    response=response,
-    measured=measured,
-    truth=truth_mc,
-    unfolded=sol,
-    covariance=cov,
-    binning=binning,
-    method="SA",
-    normed=True,
+    response=response, measured=measured, truth=truth_mc, unfolded=sol, covariance=cov, binning=binning, method="SA"
 )
 plotter.save_response("examples/simneal_response.png")
 plotter.save_histograms("examples/simneal_result.png")

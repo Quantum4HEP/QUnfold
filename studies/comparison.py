@@ -15,22 +15,8 @@ def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel):
     binning = binning[1:-1]
     widths = np.diff(binning)
     norm = np.sum(truth)
-    QPlotter.histogram_plot(
-        ax=ax1,
-        xedges=binning,
-        hist=truth,
-        label="Truth",
-        ylabel="Frequency",
-        norm=norm,
-    )
-    QPlotter.histogram_plot(
-        ax=ax1,
-        xedges=binning,
-        hist=measured,
-        label="Measured",
-        ylabel="Frequency",
-        norm=norm,
-    )
+    QPlotter.histogram_plot(ax=ax1, xedges=binning, hist=truth, label="Truth", ylabel="Frequency", norm=norm)
+    QPlotter.histogram_plot(ax=ax1, xedges=binning, hist=measured, label="Measured", ylabel="Frequency", norm=norm)
 
     num_points = len(method2sol)
     xshift = widths / (num_points + 7)
@@ -41,26 +27,11 @@ def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel):
         cov = method2cov[method][1:-1, 1:-1]
         err = np.sqrt(np.diag(cov))
         chi2 = compute_chi2(sol, truth, covariance=cov)
-        QPlotter.errorbar_plot(
-            ax=ax1,
-            xmid=xpt,
-            hist=sol,
-            err=err,
-            xlims=xlims,
-            label=method,
-            chi2=chi2,
-            norm=norm,
-        )
+        QPlotter.errorbar_plot(ax=ax1, xmid=xpt, hist=sol, err=err, xlims=xlims, label=method, chi2=chi2, norm=norm)
         sol_ratio = sol / truth
         err_ratio = err / truth
         xmid = binning[:-1] + 0.5 * widths
         QPlotter.ratio_plot(
-            ax=ax2,
-            xmid=xmid,
-            ratio=sol_ratio,
-            err=err_ratio,
-            label=method,
-            xticks=binning,
-            xlabel=xlabel,
+            ax=ax2, xmid=xmid, ratio=sol_ratio, err=err_ratio, label=method, xticks=binning, xlabel=xlabel
         )
     return fig

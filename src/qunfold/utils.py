@@ -38,9 +38,7 @@ def compute_chi2(observed, expected, covariance, toys=False):
     return chi2_red
 
 
-def lambda_optimizer(
-    response, measured, truth, binning, num_reps=30, verbose=False, seed=None
-):
+def lambda_optimizer(response, measured, truth, binning, num_reps=30, verbose=False, seed=None):
     if "gurobipy" not in sys.modules:
         raise ModuleNotFoundError("Function 'lambda_optimizer' requires Gurobi solver")
     np.random.seed(seed)
@@ -60,12 +58,7 @@ def lambda_optimizer(
     options = {"xatol": 0, "maxiter": 100, "disp": 3 if verbose else 0}
     for _ in tqdm(range(num_reps), desc="Optimizing lambda"):
         bounds = (0, np.random.rand())
-        minimizer = sp.optimize.minimize_scalar(
-            fun=objective_fun,
-            method="bounded",
-            bounds=bounds,
-            options=options,
-        )
+        minimizer = sp.optimize.minimize_scalar(fun=objective_fun, method="bounded", bounds=bounds, options=options)
         lam = minimizer.x
         fun = minimizer.fun
         if fun < min_fun:

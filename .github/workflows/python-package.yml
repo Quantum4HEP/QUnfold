@@ -33,7 +33,7 @@ jobs:
         python -m pip install --upgrade -r requirements-dev.txt
 
     - name: Lint with black
-      run: python -m black .
+      run: python -m black --config pyproject.toml .
 
     - name: Test with pytest
-      run: python -m pytest . --cov=qunfold
+      run: python -m pytest --cov=qunfold .

@@ -23,9 +23,7 @@ def get_info_particle_level(particle_info, list_particleIDs, list_partvars):
         particle_mask = particle_mask | (abs(particle_info["Particle.PID"]) == ids)
     outvars = {}
     for partvars in list_partvars:
-        sorted_indices = ak.argsort(
-            particle_info["Particle.PT"][particle_mask], axis=-1
-        )
+        sorted_indices = ak.argsort(particle_info["Particle.PT"][particle_mask], axis=-1)
         temp = particle_info[partvars][particle_mask][sorted_indices]
         outvars[partvars] = [temp[:, 1], temp[:, 0]]
     return outvars
@@ -41,9 +39,7 @@ def get_info_reco_level(reco_info, list_recovars):
 def tree_reader(reco_file, particle_file, reco_var_list, part_val_dict):
     reco_tree = uproot.open(reco_file)["Delphes"]
     particle_tree = uproot.open(particle_file)["LHEF"]
-    part_val_list = list(
-        set([item for sublist in part_val_dict.values() for item in sublist])
-    )
+    part_val_list = list(set([item for sublist in part_val_dict.values() for item in sublist]))
     part_val_list.insert(0, "Particle.PID")
     reco_info = reco_tree.arrays(reco_var_list)
     particle_info = particle_tree.arrays(part_val_list)
@@ -60,13 +56,7 @@ def tree_reader(reco_file, particle_file, reco_var_list, part_val_dict):
     return [events_idx, reco_info, all_part_info]
 
 
-def hist_resp_builder(
-    name,
-    reco,
-    particle,
-    binning,
-    do_response=False,
-):
+def hist_resp_builder(name, reco, particle, binning, do_response=False):
     mask = reco != None
     reco = reco[mask].astype(float)
 
@@ -75,11 +65,7 @@ def hist_resp_builder(
     hist_particle = np.histogram(ak.to_numpy(particle), binning)[0]
 
     if do_response:
-        response = np.histogram2d(
-            ak.to_numpy(reco),
-            ak.to_numpy(particle[mask]).astype(float),
-            binning,
-        )[0]
+        response = np.histogram2d(ak.to_numpy(reco), ak.to_numpy(particle[mask]).astype(float), binning)[0]
         response = response.T
         return name, hist_reco, hist_particle, binning, response
     else:
@@ -92,9 +78,7 @@ def reco_filter_bjet(events_idx, reco_info, var):
     mu_size = reco_info["Muon_size"]
     bjet_size = np.sum(np.abs(reco_info["Jet.Flavor"] == 5), axis=1)
     mask_dilep = (
-        ((e_size == 2) & (mu_size == 0))
-        | ((e_size == 0) & (mu_size == 2))
-        | ((e_size == 1) & (mu_size == 1))
+        ((e_size == 2) & (mu_size == 0)) | ((e_size == 0) & (mu_size == 2)) | ((e_size == 1) & (mu_size == 1))
     ) & (bjet_size >= 2)
     events_dilep_idx = events_idx[mask_dilep]
     bjet_pt_dilep = reco_info["Jet.PT"][mask_dilep]
@@ -108,9 +92,7 @@ def reco_filter_bjet(events_idx, reco_info, var):
     bjet_mask = reco_info["Jet.Flavor"][mask_dilep][sorted_dilep_idx] == 5
 
     if var == "DR_b1b2":
-        reco_var_dilep = compute_DR_reco(
-            reco_eta_dilep[bjet_mask][:, -2:], reco_phi_dilep[bjet_mask][:, -2:]
-        )
+        reco_var_dilep = compute_DR_reco(reco_eta_dilep[bjet_mask][:, -2:], reco_phi_dilep[bjet_mask][:, -2:])
     elif var == "m_b1b2":
         reco_e_dilep = compute_energy(
             m_bjet,
@@ -148,15 +130,8 @@ def reco_filter_m_l1l2(events_idx, reco_info):
     reco_pT_ee = reco_info["Electron.PT"][mask_ee][sorted_ee_idx]
     reco_eta_ee = reco_info["Electron.Eta"][mask_ee][sorted_ee_idx]
     reco_phi_ee = reco_info["Electron.Phi"][mask_ee][sorted_ee_idx]
-    reco_e_ee = compute_energy(
-        m_electron,
-        reco_pT_ee,
-        reco_phi_ee,
-        reco_eta_ee,
-    )
-    reco_var_ee = compute_invariant_mass_reco(
-        reco_pT_ee, reco_eta_ee, reco_phi_ee, reco_e_ee
-    )
+    reco_e_ee = compute_energy(m_electron, reco_pT_ee, reco_phi_ee, reco_eta_ee)
+    reco_var_ee = compute_invariant_mass_reco(reco_pT_ee, reco_eta_ee, reco_phi_ee, reco_e_ee)
 
     # mumu / 2 b-jets
     mask_mumu = (e_size == 0) & (mu_size == 2) & (bjet_size >= 2)
@@ -167,15 +142,8 @@ def reco_filter_m_l1l2(events_idx, reco_info):
     reco_pT_mumu = reco_info["Muon.PT"][mask_mumu][sorted_mumu_idx]
     reco_eta_mumu = reco_info["Muon.Eta"][mask_mumu][sorted_mumu_idx]
     reco_phi_mumu = reco_info["Muon.Phi"][mask_mumu][sorted_mumu_idx]
-    reco_e_mumu = compute_energy(
-        m_muon,
-        reco_pT_mumu,
-        reco_phi_mumu,
-        reco_eta_mumu,
-    )
-    reco_var_mumu = compute_invariant_mass_reco(
-        reco_pT_mumu, reco_eta_mumu, reco_phi_mumu, reco_e_mumu
-    )
+    reco_e_mumu = compute_energy(m_muon, reco_pT_mumu, reco_phi_mumu, reco_eta_mumu)
+    reco_var_mumu = compute_invariant_mass_reco(reco_pT_mumu, reco_eta_mumu, reco_phi_mumu, reco_e_mumu)
 
     # emu / 2 b-jets
     mask_emu = (e_size == 1) & (mu_size == 1) & (bjet_size >= 2)
@@ -184,15 +152,9 @@ def reco_filter_m_l1l2(events_idx, reco_info):
     muon_pt_emu = reco_info["Muon.PT"][mask_emu]
     sorted_emu_idx = np.argsort(np.hstack((electron_pt_emu, muon_pt_emu)))
 
-    reco_pT_emu = np.hstack(
-        (reco_info["Electron.PT"][mask_emu], reco_info["Muon.PT"][mask_emu])
-    )[sorted_emu_idx]
-    reco_eta_emu = np.hstack(
-        (reco_info["Electron.Eta"][mask_emu], reco_info["Muon.Eta"][mask_emu])
-    )[sorted_emu_idx]
-    reco_phi_emu = np.hstack(
-        (reco_info["Electron.Phi"][mask_emu], reco_info["Muon.Phi"][mask_emu])
-    )[sorted_emu_idx]
+    reco_pT_emu = np.hstack((reco_info["Electron.PT"][mask_emu], reco_info["Muon.PT"][mask_emu]))[sorted_emu_idx]
+    reco_eta_emu = np.hstack((reco_info["Electron.Eta"][mask_emu], reco_info["Muon.Eta"][mask_emu]))[sorted_emu_idx]
+    reco_phi_emu = np.hstack((reco_info["Electron.Phi"][mask_emu], reco_info["Muon.Phi"][mask_emu]))[sorted_emu_idx]
     reco_e_e = compute_energy(
         m_electron,
         reco_info["Electron.PT"][mask_emu],
@@ -200,15 +162,10 @@ def reco_filter_m_l1l2(events_idx, reco_info):
         reco_info["Electron.Eta"][mask_emu],
     )
     reco_e_mu = compute_energy(
-        m_muon,
-        reco_info["Muon.PT"][mask_emu],
-        reco_info["Muon.Phi"][mask_emu],
-        reco_info["Muon.Eta"][mask_emu],
+        m_muon, reco_info["Muon.PT"][mask_emu], reco_info["Muon.Phi"][mask_emu], reco_info["Muon.Eta"][mask_emu]
     )
     reco_e_emu = np.hstack((reco_e_e, reco_e_mu))[sorted_emu_idx]
-    reco_var_emu = compute_invariant_mass_reco(
-        reco_pT_emu, reco_eta_emu, reco_phi_emu, reco_e_emu
-    )
+    reco_var_emu = compute_invariant_mass_reco(reco_pT_emu, reco_eta_emu, reco_phi_emu, reco_e_emu)
 
     temp = np.concatenate((reco_var_ee, reco_var_mumu, reco_var_emu))
     concat_var = np.array([None] * len(events_idx))
@@ -246,9 +203,7 @@ def reco_filter_lep(events_idx, reco_info, var):
     electron_pt_emu = reco_info["Electron.PT"][mask_emu]
     muon_pt_emu = reco_info["Muon.PT"][mask_emu]
     sorted_emu_idx = np.argsort(np.hstack((electron_pt_emu, muon_pt_emu)))
-    reco_var_emu = np.hstack((reco_var_e[mask_emu], reco_var_mu[mask_emu]))[
-        sorted_emu_idx
-    ]
+    reco_var_emu = np.hstack((reco_var_e[mask_emu], reco_var_mu[mask_emu]))[sorted_emu_idx]
 
     temp = np.concatenate((reco_var_ee, reco_var_mumu, reco_var_emu))
     concat_var = np.array([[None, None]] * len(events_idx))
@@ -258,12 +213,8 @@ def reco_filter_lep(events_idx, reco_info, var):
     return concat_var[:, 1], concat_var[:, 0]
 
 
-def process(
-    reco_tree_path, part_tree_path, list_recovars, dict_partvars, do_response=False
-):
-    events_idx, reco_info, particle_info = tree_reader(
-        reco_tree_path, part_tree_path, list_recovars, dict_partvars
-    )
+def process(reco_tree_path, part_tree_path, list_recovars, dict_partvars, do_response=False):
+    events_idx, reco_info, particle_info = tree_reader(reco_tree_path, part_tree_path, list_recovars, dict_partvars)
 
     # pT_lep1/2
     reco_pT_lep1, reco_pT_lep2 = reco_filter_lep(events_idx, reco_info, "PT")
@@ -338,20 +289,7 @@ def process(
         ]
     )
     binning_subleading_pT = np.array(
-        [
-            10.00,
-            20.00,
-            30.00,
-            40.00,
-            50.00,
-            61.00,
-            73.00,
-            88.00,
-            105.00,
-            123.00,
-            150.00,
-            200.00,
-        ]
+        [10.00, 20.00, 30.00, 40.00, 50.00, 61.00, 73.00, 88.00, 105.00, 123.00, 150.00, 200.00]
     )
     binning_m_l1l2 = np.array(
         [
@@ -472,13 +410,7 @@ if __name__ == "__main__":
 
     # Particle variables
     dict_partvars = {
-        "11,13": [
-            "Particle.PT",
-            "Particle.Eta",
-            "Particle.Phi",
-            "Particle.E",
-            "Particle.PID",
-        ],
+        "11,13": ["Particle.PT", "Particle.Eta", "Particle.Phi", "Particle.E", "Particle.PID"],
         "5": ["Particle.Eta", "Particle.Phi", "Particle.PT", "Particle.E"],
     }
 
@@ -498,15 +430,8 @@ if __name__ == "__main__":
         binning = hist_tuple[3][1:-1]
         bins = len(binning) - 1
         reco_histo = ROOT.TH1D(hist_tuple[0], hist_tuple[0], bins, array("d", binning))
-        particle_histo = ROOT.TH1D(
-            f"particle_{hist_tuple[0]}",
-            f"particle_{hist_tuple[0]}",
-            bins,
-            array("d", binning),
-        )
-        for i, (reco_entries, particle_entries) in enumerate(
-            zip(hist_tuple[1], hist_tuple[2])
-        ):
+        particle_histo = ROOT.TH1D(f"particle_{hist_tuple[0]}", f"particle_{hist_tuple[0]}", bins, array("d", binning))
+        for i, (reco_entries, particle_entries) in enumerate(zip(hist_tuple[1], hist_tuple[2])):
             reco_histo.SetBinContent(i, reco_entries)
             particle_histo.SetBinContent(i, particle_entries)
         reco_dir.cd()
@@ -526,14 +451,9 @@ if __name__ == "__main__":
     for hist_tuple in our_res_list:
         binning = hist_tuple[3][1:-1]
         bins = len(binning) - 1
-        reco_histo = ROOT.TH1D(
-            f"mc_{hist_tuple[0]}", f"mc_{hist_tuple[0]}", bins, array("d", binning)
-        )
+        reco_histo = ROOT.TH1D(f"mc_{hist_tuple[0]}", f"mc_{hist_tuple[0]}", bins, array("d", binning))
         particle_histo = ROOT.TH1D(
-            f"mc_particle_{hist_tuple[0]}",
-            f"mc_particle_{hist_tuple[0]}",
-            bins,
-            array("d", binning),
+            f"mc_particle_{hist_tuple[0]}", f"mc_particle_{hist_tuple[0]}", bins, array("d", binning)
         )
         response = ROOT.TH2D(
             f"particle_{hist_tuple[0]}_vs_{hist_tuple[0]}",
@@ -543,9 +463,7 @@ if __name__ == "__main__":
             bins,
             array("d", binning),
         )
-        for i, (reco_entries, particle_entries) in enumerate(
-            zip(hist_tuple[1], hist_tuple[2])
-        ):
+        for i, (reco_entries, particle_entries) in enumerate(zip(hist_tuple[1], hist_tuple[2])):
             reco_histo.SetBinContent(i, reco_entries)
             particle_histo.SetBinContent(i, particle_entries)
         for i in range(0, bins + 2):

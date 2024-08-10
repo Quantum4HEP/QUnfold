@@ -33,26 +33,18 @@ def run_RooUnfold(method, response, measured, num_toys=None):
     return sol, cov
 
 
-def run_QUnfold(
-    method, response, measured, binning, lam, num_reads=None, num_toys=None
-):
+def run_QUnfold(method, response, measured, binning, lam, num_reads=None, num_toys=None):
     unfolder = QUnfolder(response, measured, binning=binning, lam=lam)
     unfolder.initialize_qubo_model()
 
     if method == "GRB":
         sol, cov = unfolder.solve_gurobi_integer()
     elif method == "SA":
-        sol, cov = unfolder.solve_simulated_annealing(
-            num_reads=num_reads, num_toys=num_toys
-        )
+        sol, cov = unfolder.solve_simulated_annealing(num_reads=num_reads, num_toys=num_toys)
     elif method == "HYB":
-        sol, cov = unfolder.solve_hybrid_sampler(
-            num_toys=num_toys,
-        )
+        sol, cov = unfolder.solve_hybrid_sampler(num_toys=num_toys)
     elif method == "QA":
         unfolder.set_quantum_device()
         unfolder.set_graph_embedding()
-        sol, cov, _ = unfolder.solve_quantum_annealing(
-            num_reads=num_reads, num_toys=num_toys
-        )
+        sol, cov, _ = unfolder.solve_quantum_annealing(num_reads=num_reads, num_toys=num_toys)
     return sol, cov

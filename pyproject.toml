@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "QUnfold"
+version = "0.3.4"
+description = "A quantum-based approach to the distribution unfolding problem"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Gianluca Bianco", email = "biancogianluca9@gmail.com"},
+    {name = "Simone Gasperini", email = "simone.gasperini4@unibo.it"}
+]
+keywords = [
+    "quantum",
+    "annealing",
+    "unfolding",
+    "statistics",
+    "python",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Linux",
+    "Operating System :: MacOS",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+dynamic = ["readme", "dependencies"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+dependencies = {file = "requirements.txt"}
+
+[project.optional-dependencies]
+gurobi = ["gurobipy"]
+
+[project.urls]
+Homepage = "https://github.com/JustWhit3/QUnfold"
+Documentation = "https://qunfold.readthedocs.io/en/latest/"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 120
+skip-magic-trailing-comma = true

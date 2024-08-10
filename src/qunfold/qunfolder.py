@@ -40,7 +40,7 @@ class QUnfolder:
         eff = np.sum(self.R, axis=0)
         eff[np.isclose(eff, 0)] = 1
         exp = np.ceil(self.d / eff)
-        return [int(np.ceil(np.log2(x * 1.2))) if x else 1 for x in exp]
+        return [(int(np.ceil(np.log2(x * 1.2))) if x else 1) for x in exp]
 
     @property
     def precision_vectors(self):
@@ -81,28 +81,20 @@ class QUnfolder:
         B = self.quadratic_coeffs
         pvecs = self.precision_vectors
         linear_blocks = [a[i] * np.diag(pvecs[i]) for i in range(dim)]
-        quadratic_blocks = [
-            [B[i, j] * np.outer(pvecs[i], pvecs[j]) for j in range(dim)]
-            for i in range(dim)
-        ]
+        quadratic_blocks = [[B[i, j] * np.outer(pvecs[i], pvecs[j]) for j in range(dim)] for i in range(dim)]
         return sp.linalg.block_diag(*linear_blocks) + np.block(quadratic_blocks)
 
     def _get_dwave_bqm(self):
         Q = self.qubo_matrix
         size = len(Q)
         linear = {i: Q[i, i] for i in range(size)}
-        quadratic = {
-            (i, j): 2 * Q[i, j] for i in range(size) for j in range(i + 1, size)
-        }
+        quadratic = {(i, j): 2 * Q[i, j] for i in range(size) for j in range(i + 1, size)}
         return dimod.BinaryQuadraticModel(linear, quadratic, vartype=dimod.BINARY)
 
     def _post_process_sampleset(self, sampleset):
         pvecs = self.precision_vectors
         indices = np.cumsum([0] + [len(pvec) for pvec in pvecs[:-1]])
-        solutions = [
-            np.add.reduceat(rec.sample * np.concatenate(pvecs), indices=indices)
-            for rec in sampleset.record
-        ]
+        solutions = [np.add.reduceat(rec.sample * np.concatenate(pvecs), indices=indices) for rec in sampleset.record]
         energies = [rec.energy for rec in sampleset.record]
         min_energy = min(energies)
         beta_boltzmann = 100
@@ -110,9 +102,7 @@ class QUnfolder:
         return np.average(solutions, weights=weights, axis=0)
 
     def _get_graph_embedding(self, **kwargs):
-        source_edgelist = list(self.dwave_bqm.quadratic) + list(
-            (v, v) for v in self.dwave_bqm.linear
-        )
+        source_edgelist = list(self.dwave_bqm.quadratic) + list((v, v) for v in self.dwave_bqm.linear)
         target_edgelist = self._sampler.edgelist
         return minorminer.find_embedding(S=source_edgelist, T=target_edgelist, **kwargs)
 
@@ -143,18 +133,14 @@ class QUnfolder:
         self.qubo_matrix = self._get_qubo_matrix()
         self.dwave_bqm = self._get_dwave_bqm()
 
-    def solve_simulated_annealing(
-        self, num_reads, num_toys=None, num_cores=None, seed=None
-    ):
+    def solve_simulated_annealing(self, num_reads, num_toys=None, num_cores=None, seed=None):
         self._sampler = SimulatedAnnealingSampler()
         sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
         sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
             cov = np.diag(sol)
         else:
-            cov = self._run_montecarlo_toys(
-                num_toys, num_cores, num_reads=num_reads, seed=seed
-            )
+            cov = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
         return sol, cov
 
     def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
@@ -173,18 +159,14 @@ class QUnfolder:
     def set_graph_embedding(self, **kwargs):
         self.graph_embedding = self._get_graph_embedding(**kwargs)
 
-    def solve_quantum_annealing(
-        self, num_reads, num_toys=None, prog_bar=True, num_cores=None
-    ):
+    def solve_quantum_annealing(self, num_reads, num_toys=None, prog_bar=True, num_cores=None):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
         sol = self._post_process_sampleset(sampleset)
         if num_toys is None:
             cov = np.diag(sol)
         else:
-            cov = self._run_montecarlo_toys(
-                num_toys, prog_bar, num_cores, num_reads=num_reads
-            )
+            cov = self._run_montecarlo_toys(num_toys, prog_bar, num_cores, num_reads=num_reads)
         return sol, cov
 
     def compute_energy(self, x):
@@ -201,10 +183,7 @@ class QUnfolder:
         def solve_gurobi_integer(self):
             model = gurobipy.Model()
             model.setParam("OutputFlag", 0)
-            x = [
-                model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1)
-                for b in self.num_bits
-            ]
+            x = [model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1) for b in self.num_bits]
             a = self.linear_coeffs
             B = self.quadratic_coeffs
             model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
@@ -217,19 +196,12 @@ class QUnfolder:
             model = gurobipy.Model()
             model.setParam("OutputFlag", 0)
             num_bits = self.num_bits
-            x = [
-                model.addVar(vtype=gurobipy.GRB.BINARY)
-                for i in range(self.num_bins)
-                for _ in range(num_bits[i])
-            ]
+            x = [model.addVar(vtype=gurobipy.GRB.BINARY) for i in range(self.num_bins) for _ in range(num_bits[i])]
             Q = self.qubo_matrix
             model.setObjective(x @ Q @ x, sense=gurobipy.GRB.MINIMIZE)
             model.optimize()
             bitstr = np.array([var.x for var in x], dtype=int)
             arrays = np.split(bitstr, np.cumsum(num_bits[:-1]))
-            sol = np.array(
-                [int("".join(arr.astype(str))[::-1], base=2) for arr in arrays],
-                dtype=float,
-            )
+            sol = np.array([int("".join(arr.astype(str))[::-1], base=2) for arr in arrays], dtype=float)
             cov = np.diag(sol)
             return sol, cov

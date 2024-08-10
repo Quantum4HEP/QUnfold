@@ -14,9 +14,7 @@ def smear(xt, bias, smearing, eff=1):
     return xt + xsmear
 
 
-def generate_standard(
-    truth, measured, response, type, distr, samples, bias, smearing, eff
-):
+def generate_standard(truth, measured, response, type, distr, samples, bias, smearing, eff):
     # Data generation
     if type == "data":
         for _ in range(samples):
@@ -57,9 +55,7 @@ def generate_standard(
         return response
 
 
-def generate_double_peaked(
-    truth, measured, response, type, samples, bias, smearing, eff
-):
+def generate_double_peaked(truth, measured, response, type, samples, bias, smearing, eff):
     # Data generation
     if type == "data":
         for _ in range(samples):
@@ -108,18 +104,10 @@ def generate(distr, binning, samples, bias, smearing, eff):
     response = ROOT.RooUnfoldResponse(bins, binning[0], binning[-1])
 
     if any(d in distr for d in ["normal", "breit-wigner", "exponential", "gamma"]):
-        truth, measured = generate_standard(
-            truth, measured, response, "data", distr, samples, bias, smearing, eff
-        )
-        response = generate_standard(
-            truth, measured, response, "response", distr, samples, bias, smearing, eff
-        )
+        truth, measured = generate_standard(truth, measured, response, "data", distr, samples, bias, smearing, eff)
+        response = generate_standard(truth, measured, response, "response", distr, samples, bias, smearing, eff)
     elif any(d in distr for d in ["double-peaked"]):
-        truth, measured = generate_double_peaked(
-            truth, measured, response, "data", samples, bias, smearing, eff
-        )
-        response = generate_double_peaked(
-            truth, measured, response, "response", samples, bias, smearing, eff
-        )
+        truth, measured = generate_double_peaked(truth, measured, response, "data", samples, bias, smearing, eff)
+        response = generate_double_peaked(truth, measured, response, "response", samples, bias, smearing, eff)
 
     return truth, measured, response

@@ -27,18 +27,7 @@ legend_fontsize = 10
 
 
 class QPlotter:
-    def __init__(
-        self,
-        response,
-        measured,
-        truth,
-        unfolded,
-        covariance,
-        binning,
-        method,
-        ybottom=0.0,
-        normed=True,
-    ):
+    def __init__(self, response, measured, truth, unfolded, covariance, binning, method, ybottom=0.0, normed=True):
         self.response = response[1:-1, 1:-1]
         self.measured = measured[1:-1]
         self.truth = truth[1:-1]
@@ -67,23 +56,8 @@ class QPlotter:
         color = label2color.get(label, default_color)
         rchi2 = round(chi2, ndigits=chi2_ndigits)
         label = rf"Unfolded {label} ($\chi^2 = {rchi2}$)"
-        ax.errorbar(
-            x=xmid,
-            y=hist,
-            yerr=err,
-            label=label,
-            color=color,
-            marker=marker,
-            ms=markersize,
-            linestyle="None",
-        )
-        ax.tick_params(
-            labelsize=ticks_fontsize,
-            top=False,
-            right=False,
-            labelbottom=False,
-            reset=True,
-        )
+        ax.errorbar(x=xmid, y=hist, yerr=err, label=label, color=color, marker=marker, ms=markersize, linestyle="None")
+        ax.tick_params(labelsize=ticks_fontsize, top=False, right=False, labelbottom=False, reset=True)
         yticks = [-1, -1] + ax.get_yticks().tolist()[2:]
         yticklabels = ["", ""] + ax.get_yticklabels()[2:]
         ax.set_yticks(yticks)
@@ -97,15 +71,7 @@ class QPlotter:
     def ratio_plot(ax, xmid, ratio, err, label, xticks, xlabel):
         ax.axhline(y=1, color=label2color["Truth"])
         color = label2color.get(label, default_color)
-        ax.errorbar(
-            x=xmid,
-            y=ratio,
-            yerr=err,
-            color=color,
-            marker=marker,
-            ms=markersize,
-            linestyle="None",
-        )
+        ax.errorbar(x=xmid, y=ratio, yerr=err, color=color, marker=marker, ms=markersize, linestyle="None")
         ax.tick_params(labelsize=ticks_fontsize, right=False, reset=True)
         ax.set_xticks(xticks)
         ax.set_xlabel(xlabel, fontsize=labels_fontsize)
@@ -145,40 +111,11 @@ class QPlotter:
         chi2 = compute_chi2(sol, truth, covariance=cov)
         norm = np.sum(truth) if self.normed else None
 
-        self.histogram_plot(
-            ax=ax1,
-            xedges=self.binning,
-            hist=truth,
-            label="Truth",
-            ylabel=ylabel,
-            norm=norm,
-        )
-        self.histogram_plot(
-            ax=ax1,
-            xedges=self.binning,
-            hist=measured,
-            label="Measured",
-            ylabel=ylabel,
-            norm=norm,
-        )
-        self.errorbar_plot(
-            ax=ax1,
-            xmid=xmid,
-            hist=sol,
-            err=err,
-            xlims=xlims,
-            label=label,
-            chi2=chi2,
-            norm=norm,
-        )
+        self.histogram_plot(ax=ax1, xedges=self.binning, hist=truth, label="Truth", ylabel=ylabel, norm=norm)
+        self.histogram_plot(ax=ax1, xedges=self.binning, hist=measured, label="Measured", ylabel=ylabel, norm=norm)
+        self.errorbar_plot(ax=ax1, xmid=xmid, hist=sol, err=err, xlims=xlims, label=label, chi2=chi2, norm=norm)
         self.ratio_plot(
-            ax=ax2,
-            xmid=xmid,
-            ratio=sol_ratio,
-            err=err_ratio,
-            label=label,
-            xticks=self.binning,
-            xlabel="Bins",
+            ax=ax2, xmid=xmid, ratio=sol_ratio, err=err_ratio, label=label, xticks=self.binning, xlabel="Bins"
         )
         ax1.set_ylim(bottom=self.ybottom)
         fig.tight_layout()

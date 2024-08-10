@@ -51,35 +51,24 @@ if __name__ == "__main__":
         binning = np.array([-np.inf] + bin_edges + [np.inf])
 
         ######################### RooUnfold #########################
-        roounfold_response = ROOT.RooUnfoldResponse(
-            th1_measured_mc, th1_truth_mc, th2_response
-        )
+        roounfold_response = ROOT.RooUnfoldResponse(th1_measured_mc, th1_truth_mc, th2_response)
         roounfold_response.UseOverflow(True)
 
         sol_MI, cov_MI = run_RooUnfold(
-            method="MI",
-            response=roounfold_response,
-            measured=th1_measured,
-            num_toys=num_toys,
+            method="MI", response=roounfold_response, measured=th1_measured, num_toys=num_toys
         )
 
         sol_IBU, cov_IBU = run_RooUnfold(
-            method="IBU",
-            response=roounfold_response,
-            measured=th1_measured,
-            num_toys=num_toys,
+            method="IBU", response=roounfold_response, measured=th1_measured, num_toys=num_toys
         )
 
         ########################## QUnfold ##########################
         truth = TH1_to_numpy(th1_truth, overflow=True)
         measured = TH1_to_numpy(th1_measured, overflow=True)
         response = normalize_response(
-            response=TH2_to_numpy(th2_response, overflow=True),
-            truth_mc=TH1_to_numpy(th1_truth_mc, overflow=True),
+            response=TH2_to_numpy(th2_response, overflow=True), truth_mc=TH1_to_numpy(th1_truth_mc, overflow=True)
         )
-        lam = lambda_optimizer(
-            response=response, measured=measured, truth=truth, binning=binning
-        )
+        lam = lambda_optimizer(response=response, measured=measured, truth=truth, binning=binning)
 
         sol_SA, cov_SA = run_QUnfold(
             method="SA",
@@ -93,12 +82,7 @@ if __name__ == "__main__":
 
         if enable_hybrid:
             sol_HYB, cov_HYB = run_QUnfold(
-                method="HYB",
-                response=response,
-                measured=measured,
-                binning=binning,
-                lam=lam,
-                num_toys=num_toys,
+                method="HYB", response=response, measured=measured, binning=binning, lam=lam, num_toys=num_toys
             )
 
         if enable_quantum:
@@ -124,12 +108,7 @@ if __name__ == "__main__":
             covariance.update({"QA": cov_QA})
 
         fig = plot_comparison(
-            solution,
-            covariance,
-            truth=truth,
-            measured=measured,
-            binning=binning,
-            xlabel=var2label[var],
+            solution, covariance, truth=truth, measured=measured, binning=binning, xlabel=var2label[var]
         )
 
         dirpath = "studies/paper_acat"

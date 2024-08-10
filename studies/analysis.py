@@ -32,29 +32,18 @@ if __name__ == "__main__":
         print(f"Unfolding '{distr}' distribution...")
 
         th1_truth, th1_measured, roounfold_response = generate(
-            distr=distr,
-            binning=binning,
-            samples=samples,
-            bias=bias,
-            smearing=smearing,
-            eff=eff,
+            distr=distr, binning=binning, samples=samples, bias=bias, smearing=smearing, eff=eff
         )
 
         ######################### RooUnfold #########################
         roounfold_response.UseOverflow(True)
 
         sol_MI, cov_MI = run_RooUnfold(
-            method="MI",
-            response=roounfold_response,
-            measured=th1_measured,
-            num_toys=num_toys,
+            method="MI", response=roounfold_response, measured=th1_measured, num_toys=num_toys
         )
 
         sol_IBU, cov_IBU = run_RooUnfold(
-            method="IBU",
-            response=roounfold_response,
-            measured=th1_measured,
-            num_toys=num_toys,
+            method="IBU", response=roounfold_response, measured=th1_measured, num_toys=num_toys
         )
 
         ########################## QUnfold ##########################
@@ -64,13 +53,7 @@ if __name__ == "__main__":
             response=TH2_to_numpy(roounfold_response.Hresponse(), overflow=True),
             truth_mc=TH1_to_numpy(roounfold_response.Htruth(), overflow=True),
         )
-        lam = lambda_optimizer(
-            response=response,
-            measured=measured,
-            binning=binning,
-            truth=truth,
-            num_reps=20,
-        )
+        lam = lambda_optimizer(response=response, measured=measured, binning=binning, truth=truth, num_reps=20)
 
         sol_SA, cov_SA = run_QUnfold(
             method="SA",
@@ -84,12 +67,7 @@ if __name__ == "__main__":
 
         if enable_hybrid:
             sol_HYB, cov_HYB = run_QUnfold(
-                method="HYB",
-                response=response,
-                measured=measured,
-                binning=binning,
-                lam=lam,
-                num_toys=num_toys,
+                method="HYB", response=response, measured=measured, binning=binning, lam=lam, num_toys=num_toys
             )
 
         if enable_quantum:
@@ -114,14 +92,7 @@ if __name__ == "__main__":
             solution.update({"QA": sol_QA})
             covariance.update({"QA": cov_QA})
 
-        fig = plot_comparison(
-            solution,
-            covariance,
-            truth=truth,
-            measured=measured,
-            binning=binning,
-            xlabel="Bins",
-        )
+        fig = plot_comparison(solution, covariance, truth=truth, measured=measured, binning=binning, xlabel="Bins")
 
         dirpath = "studies/analysis"
         if not os.path.exists(dirpath):
