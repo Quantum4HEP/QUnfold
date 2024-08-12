@@ -11,10 +11,10 @@ np.random.seed(seed)
 # Set parameters for synthetic data generation
 entries = 20000
 bins = 14
-xmin, xmax = 0.0, 15.0  # xaxis range
+xmin, xmax = 0.0, 14.0  # xaxis range
 kappa, theta = 4.0, 1.0  # gamma distribution
-mu_smear, std_smear = -0.1, 0.4  # gaussian smearing
-efficiency = 0.7  # constant efficiency
+mu_smear, std_smear = -0.1, 0.3  # gaussian smearing
+efficiency = 0.8  # constant efficiency
 
 # Generate Monte Carlo truth and reco data (with Gaussian smearing)
 truth_mc_data = np.random.gamma(kappa, theta, size=entries)

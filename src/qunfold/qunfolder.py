@@ -58,22 +58,26 @@ class QUnfolder:
         return (self.R.T @ self.R) + self.lam * (L.T @ L)
 
     def _get_laplacian(self):
-        hs = np.diff(self.binning)
-        n = len(hs)
-        L = np.zeros(shape=(n, n))
-        L[0, 0] = -1 / (hs[0] * hs[1])
-        L[-1, -1] = -1 / (hs[-2] * hs[-1])
-        for i in range(1, n - 1):
-            h_minus = hs[i - 1]
-            h = hs[i]
-            h_plus = hs[i + 1]
-            L[i, i] += -1 / (h_minus * h) - 1 / (h * h_plus)
-            L[i, i + 1] += 1 / (h * (h + h_plus))
-            L[i + 1, i] += 1 / (h_plus * (h + h_plus))
-            L[i, i - 1] += 1 / (h * (h_minus + h))
-            L[i - 1, i] += 1 / (h_minus * (h_minus + h))
-        norm = 2 / np.max(np.abs(L))
-        return norm * L
+        n = self.num_bins
+        L = np.zeros((n, n))
+        x = self.binning[1:-2] + 0.5 * np.diff(self.binning[1:-1])
+        k = 1
+        for i in range(2, n - 2):
+            xl, x0, xr = x[k - 1], x[k], x[k + 1]
+            k += 1
+            A = np.array([[xl**2, xl, 1], [x0**2, x0, 1], [xr**2, xr, 1]])
+            coeffs_e0 = np.linalg.solve(A, [1, 0, 0])
+            coeffs_e1 = np.linalg.solve(A, [0, 1, 0])
+            coeffs_e2 = np.linalg.solve(A, [0, 0, 1])
+            L[i, i - 1] += coeffs_e0[0]
+            L[i - 1, i] += coeffs_e2[0]
+            L[i, i] += 2 * coeffs_e1[0]
+            L[i, i + 1] += coeffs_e2[0]
+            L[i + 1, i] += coeffs_e0[0]
+        L[1, 1] = L[2, 2]
+        L[-2, -2] = L[-3, -3]
+        L *= 2 / np.max(np.abs(L))
+        return L
 
     def _get_qubo_matrix(self):
         dim = self.num_bins
