@@ -3,7 +3,8 @@ import uproot
 import awkward as ak
 import numpy as np
 from array import array
-from studies.utils.physics import (
+from sklearn.preprocessing import KBinsDiscretizer
+from physics import (
     compute_invariant_mass_reco,
     compute_invariant_mass_particle,
     compute_energy,
@@ -36,6 +37,15 @@ def get_info_reco_level(reco_info, list_recovars):
     return outvars
 
 
+def get_variable_binning(x, x_range, num_bins):
+    kbd = KBinsDiscretizer(num_bins, encode="ordinal", strategy="kmeans")
+    low, high = x_range
+    data = ak.to_numpy(x[(low <= x) & (x <= high)])
+    bin_egdes = kbd.fit(data.reshape(-1, 1)).bin_edges_[0]
+    bin_egdes = [low] + bin_egdes.tolist()[1:-1] + [high]
+    return bin_egdes
+
+
 def tree_reader(reco_file, particle_file, reco_var_list, part_val_dict):
     reco_tree = uproot.open(reco_file)["Delphes"]
     particle_tree = uproot.open(particle_file)["LHEF"]
@@ -60,7 +70,7 @@ def hist_resp_builder(name, reco, particle, binning, do_response=False):
     mask = reco != None
     reco = reco[mask].astype(float)
 
-    binning = np.array([-np.inf] + binning.tolist() + [np.inf])
+    binning = np.array([-np.inf] + binning + [np.inf])
     hist_reco = np.histogram(reco, binning)[0]
     hist_particle = np.histogram(ak.to_numpy(particle), binning)[0]
 
@@ -225,7 +235,6 @@ def process(reco_tree_path, part_tree_path, list_recovars, dict_partvars, do_res
     particle_Eta_lep1, particle_Eta_lep2 = particle_info["11,13"]["Particle.Eta"]
 
     # phi_lep1/2
-    reco_Phi_lep1, reco_Phi_lep2 = reco_filter_lep(events_idx, reco_info, "Phi")
     particle_Phi_lep1, particle_Phi_lep2 = particle_info["11,13"]["Particle.Phi"]
 
     # DR_b1b2
@@ -268,117 +277,26 @@ def process(reco_tree_path, part_tree_path, list_recovars, dict_partvars, do_res
     )
 
     # Binning
-    binning_leading_pT = np.array(
-        [
-            10.00,
-            20.00,
-            30.00,
-            40.00,
-            50.00,
-            60.00,
-            71.00,
-            83.00,
-            97.00,
-            115.00,
-            134.00,
-            158.00,
-            188.00,
-            223.00,
-            268.00,
-            338.00,
-        ]
-    )
-    binning_subleading_pT = np.array(
-        [10.00, 20.00, 30.00, 40.00, 50.00, 61.00, 73.00, 88.00, 105.00, 123.00, 150.00, 200.00]
-    )
-    binning_m_l1l2 = np.array(
-        [
-            10.00,
-            25.00,
-            40.00,
-            55.00,
-            70.00,
-            85.00,
-            100.00,
-            115.00,
-            131.00,
-            150.00,
-            173.00,
-            200.00,
-            230.00,
-            270.00,
-            310.00,
-            360.00,
-            440.00,
-            550.00,
-        ]
-    )
-    binning_DR_b1b2 = np.array(
-        [
-            0.4,
-            0.6,
-            0.8,
-            1.0,
-            1.2,
-            1.4,
-            1.6,
-            1.8,
-            2.0,
-            2.2,
-            2.4,
-            2.6,
-            2.8,
-            3.0,
-            3.2,
-            3.4,
-            3.6,
-            3.8,
-            4.0,
-            4.2,
-            4.4,
-            4.6,
-            4.8,
-        ]  # Equally spaced, but for this variable it is ok
-    )
-    binning_m_b1b2 = np.array(
-        [
-            0.00,
-            # 25.00,
-            55.00,
-            85.00,
-            115.00,
-            150.00,
-            200.00,
-            270.00,
-            360.00,
-            550.00,
-            800.00,
-        ]
-    )
-    binning_leading_eta = np.linspace(-2.5, 2.5, 31)
-    binning_subleading_eta = np.linspace(-2.5, 2.5, 31)
-
-    # Unused
-    binning_leading_phi = np.linspace(-3.0, 3.0, 20)
-    binning_subleading_phi = np.linspace(-3.0, 3.0, 20)
+    binning_leading_pT = get_variable_binning(particle_pT_lep1, x_range=(0.0, 200.0), num_bins=13)
+    binning_subleading_pT = get_variable_binning(particle_pT_lep2, x_range=(0.0, 140.0), num_bins=13)
+    binning_m_l1l2 = get_variable_binning(particle_m_l1l2, x_range=(0.0, 420.0), num_bins=16)
+    binning_DR_b1b2 = get_variable_binning(particle_DR_b1b2, x_range=(0.2, 5.0), num_bins=15)
+    binning_m_b1b2 = get_variable_binning(particle_m_b1b2, x_range=(0.0, 500.0), num_bins=15)
+    binning_leading_eta = get_variable_binning(particle_Eta_lep1, x_range=(-2.5, 2.5), num_bins=18)
+    binning_subleading_eta = get_variable_binning(particle_Eta_lep2, x_range=(-2.5, 2.5), num_bins=18)
 
     # Result
     variables = [
         ("pT_lep1", reco_pT_lep1, particle_pT_lep1, binning_leading_pT),
         ("pT_lep2", reco_pT_lep2, particle_pT_lep2, binning_subleading_pT),
+        ("m_l1l2", reco_m_l1l2, particle_m_l1l2, binning_m_l1l2),
+        ("DR_b1b2", reco_DR_b1b2, particle_DR_b1b2, binning_DR_b1b2),
+        ("m_b1b2", reco_m_b1b2, particle_m_b1b2, binning_m_b1b2),
         ("eta_lep1", reco_Eta_lep1, particle_Eta_lep1, binning_leading_eta),
         ("eta_lep2", reco_Eta_lep2, particle_Eta_lep2, binning_subleading_eta),
-        ("phi_lep1", reco_Phi_lep1, particle_Phi_lep1, binning_leading_phi),
-        ("phi_lep2", reco_Phi_lep2, particle_Phi_lep2, binning_subleading_phi),
-        ("DR_b1b2", reco_DR_b1b2, particle_DR_b1b2, binning_DR_b1b2),
-        ("m_l1l2", reco_m_l1l2, particle_m_l1l2, binning_m_l1l2),
-        ("m_b1b2", reco_m_b1b2, particle_m_b1b2, binning_m_b1b2),
     ]
 
-    processed = []
-    for var in variables:
-        processed.append(hist_resp_builder(*var, do_response))
-
+    processed = [hist_resp_builder(*var, do_response) for var in variables]
     return processed
 
 
