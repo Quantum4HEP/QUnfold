@@ -18,17 +18,12 @@ def normalize_response(response, truth_mc):
     return response
 
 
-def compute_chi2(observed, expected, covariance):
-    diag = np.diag(covariance)
-    iszero = diag == 0
-    covariance[np.diag_indices_from(covariance)] = np.where(iszero, 1.0, diag)
-    residuals = observed - expected
-    try:
-        inv_cov = np.linalg.inv(covariance)
-    except np.linalg.LinAlgError:
-        inv_cov = np.linalg.pinv(covariance)
-    chi2 = residuals.T @ inv_cov @ residuals
-    chi2_red = chi2 / len(expected)
+def compute_chi2(observed, expected):
+    iszero = expected == 0
+    observed = np.where(iszero, observed + 1, observed)
+    expected = np.where(iszero, expected + 1, expected)
+    chi2 = np.sum((observed - expected) ** 2 / expected)
+    chi2_red = chi2 / (len(expected) - 1)
     return chi2_red
 
 
@@ -43,8 +38,7 @@ def lambda_optimizer(response, measured, truth, binning, num_reps=30, verbose=Fa
         sol, _ = unfolder.solve_gurobi_integer()
         obs = sol[1:-1]
         exp = truth[1:-1]
-        cov = np.diag(exp)
-        chi2 = compute_chi2(observed=obs, expected=exp, covariance=cov)
+        chi2 = compute_chi2(observed=obs, expected=exp)
         return chi2
 
     best_lam = 0
