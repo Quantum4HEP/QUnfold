@@ -7,6 +7,7 @@ import minorminer
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from dwave.samplers import SimulatedAnnealingSampler
+from dwave.samplers import SteepestDescentSolver
 from dwave.system import LeapHybridSampler
 from dwave.system import DWaveSampler, FixedEmbeddingComposite
 
@@ -95,15 +96,20 @@ class QUnfolder:
         quadratic = {(i, j): 2 * Q[i, j] for i in range(size) for j in range(i + 1, size)}
         return dimod.BinaryQuadraticModel(linear, quadratic, vartype=dimod.BINARY)
 
-    def _post_process_sampleset(self, sampleset):
+    def _decode_sampleset(self, sampleset):
         pvecs = self.precision_vectors
         indices = np.cumsum([0] + [len(pvec) for pvec in pvecs[:-1]])
         solutions = [np.add.reduceat(rec.sample * np.concatenate(pvecs), indices=indices) for rec in sampleset.record]
         energies = [rec.energy for rec in sampleset.record]
-        min_energy = min(energies)
-        beta_boltzmann = 100
-        weights = np.exp(-beta_boltzmann * np.abs(np.array(energies) - min_energy))
-        return np.average(solutions, weights=weights, axis=0)
+        return np.array(solutions), np.array(energies)
+
+    def _post_process_sampleset(self, sampleset, steepest_descent):
+        if steepest_descent:
+            sampleset = SteepestDescentSolver().sample(self.dwave_bqm, initial_states=sampleset)
+        solutions, energies = self._decode_sampleset(sampleset=sampleset)
+        sol = solutions[np.argmin(energies)]
+        cov = np.cov(solutions, rowvar=False)
+        return sol, cov
 
     def _get_graph_embedding(self, **kwargs):
         source_edgelist = list(self.dwave_bqm.quadratic) + list((v, v) for v in self.dwave_bqm.linear)
@@ -121,7 +127,7 @@ class QUnfolder:
             else:
                 sampler = self._sampler
             sampleset = sampler.sample(toy.dwave_bqm, **kwargs)
-            sol = toy._post_process_sampleset(sampleset)
+            sol, _ = toy._post_process_sampleset(sampleset)
             return sol
 
         max_workers = num_cores if num_cores is not None else os.cpu_count()
@@ -130,8 +136,8 @@ class QUnfolder:
             desc = "Running MC toys"
             disable = not prog_bar
             results = list(tqdm(jobs, total=num_toys, desc=desc, disable=disable))
-        cov = np.cov(results, rowvar=False)
-        return cov
+        cov_toys = np.cov(results, rowvar=False)
+        return cov_toys
 
     def initialize_qubo_model(self):
         self.qubo_matrix = self._get_qubo_matrix()
@@ -140,21 +146,19 @@ class QUnfolder:
     def solve_simulated_annealing(self, num_reads, num_toys=None, num_cores=None, seed=None):
         self._sampler = SimulatedAnnealingSampler()
         sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
-        sol = self._post_process_sampleset(sampleset)
-        if num_toys is None:
-            cov = np.diag(sol)
-        else:
-            cov = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
+        sol, cov = self._post_process_sampleset(sampleset, steepest_descent=True)
+        if num_toys is not None:
+            cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
+            cov += cov_toys
         return sol, cov
 
     def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
         self._sampler = LeapHybridSampler()
         sampleset = self._sampler.sample(self.dwave_bqm)
-        sol = self._post_process_sampleset(sampleset)
-        if num_toys is None:
-            cov = np.diag(sol)
-        else:
-            cov = self._run_montecarlo_toys(num_toys, num_cores)
+        sol, cov = self._post_process_sampleset(sampleset, steepest_descent=False)
+        if num_toys is not None:
+            cov_toys = self._run_montecarlo_toys(num_toys, num_cores)
+            cov += cov_toys
         return sol, cov
 
     def set_quantum_device(self, device_name=None, dwave_token=None):
@@ -166,11 +170,10 @@ class QUnfolder:
     def solve_quantum_annealing(self, num_reads, num_toys=None, prog_bar=True, num_cores=None):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
-        sol = self._post_process_sampleset(sampleset)
-        if num_toys is None:
-            cov = np.diag(sol)
-        else:
-            cov = self._run_montecarlo_toys(num_toys, prog_bar, num_cores, num_reads=num_reads)
+        sol, cov = self._post_process_sampleset(sampleset, steepest_descent=True)
+        if num_toys is not None:
+            cov_toys = self._run_montecarlo_toys(num_toys, prog_bar, num_cores, num_reads=num_reads)
+            cov += cov_toys
         return sol, cov
 
     def compute_energy(self, x):
