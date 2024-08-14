@@ -11,29 +11,23 @@ except ImportError:
 
 
 def normalize_response(response, truth_mc):
-    """
-    Normalize the response matrix using the Monte Carlo generated truth histogram.
-
-    Args:
-        response (numpy.ndarray): response matrix to normalize.
-        truth_mc (numpy.ndarray): Monte Carlo truth histogram.
-
-    Returns:
-        numpy.ndarray: normalized response matrix.
-    """
-    return response / (truth_mc + 1e-12)
+    iszero = truth_mc == 0.0
+    response /= np.where(iszero, 1.0, truth_mc)
+    diag = np.diag(response)
+    response[np.diag_indices_from(response)] = np.where(iszero, 1.0, diag)
+    return response
 
 
-def compute_chi2(observed, expected, covariance, toys=False):
-    nonzero = expected != 0
-    observed = observed[nonzero]
-    expected = expected[nonzero]
-    if toys:
-        cov = covariance[nonzero, :][:, nonzero]
-    else:
-        cov = np.diag(expected)
+def compute_chi2(observed, expected, covariance):
+    diag = np.diag(covariance)
+    iszero = diag == 0
+    covariance[np.diag_indices_from(covariance)] = np.where(iszero, 1.0, diag)
     residuals = observed - expected
-    chi2 = residuals.T @ np.linalg.pinv(cov) @ residuals
+    try:
+        inv_cov = np.linalg.inv(covariance)
+    except np.linalg.LinAlgError:
+        inv_cov = np.linalg.pinv(covariance)
+    chi2 = residuals.T @ inv_cov @ residuals
     chi2_red = chi2 / len(expected)
     return chi2_red
 
