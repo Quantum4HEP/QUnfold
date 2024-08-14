@@ -19,7 +19,11 @@ figsize = (12, 9)
 chi2_ndigits = 2
 alpha = 0.25
 marker = "o"
-markersize = 4
+markersize = 2
+linewidth = 1
+elinewidth = 1
+capsize = 3
+capthick = 1
 ticks_fontsize = 8
 labels_fontsize = 14
 legend_fontsize = 10
@@ -45,7 +49,7 @@ class QPlotter:
             ylabel = "Frequency"
         hist = np.append(hist, [hist[-1]])
         color = label2color.get(label, default_color)
-        ax.step(xedges, hist, label=label, color=color, where="post")
+        ax.step(xedges, hist, label=label, color=color, where="post", linewidth=linewidth)
         ax.fill_between(xedges, hist, color=color, alpha=alpha, step="post")
         ax.set_ylabel(ylabel, fontsize=labels_fontsize)
         ax.set_ylim(ybottom)
@@ -58,7 +62,19 @@ class QPlotter:
         color = label2color.get(label, default_color)
         rchi2 = round(chi2, ndigits=chi2_ndigits)
         label = rf"Unfolded {label} ($\chi^2 = {rchi2}$)"
-        ax.errorbar(x=xmid, y=hist, yerr=err, label=label, color=color, marker=marker, ms=markersize, linestyle="None")
+        ax.errorbar(
+            x=xmid,
+            y=hist,
+            yerr=err,
+            label=label,
+            color=color,
+            marker=marker,
+            ms=markersize,
+            elinewidth=elinewidth,
+            capsize=capsize,
+            capthick=capthick,
+            linestyle="None",
+        )
         ax.tick_params(labelsize=ticks_fontsize, top=False, right=False, labelbottom=False, reset=True)
         ax.legend(fontsize=legend_fontsize)
         ax.set_xlim(left=xlims[0], right=xlims[1])
@@ -67,9 +83,20 @@ class QPlotter:
 
     @staticmethod
     def ratio_plot(ax, xmid, ratio, err, label, xticks, xlabel="Bins"):
-        ax.axhline(y=1, color=label2color["Truth"])
+        ax.axhline(y=1, color=label2color["Truth"], linewidth=linewidth)
         color = label2color.get(label, default_color)
-        ax.errorbar(x=xmid, y=ratio, yerr=err, color=color, marker=marker, ms=markersize, linestyle="None")
+        ax.errorbar(
+            x=xmid,
+            y=ratio,
+            yerr=err,
+            color=color,
+            marker=marker,
+            ms=markersize,
+            elinewidth=elinewidth,
+            capsize=capsize,
+            capthick=capthick,
+            linestyle="None",
+        )
         ax.tick_params(labelsize=ticks_fontsize, right=False, reset=True)
         ax.set_xticks(xticks)
         ax.set_xlabel(xlabel, fontsize=labels_fontsize)
@@ -105,7 +132,7 @@ class QPlotter:
         widths = np.diff(self.binning)
         xmid = self.binning[:-1] + 0.5 * widths
         xlims = (self.binning[0], self.binning[-1])
-        chi2 = compute_chi2(sol, truth, covariance=cov)
+        chi2 = compute_chi2(observed=sol, expected=truth)
 
         self.histogram_plot(
             ax=ax1, xedges=self.binning, hist=truth, label="Truth", ybottom=self.ybottom, norm=self.norm

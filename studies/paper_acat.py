@@ -25,7 +25,7 @@ var2label = {
     "eta_lep2": r"$\eta^{lep_2}$",
 }
 
-num_reads = 5000
+num_reads = 400
 num_toys = None
 enable_hybrid = False
 enable_quantum = False

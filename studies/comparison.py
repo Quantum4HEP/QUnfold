@@ -18,19 +18,18 @@ def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel):
     QPlotter.histogram_plot(ax=ax1, xedges=binning, hist=measured, label="Measured")
 
     num_points = len(method2sol)
-    xshift = widths / (num_points + 7)
+    xshift = widths / (num_points + 9)
     xlims = (binning[0], binning[-1])
     for i, method in enumerate(method2sol):
-        xpt = binning[:-1] + (i + 4) * xshift
+        xpt = binning[:-1] + (i + 5) * xshift
         sol = method2sol[method][1:-1]
         cov = method2cov[method][1:-1, 1:-1]
         err = np.sqrt(np.diag(cov))
-        chi2 = compute_chi2(sol, truth, covariance=cov)
+        chi2 = compute_chi2(observed=sol, expected=truth)
         QPlotter.errorbar_plot(ax=ax1, xmid=xpt, hist=sol, err=err, xlims=xlims, label=method, chi2=chi2)
         sol_ratio = sol / truth
         err_ratio = err / truth
-        xmid = binning[:-1] + 0.5 * widths
         QPlotter.ratio_plot(
-            ax=ax2, xmid=xmid, ratio=sol_ratio, err=err_ratio, label=method, xticks=binning, xlabel=xlabel
+            ax=ax2, xmid=xpt, ratio=sol_ratio, err=err_ratio, label=method, xticks=binning, xlabel=xlabel
         )
     return fig

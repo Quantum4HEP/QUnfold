@@ -21,7 +21,7 @@ bias = -0.13
 smearing = 0.21
 eff = 0.7
 
-num_reads = 300
+num_reads = 400
 num_toys = None
 enable_hybrid = False
 enable_quantum = False
