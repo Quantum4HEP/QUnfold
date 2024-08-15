@@ -96,19 +96,35 @@ class QUnfolder:
         quadratic = {(i, j): 2 * Q[i, j] for i in range(size) for j in range(i + 1, size)}
         return dimod.BinaryQuadraticModel(linear, quadratic, vartype=dimod.BINARY)
 
-    def _decode_sampleset(self, sampleset):
+    def _decode_binary_solution(self, binsol):
+        split_indices = np.cumsum(self.num_bits[:-1])
+        bitstrings_list = np.split(binsol, indices_or_sections=split_indices)
+        sol = np.array([pvec @ bits for pvec, bits in zip(self.precision_vectors, bitstrings_list)])
+        return sol
+
+    def _decode_binary_covariance(self, bincov):
+        split_indices = np.cumsum(self.num_bits[:-1])
+        rows = cols = np.split(np.arange(len(bincov)), indices_or_sections=split_indices)
         pvecs = self.precision_vectors
-        indices = np.cumsum([0] + [len(pvec) for pvec in pvecs[:-1]])
-        solutions = [np.add.reduceat(rec.sample * np.concatenate(pvecs), indices=indices) for rec in sampleset.record]
-        energies = [rec.energy for rec in sampleset.record]
-        return np.array(solutions), np.array(energies)
+        nbins = self.num_bins
+        cov = np.zeros(shape=(nbins, nbins))
+        for i in range(nbins):
+            for j in range(nbins):
+                block = bincov[np.ix_(rows[i], cols[j])]
+                cov[i, j] = pvecs[i] @ block @ pvecs[j]
+        return cov
 
     def _post_process_sampleset(self, sampleset, steepest_descent):
         if steepest_descent:
             sampleset = SteepestDescentSolver().sample(self.dwave_bqm, initial_states=sampleset)
-        solutions, energies = self._decode_sampleset(sampleset=sampleset)
-        sol = solutions[np.argmin(energies)]
-        cov = np.cov(solutions, rowvar=False)
+        solutions = np.array([rec.sample for rec in sampleset.record])
+        energies = np.array([rec.energy for rec in sampleset.record])
+        temperature = (np.max(energies) - np.min(energies)) / np.log(len(energies))
+        weights = np.exp(-(1 / temperature) * (energies - np.min(energies)))
+        binsol = np.average(solutions, weights=weights, axis=0)
+        bincov = np.cov(solutions, rowvar=False, aweights=weights)
+        sol = self._decode_binary_solution(binsol=binsol)
+        cov = self._decode_binary_covariance(bincov=bincov)
         return sol, cov
 
     def _get_graph_embedding(self, **kwargs):
