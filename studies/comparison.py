@@ -27,6 +27,8 @@ def plot_comparison(method2sol, method2cov, truth, measured, binning, xlabel):
         err = np.sqrt(np.diag(cov))
         chi2 = compute_chi2(observed=sol, expected=truth)
         QPlotter.errorbar_plot(ax=ax1, xmid=xpt, hist=sol, err=err, xlims=xlims, label=method, chi2=chi2)
+        yticks = [tick for tick in ax1.get_yticks() if tick != 0]
+        ax1.set_yticks(yticks)
         sol_ratio = sol / truth
         err_ratio = err / truth
         QPlotter.ratio_plot(

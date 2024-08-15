@@ -141,6 +141,8 @@ class QPlotter:
             ax=ax1, xedges=self.binning, hist=measured, label="Measured", ybottom=self.ybottom, norm=self.norm
         )
         self.errorbar_plot(ax=ax1, xmid=xmid, hist=sol, err=err, xlims=xlims, label=label, chi2=chi2, norm=self.norm)
+        yticks = [tick for tick in ax1.get_yticks() if tick != 0]
+        ax1.set_yticks(yticks)
         self.ratio_plot(ax=ax2, xmid=xmid, ratio=sol_ratio, err=err_ratio, label=label, xticks=self.binning)
         fig.tight_layout()
 
