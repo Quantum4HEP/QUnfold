@@ -59,25 +59,16 @@ class QUnfolder:
         return (self.R.T @ self.R) + self.lam * (L.T @ L)
 
     def _get_laplacian(self):
-        n = self.num_bins
-        L = np.zeros((n, n))
-        x = self.binning[1:-2] + 0.5 * np.diff(self.binning[1:-1])
-        k = 1
+        with np.errstate(invalid="ignore"):
+            xmid = self.binning[:-1] + 0.5 * np.diff(self.binning)
+        n = len(xmid)
+        L = np.zeros(shape=(n, n))
+        dx = np.diff(xmid)
         for i in range(2, n - 2):
-            xl, x0, xr = x[k - 1], x[k], x[k + 1]
-            k += 1
-            A = np.array([[xl**2, xl, 1], [x0**2, x0, 1], [xr**2, xr, 1]])
-            coeffs_e0 = np.linalg.solve(A, [1, 0, 0])
-            coeffs_e1 = np.linalg.solve(A, [0, 1, 0])
-            coeffs_e2 = np.linalg.solve(A, [0, 0, 1])
-            L[i, i - 1] += coeffs_e0[0]
-            L[i - 1, i] += coeffs_e2[0]
-            L[i, i] += 2 * coeffs_e1[0]
-            L[i, i + 1] += coeffs_e2[0]
-            L[i + 1, i] += coeffs_e0[0]
-        L[1, 1] = L[2, 2]
-        L[-2, -2] = L[-3, -3]
-        L *= 2 / np.max(np.abs(L))
+            L[i, i - 1] = 2 / (dx[i - 1] * (dx[i - 1] + dx[i]))
+            L[i, i] = -2 / (dx[i - 1] * dx[i])
+            L[i, i + 1] = 2 / (dx[i] * (dx[i - 1] + dx[i]))
+        L = 2 * L / np.max(np.abs(L))
         return L
 
     def _get_qubo_matrix(self):
