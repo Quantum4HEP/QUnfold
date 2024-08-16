@@ -42,7 +42,7 @@ def run_QUnfold(method, response, measured, binning, lam, num_reads=None, num_to
     elif method == "SA":
         sol, cov = unfolder.solve_simulated_annealing(num_reads=num_reads, num_toys=num_toys)
     elif method == "HYB":
-        sol, cov = unfolder.solve_hybrid_sampler(num_toys=num_toys)
+        sol, cov = unfolder.solve_hybrid_sampler()
     elif method == "QA":
         unfolder.set_quantum_device()
         unfolder.set_graph_embedding()

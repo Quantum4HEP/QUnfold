@@ -105,9 +105,8 @@ class QUnfolder:
                 cov[i, j] = pvecs[i] @ block @ pvecs[j]
         return cov
 
-    def _post_process_sampleset(self, sampleset, steepest_descent):
-        if steepest_descent:
-            sampleset = SteepestDescentSolver().sample(self.dwave_bqm, initial_states=sampleset)
+    def _post_process_sampleset(self, sampleset):
+        sampleset = SteepestDescentSolver().sample(self.dwave_bqm, initial_states=sampleset)
         solutions = np.array([rec.sample for rec in sampleset.record])
         energies = np.array([rec.energy for rec in sampleset.record])
         temperature = (np.max(energies) - np.min(energies)) / np.log(len(energies))
@@ -153,19 +152,18 @@ class QUnfolder:
     def solve_simulated_annealing(self, num_reads, num_toys=None, num_cores=None, seed=None):
         self._sampler = SimulatedAnnealingSampler()
         sampleset = self._sampler.sample(self.dwave_bqm, num_reads=num_reads, seed=seed)
-        sol, cov = self._post_process_sampleset(sampleset, steepest_descent=True)
+        sol, cov = self._post_process_sampleset(sampleset)
         if num_toys is not None:
             cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
             cov += cov_toys
         return sol, cov
 
-    def solve_hybrid_sampler(self, num_toys=None, num_cores=None):
+    def solve_hybrid_sampler(self):
         self._sampler = LeapHybridSampler()
         sampleset = self._sampler.sample(self.dwave_bqm)
-        sol, cov = self._post_process_sampleset(sampleset, steepest_descent=False)
-        if num_toys is not None:
-            cov_toys = self._run_montecarlo_toys(num_toys, num_cores)
-            cov += cov_toys
+        binsol = np.array(sampleset.record[0].sample)
+        sol = self._decode_binary_solution(binsol=binsol)
+        cov = np.diag(sol)
         return sol, cov
 
     def set_quantum_device(self, device_name=None, dwave_token=None):
@@ -177,7 +175,7 @@ class QUnfolder:
     def solve_quantum_annealing(self, num_reads, num_toys=None, prog_bar=True, num_cores=None):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
         sampleset = sampler.sample(self.dwave_bqm, num_reads=num_reads)
-        sol, cov = self._post_process_sampleset(sampleset, steepest_descent=True)
+        sol, cov = self._post_process_sampleset(sampleset)
         if num_toys is not None:
             cov_toys = self._run_montecarlo_toys(num_toys, prog_bar, num_cores, num_reads=num_reads)
             cov += cov_toys
