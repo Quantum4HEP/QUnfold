@@ -1,8 +1,8 @@
 import sys
+import jax
 import numpy as np
 import scipy as sp
 from tqdm import tqdm
-from scipy.optimize import approx_fprime
 from qunfold import QUnfolder
 
 try:
@@ -28,13 +28,17 @@ def compute_chi2(observed, expected):
     return chi2_red
 
 
-def approx_hessian(func, *point):
-    precision = np.sqrt(np.finfo(dtype=np.float32).eps)
-    epsilon = precision * np.array([max(1, x) for x in point])
-    function = lambda point: func(*point)
-    gradient = lambda point: approx_fprime(xk=point, f=function, epsilon=epsilon)
-    xk = np.array([x for x in point])
-    return approx_fprime(xk=xk, f=gradient, epsilon=epsilon)
+def approx_hessian(f, x):
+    x = jax.numpy.array(x, dtype=float)
+    n = len(x)
+    hessian = jax.numpy.zeros(shape=(n, n))
+    grad_f = jax.grad(f)
+    for i in range(n):
+        v = jax.numpy.zeros_like(x)
+        v = v.at[i].set(1.0)
+        _, hvp = jax.jvp(grad_f, primals=(x,), tangents=(v,))
+        hessian = hessian.at[:, i].set(hvp)
+    return hessian
 
 
 def lambda_optimizer(response, measured, truth, binning, num_reps=30, verbose=False, seed=None):
