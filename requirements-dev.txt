@@ -1,3 +1,4 @@
+sympy
 uproot
 pytest-cov
 hypothesis

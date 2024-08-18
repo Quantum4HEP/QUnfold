@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import scipy as sp
 from tqdm import tqdm
+from scipy.optimize import approx_fprime
 from qunfold import QUnfolder
 
 try:
@@ -25,6 +26,15 @@ def compute_chi2(observed, expected):
     chi2 = np.sum((observed - expected) ** 2 / expected)
     chi2_red = chi2 / (len(expected) - 1)
     return chi2_red
+
+
+def approx_hessian(func, *point):
+    precision = np.sqrt(np.finfo(dtype=np.float32).eps)
+    epsilon = precision * np.array([max(1, x) for x in point])
+    function = lambda point: func(*point)
+    gradient = lambda point: approx_fprime(xk=point, f=function, epsilon=epsilon)
+    xk = np.array([x for x in point])
+    return approx_fprime(xk=xk, f=gradient, epsilon=epsilon)
 
 
 def lambda_optimizer(response, measured, truth, binning, num_reps=30, verbose=False, seed=None):
