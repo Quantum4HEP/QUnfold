@@ -277,21 +277,25 @@ def process(reco_tree_path, part_tree_path, list_recovars, dict_partvars, do_res
     )
 
     # Binning
-    binning_leading_pT = get_variable_binning(particle_pT_lep1, x_range=(0.0, 200.0), num_bins=13)
-    binning_subleading_pT = get_variable_binning(particle_pT_lep2, x_range=(0.0, 140.0), num_bins=13)
-    binning_m_l1l2 = get_variable_binning(particle_m_l1l2, x_range=(0.0, 420.0), num_bins=16)
-    binning_DR_b1b2 = get_variable_binning(particle_DR_b1b2, x_range=(0.2, 5.0), num_bins=15)
-    binning_m_b1b2 = get_variable_binning(particle_m_b1b2, x_range=(0.0, 500.0), num_bins=15)
-    binning_leading_eta = get_variable_binning(particle_Eta_lep1, x_range=(-2.5, 2.5), num_bins=18)
-    binning_subleading_eta = get_variable_binning(particle_Eta_lep2, x_range=(-2.5, 2.5), num_bins=18)
+    binning_leading_pT = get_variable_binning(particle_pT_lep1, x_range=(10, 400), num_bins=14)
+    binning_subleading_pT = get_variable_binning(particle_pT_lep2, x_range=(10, 250), num_bins=16)
+    binning_m_l1l2 = get_variable_binning(particle_m_l1l2, x_range=(min(particle_m_l1l2), 600), num_bins=21)
+    binning_m_b1b2 = get_variable_binning(particle_m_b1b2, x_range=(min(particle_m_b1b2), 800), num_bins=15)
+    binning_DR_b1b2 = get_variable_binning(particle_DR_b1b2, x_range=(0.49, 5.0), num_bins=15)
+    binning_leading_eta = get_variable_binning(
+        particle_Eta_lep1, x_range=(min(particle_Eta_lep1), max(particle_Eta_lep1)), num_bins=17
+    )
+    binning_subleading_eta = get_variable_binning(
+        particle_Eta_lep2, x_range=(min(particle_Eta_lep2), max(particle_Eta_lep2)), num_bins=17
+    )
 
     # Result
     variables = [
         ("pT_lep1", reco_pT_lep1, particle_pT_lep1, binning_leading_pT),
         ("pT_lep2", reco_pT_lep2, particle_pT_lep2, binning_subleading_pT),
         ("m_l1l2", reco_m_l1l2, particle_m_l1l2, binning_m_l1l2),
-        ("DR_b1b2", reco_DR_b1b2, particle_DR_b1b2, binning_DR_b1b2),
         ("m_b1b2", reco_m_b1b2, particle_m_b1b2, binning_m_b1b2),
+        ("DR_b1b2", reco_DR_b1b2, particle_DR_b1b2, binning_DR_b1b2),
         ("eta_lep1", reco_Eta_lep1, particle_Eta_lep1, binning_leading_eta),
         ("eta_lep2", reco_Eta_lep2, particle_Eta_lep2, binning_subleading_eta),
     ]
