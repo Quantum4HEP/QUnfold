@@ -23,6 +23,7 @@ class QUnfolder:
         self.d = measured
         self.binning = binning
         self.lam = lam
+        self.sol_pick = "weighted-average"
 
     @property
     def num_bins(self):
@@ -87,34 +88,48 @@ class QUnfolder:
         quadratic = {(i, j): 2 * Q[i, j] for i in range(size) for j in range(i + 1, size)}
         return dimod.BinaryQuadraticModel(linear, quadratic, vartype=dimod.BINARY)
 
-    def _decode_binary_solution(self, binsol):
+    def _decode_array(self, arr):
         split_indices = np.cumsum(self.num_bits[:-1])
-        bitstrings_list = np.split(binsol, indices_or_sections=split_indices)
-        sol = np.array([pvec @ bits for pvec, bits in zip(self.precision_vectors, bitstrings_list)])
-        return sol
+        bitstrings_list = np.split(arr, indices_or_sections=split_indices)
+        decoded_arr = np.array([pvec @ bits for pvec, bits in zip(self.precision_vectors, bitstrings_list)])
+        return decoded_arr
 
-    def _decode_binary_covariance(self, bincov):
+    def _decode_matrix(self, mat):
         split_indices = np.cumsum(self.num_bits[:-1])
-        rows = cols = np.split(np.arange(len(bincov)), indices_or_sections=split_indices)
+        rows = cols = np.split(np.arange(len(mat)), indices_or_sections=split_indices)
         pvecs = self.precision_vectors
         nbins = self.num_bins
-        cov = np.zeros(shape=(nbins, nbins))
+        decoded_mat = np.zeros(shape=(nbins, nbins))
         for i in range(nbins):
             for j in range(nbins):
-                block = bincov[np.ix_(rows[i], cols[j])]
-                cov[i, j] = pvecs[i] @ block @ pvecs[j]
-        return cov
+                block = mat[np.ix_(rows[i], cols[j])]
+                decoded_mat[i, j] = pvecs[i] @ block @ pvecs[j]
+        return decoded_mat
 
     def _post_process_sampleset(self, sampleset):
         sampleset = SteepestDescentSolver().sample(self.dwave_bqm, initial_states=sampleset)
         solutions = np.array([rec.sample for rec in sampleset.record])
         energies = np.array([rec.energy for rec in sampleset.record])
-        temperature = (np.max(energies) - np.min(energies)) / np.log(len(energies))
-        weights = np.exp(-(1 / temperature) * (energies - np.min(energies)))
-        binsol = np.average(solutions, weights=weights, axis=0)
-        bincov = np.cov(solutions, rowvar=False, aweights=weights)
-        sol = self._decode_binary_solution(binsol=binsol)
-        cov = self._decode_binary_covariance(bincov=bincov)
+        if self.sol_pick == "mean":
+            binsol = np.mean(solutions, axis=0)
+            devs = solutions - binsol
+            bincov = (devs.T @ devs) / len(devs)
+        elif self.sol_pick == "weighted-average":
+            temperature = (np.max(energies) - np.min(energies)) / np.log(len(energies))
+            weights = np.exp(-(1 / temperature) * (energies - np.min(energies)))
+            weights /= np.sum(weights)
+            binsol = np.average(solutions, weights=weights, axis=0)
+            devs = solutions - binsol
+            bincov = (devs.T @ (devs * weights[:, np.newaxis])) / (1 - np.sum(weights**2))
+        elif self.sol_pick == "lowest-energy":
+            raise NotImplementedError  # TODO
+            from qunfold.utils import approx_hessian
+
+            binsol = solutions[np.argmin(energies)]
+            hess = approx_hessian(f=self.dwave_bqm.energy, x=binsol)
+            bincov = np.linalg.pinv(hess)
+        sol = self._decode_array(arr=binsol)
+        cov = self._decode_matrix(mat=bincov)
         return sol, cov
 
     def _get_graph_embedding(self, **kwargs):
@@ -161,8 +176,8 @@ class QUnfolder:
     def solve_hybrid_sampler(self):
         self._sampler = LeapHybridSampler()
         sampleset = self._sampler.sample(self.dwave_bqm)
-        binsol = np.array(sampleset.record[0].sample)
-        sol = self._decode_binary_solution(binsol=binsol)
+        sample = sampleset.record[0].sample
+        sol = self._decode_array(arr=sample)
         cov = np.diag(sol)
         return sol, cov
 
