@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 from sklearn.preprocessing import KBinsDiscretizer
 from qunfold import QUnfolder, QPlotter
 from qunfold.utils import normalize_response, lambda_optimizer
@@ -10,20 +11,21 @@ np.random.seed(seed)
 
 # Set parameters for synthetic data generation
 entries = 20000
-bins = 14
-xmin, xmax = 0.0, 14.0  # xaxis range
-kappa, theta = 4.0, 1.0  # gamma distribution
-mu_smear, std_smear = -0.1, 0.3  # gaussian smearing
-efficiency = 0.8  # constant efficiency
+bins = 16
+xmin, xmax = -3.5, 4.6
+loc, scale = -2.0, 1.9
+skewness = 3.6
+mu_smear, std_smear = -0.08, 0.17
+efficiency = 0.7  # same for all bins
 
 # Generate Monte Carlo truth and reco data (with Gaussian smearing)
-truth_mc_data = np.random.gamma(kappa, theta, size=entries)
+truth_mc_data = stats.skewnorm.rvs(skewness, loc=loc, scale=scale, size=entries)
 smearing_mc = np.random.normal(mu_smear, std_smear, size=entries)
 eff_mask_mc = np.random.rand(entries) < efficiency
 reco_mc_data = (truth_mc_data + smearing_mc)[eff_mask_mc]
 
 # Generate unknown truth and measured data (with Gaussian smearing)
-truth_data = np.random.gamma(kappa, theta, size=entries)
+truth_data = stats.skewnorm.rvs(skewness, loc=loc, scale=scale, size=entries)
 smearing = np.random.normal(mu_smear, std_smear, size=entries)
 eff_mask = np.random.rand(entries) < efficiency
 measured_data = (truth_data + smearing)[eff_mask]

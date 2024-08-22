@@ -60,15 +60,17 @@ class QUnfolder:
         return (self.R.T @ self.R) + self.lam * (L.T @ L)
 
     def _get_laplacian(self):
-        with np.errstate(invalid="ignore"):
-            xmid = self.binning[:-1] + 0.5 * np.diff(self.binning)
-        n = len(xmid)
+        x = (self.binning[:-1] + self.binning[1:]) / 2
+        n = len(x)
         L = np.zeros(shape=(n, n))
-        dx = np.diff(xmid)
-        for i in range(2, n - 2):
-            L[i, i - 1] = 2 / (dx[i - 1] * (dx[i - 1] + dx[i]))
-            L[i, i] = -2 / (dx[i - 1] * dx[i])
-            L[i, i + 1] = 2 / (dx[i] * (dx[i - 1] + dx[i]))
+        for i in range(1, n - 1):
+            h1 = x[i] - x[i - 1]
+            h2 = x[i + 1] - x[i]
+            L[i, i - 1] = 2 / (h1 * (h1 + h2))
+            L[i, i] = -2 / (h1 * h2)
+            L[i, i + 1] = 2 / (h2 * (h1 + h2))
+        L[0, :] = L[1, :]
+        L[-1, :] = L[-2, :]
         L = 2 * L / np.max(np.abs(L))
         return L
 
