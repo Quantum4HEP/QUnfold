@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "QUnfold"
 version = "0.3.4"
 description = "A quantum-based approach to the distribution unfolding problem"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Gianluca Bianco", email = "biancogianluca9@gmail.com"},
