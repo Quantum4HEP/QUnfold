@@ -1,11 +1,11 @@
 FROM ubuntu:22.04
 
 RUN apt-get update && \
-apt-get install -y sudo git wget curl bzip2 libx11-6 libxpm4 libxft2 libxext6 cmake libc6-dev && \
+apt-get install -y sudo git vim nano wget curl bzip2 libx11-6 libxpm4 libxft2 libxext6 cmake libc6-dev && \
 apt-get upgrade -y && \
 apt-get clean
 
-RUN useradd -ms /bin/bash qunfold
+RUN useradd -m -g sudo -s /bin/bash qunfold
 RUN echo "qunfold:qunfold" | chpasswd
 USER qunfold
 WORKDIR /home/qunfold
@@ -27,8 +27,7 @@ RUN git clone https://github.com/JustWhit3/QUnfold.git
 WORKDIR /home/qunfold/QUnfold
 RUN /bin/bash -c "source activate qunfold-env && \
 pip install -e .[gurobi] && \
-pip install -r requirements-dev.txt && \
-pip install -r requirements-docs.txt"
+pip install jupyterlab"
 
 RUN conda clean -a -y
 
