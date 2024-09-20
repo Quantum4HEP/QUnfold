@@ -12,8 +12,8 @@ WORKDIR /home/qunfold
 
 RUN git clone https://github.com/Quantum4HEP/QUnfold.git
 WORKDIR /home/qunfold/QUnfold
-RUN pip3 install -e . && \
-pip3 install jupyterlab"
+RUN pip3 install -e . 
+RUN pip3 install jupyterlab
 
 RUN pip3 cache purge
 
