@@ -1,15 +1,12 @@
-<p align="center">
-  <img src="https://github.com/JustWhit3/QUnfold/blob/main/logo.png">
-</p>
+![logo](logo.png)
 
 <p align="center">
-	<a href="https://doi.org/10.5281/zenodo.10877157"><img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></br></a>
+	<a href="https://doi.org/10.5281/zenodo.10877157"><img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg"></a>
+  <a href="https://qunfold.readthedocs.io/en/latest/"><img title="docs" alt="docs" src="https://readthedocs.org/projects/qunfold/badge/?version=latest"></a>
+  <a href="https://hub.docker.com/r/marcolorusso/qunfold/tags"><img title="docker" alt="docker" src="https://img.shields.io/docker/automated/marcolorusso/qunfold"></br>
   <img title="v0.3" alt="v0.3" src="https://img.shields.io/badge/version-v0.3-informational?color=red"></a>
   <img title="license" alt="license" src="https://img.shields.io/badge/license-MIT-informational?color=red"></a>
-	<img title="python" alt="python" src="https://img.shields.io/badge/python-≥3.9-informational?color=red"></br>
-  <img title="codeql" alt="codeql" src="https://github.com/JustWhit3/QUnfold/actions/workflows/codeql.yml/badge.svg">
-  <a href="https://qunfold.readthedocs.io/en/latest/"><img title="docs" alt="docs" src="https://readthedocs.org/projects/qunfold/badge/?version=latest"></a>
-  <a href="https://hub.docker.com/r/marcolorusso/qunfold/tags"><img alt="docker build" src="https://img.shields.io/docker/automated/marcolorusso/qunfold"></a>
+	<img title="python" alt="python" src="https://img.shields.io/badge/python-≥3.9-informational?color=red"></a>
 </p>
 
 ## Table of contents
