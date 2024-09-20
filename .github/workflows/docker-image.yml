@@ -15,8 +15,11 @@ jobs:
 
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag marcolorusso/qunfold
+    - name: Build Developer Docker image
+      run: docker build . --file Dockerfile.dev --tag marcolorusso/qunfold-dev
 
     - name: Push to DockerHub
       run: |
         docker login -u marcolorusso -p ${{ secrets.DOCKER_TOKEN }}
         docker push marcolorusso/qunfold
+        docker push marcolorusso/qunfold-dev
