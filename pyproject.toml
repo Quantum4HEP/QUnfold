@@ -22,7 +22,7 @@ keywords = [
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: Linux",
+    "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
