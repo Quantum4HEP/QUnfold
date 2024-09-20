@@ -37,7 +37,7 @@ dependencies = {file = "requirements.txt"}
 gurobi = ["gurobipy"]
 
 [project.urls]
-Homepage = "https://github.com/JustWhit3/QUnfold"
+Homepage = "https://github.com/Quantum4HEP/QUnfold"
 Documentation = "https://qunfold.readthedocs.io/en/latest/"
 
 [tool.setuptools.packages.find]
