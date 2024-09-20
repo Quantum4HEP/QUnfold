@@ -6,7 +6,7 @@ authors:
   - family-names: "Gasperini"
     given-names: "Simone"
 title: "QUnfold"
-version: 0.3.4
+version: 0.3.5
 doi: https://zenodo.org/badge/latestdoi/652649177
-date-released: 2024-07-07
+date-released: 2024-09-20
 url: "https://github.com/Quantum4HEP/QUnfold"
