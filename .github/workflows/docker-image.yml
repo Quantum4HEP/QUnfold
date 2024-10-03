@@ -16,7 +16,7 @@ jobs:
       include:
         - dockerfile: Dockerfile
           tagname: qunfold
-        - dockerfile: Dockerfile-dev
+        - dockerfile: Dockerfile.dev
           tagname: qunfold-dev
     steps:
     - name: Checkout repository
@@ -33,6 +33,7 @@ jobs:
       with:
         username: marcolorusso
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
     - name: Build
       uses: docker/build-push-action@v6
       with:
