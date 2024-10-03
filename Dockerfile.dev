@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+ARG BUILDPLATFORM
+
 RUN apt-get update && \
 apt-get install -y sudo git vim nano wget curl bzip2 libx11-6 libxpm4 libxft2 libxext6 cmake libc6-dev && \
 apt-get upgrade -y && \
