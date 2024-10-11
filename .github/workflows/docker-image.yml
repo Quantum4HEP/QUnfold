@@ -42,6 +42,7 @@ jobs:
         file: ${{ matrix.dockerfile }}
         platforms: ${{ matrix.platform }}
         tags: marcolorusso/${{ matrix.tagname }}:latest
+        push: true
 
       
       
