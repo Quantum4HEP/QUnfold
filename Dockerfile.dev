@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
 ARG BUILDPLATFORM
+ARG TARGETPLATFORM
 
 RUN apt-get update && \
 apt-get install -y sudo git vim nano wget curl bzip2 libx11-6 libxpm4 libxft2 libxext6 cmake libc6-dev && \
@@ -13,12 +14,12 @@ USER qunfold
 WORKDIR /home/qunfold
 
 RUN \
-    if [ "$BUILDPLATFORM" = "linux/amd64" ]; then \
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
         echo "Downloading file for amd64..."; \
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh; \
 bash Miniconda3-latest-Linux-x86_64.sh -b -p /home/qunfold/miniconda3; \
 rm Miniconda3-latest-Linux-x86_64.sh; \
-    elif [ "$BUILDPLATFORM" = "linux/arm64" ]; then \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
         echo "Downloading file for arm64..."; \
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh; \
 bash Miniconda3-latest-Linux-aarch64.sh -b -p /home/qunfold/miniconda3; \
