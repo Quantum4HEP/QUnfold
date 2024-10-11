@@ -40,7 +40,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         file: ${{ matrix.dockerfile }}
-        platforms: ${{ matrix.dockerfile }}
+        platforms: ${{ matrix.platform }}
         tags: marcolorusso/${{ matrix.tagname }}:latest
 
       
