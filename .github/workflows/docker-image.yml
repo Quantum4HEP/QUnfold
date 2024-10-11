@@ -19,7 +19,7 @@ jobs:
           platform: linux/amd64,linux/arm64
         - dockerfile: Dockerfile.dev
           tagname: qunfold-dev
-          platform: linux/amd64
+          platform: linux/amd64,linux/arm64
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
