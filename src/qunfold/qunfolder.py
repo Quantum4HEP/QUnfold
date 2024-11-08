@@ -23,7 +23,7 @@ class QUnfolder:
         self.d = measured
         self.binning = binning
         self.lam = lam
-        self.sol_pick = "weighted-average"
+        self.sol_pick = "lowest-energy"
 
     @property
     def num_bins(self):
@@ -116,6 +116,8 @@ class QUnfolder:
             binsol = np.mean(solutions, axis=0)
             devs = solutions - binsol
             bincov = (devs.T @ devs) / len(devs)
+            sol = self._decode_array(arr=binsol)
+            cov = self._decode_matrix(mat=bincov)
         elif self.sol_pick == "weighted-average":
             temperature = (np.max(energies) - np.min(energies)) / np.log(len(energies))
             weights = np.exp(-(1 / temperature) * (energies - np.min(energies)))
@@ -123,15 +125,13 @@ class QUnfolder:
             binsol = np.average(solutions, weights=weights, axis=0)
             devs = solutions - binsol
             bincov = (devs.T @ (devs * weights[:, np.newaxis])) / (1 - np.sum(weights**2))
+            sol = self._decode_array(arr=binsol)
+            cov = self._decode_matrix(mat=bincov)
         elif self.sol_pick == "lowest-energy":
-            raise NotImplementedError  # TODO
-            from qunfold.utils import approx_hessian
-
             binsol = solutions[np.argmin(energies)]
-            hess = approx_hessian(f=self.dwave_bqm.energy, x=binsol)
-            bincov = np.linalg.pinv(hess)
-        sol = self._decode_array(arr=binsol)
-        cov = self._decode_matrix(mat=bincov)
+            sol = self._decode_array(arr=binsol)
+            cov = np.diag(sol)
+        sol = np.round(sol)
         return sol, cov
 
     def _get_graph_embedding(self, **kwargs):
@@ -211,11 +211,16 @@ class QUnfolder:
 
         def solve_gurobi_integer(self):
             model = gurobipy.Model()
+            vtype = gurobipy.GRB.INTEGER
+            sense = gurobipy.GRB.MINIMIZE
             model.setParam("OutputFlag", 0)
-            x = [model.addVar(vtype=gurobipy.GRB.INTEGER, lb=0, ub=2**b - 1) for b in self.num_bits]
-            a = self.linear_coeffs
-            B = self.quadratic_coeffs
-            model.setObjective(a @ x + x @ B @ x, sense=gurobipy.GRB.MINIMIZE)
+            x = [model.addVar(vtype=vtype, lb=0, ub=2**b - 1) for b in self.num_bits]
+            R, d = self.R, self.d
+            objective = (R @ x - d) @ (R @ x - d)
+            if self.lam != 0:
+                G = self._get_laplacian()
+                objective += self.lam * (G @ x) @ (G @ x)
+            model.setObjective(objective, sense=sense)
             model.optimize()
             sol = np.array([var.x for var in x])
             cov = np.diag(sol)
@@ -223,14 +228,15 @@ class QUnfolder:
 
         def solve_gurobi_binary(self):
             model = gurobipy.Model()
+            vtype = gurobipy.GRB.BINARY
+            sense = gurobipy.GRB.MINIMIZE
             model.setParam("OutputFlag", 0)
-            num_bits = self.num_bits
-            x = [model.addVar(vtype=gurobipy.GRB.BINARY) for i in range(self.num_bins) for _ in range(num_bits[i])]
+            x = [model.addVar(vtype=vtype) for i in range(self.num_bins) for _ in range(self.num_bits[i])]
             Q = self.qubo_matrix
-            model.setObjective(x @ Q @ x, sense=gurobipy.GRB.MINIMIZE)
+            model.setObjective(x @ Q @ x, sense=sense)
             model.optimize()
             bitstr = np.array([var.x for var in x], dtype=int)
-            arrays = np.split(bitstr, np.cumsum(num_bits[:-1]))
+            arrays = np.split(bitstr, np.cumsum(self.num_bits[:-1]))
             sol = np.array([int("".join(arr.astype(str))[::-1], base=2) for arr in arrays], dtype=float)
             cov = np.diag(sol)
             return sol, cov
