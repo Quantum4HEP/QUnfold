@@ -186,8 +186,12 @@ class QUnfolder:
     def set_quantum_device(self, device_name=None, dwave_token=None):
         self._sampler = DWaveSampler(solver=device_name, token=dwave_token)
 
-    def set_graph_embedding(self, **kwargs):
-        self.graph_embedding = self._get_graph_embedding(**kwargs)
+    def set_graph_embedding(self, fixed = False, emb = None, **kwargs):
+        if fixed:
+            print("Using fixed embedding")
+            self.graph_embedding = emb
+        else:
+            self.graph_embedding = self._get_graph_embedding(**kwargs)
 
     def solve_quantum_annealing(self, num_reads, num_toys=None, prog_bar=True, num_cores=None):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
