@@ -4,7 +4,7 @@ ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 
 RUN apt-get update && \
-apt-get install -y sudo git vim nano wget curl bzip2 libx11-6 libxpm4 libxft2 libxext6 cmake libc6-dev && \
+apt-get install -y sudo git vim nano wget curl && \
 apt-get upgrade -y && \
 apt-get clean
 
@@ -33,6 +33,11 @@ RUN
 
 ENV PATH=/home/qunfold/miniconda3/bin:$PATH
 RUN conda create -n qunfold-env python=3.10.14 -y
+
+RUN apt-get update && \
+apt-get install -y sudo bzip2 libx11-6 libxpm4 libxft2 libxext6 cmake libc6-dev && \
+apt-get upgrade -y && \
+apt-get clean
 
 RUN /bin/bash -c "source activate qunfold-env && \
 conda install -c conda-forge root -y"
