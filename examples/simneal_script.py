@@ -48,10 +48,24 @@ measured, _ = np.histogram(measured_data, bins=binning)
 # Find optimal value for regularization parameter lambda
 lam = lambda_optimizer(response=response, measured=measured, truth=truth_mc, binning=binning, num_reps=20, seed=seed)
 
-# Run QUnfold algorithm to solve unfolding problem
+# Initialize QUBO model for unfolding
 unfolder = QUnfolder(response=response, measured=measured, binning=binning, lam=lam)
 unfolder.initialize_qubo_model()
+
+# Run SA to solve QUBO problem
 sol, cov = unfolder.solve_simulated_annealing(num_reads=400, seed=seed)
+
+# Run HYB to solve Quadratic Model
+"""
+sol, cov = unfolder.solve_hybrid_sampler()
+"""
+
+# Run QA to solve QUBO problem
+"""
+unfolder.set_quantum_device()
+unfolder.set_graph_embedding()
+sol, cov = unfolder.solve_quantum_annealing(num_reads=400)
+"""
 
 # Plot response and unfolding result and save figures
 plotter = QPlotter(
