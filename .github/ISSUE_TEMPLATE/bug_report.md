@@ -7,17 +7,17 @@ assignees: ''
 
 ---
 
-**Prerequisites**
+## Prerequisites
 
 Please make sure to check off these prerequisites before submitting a bug report.
 - [ ] Test that the bug appears on the current version of the master branch. Make sure to include the commit hash of the commit you checked out.
 - [ ] Check that the issue hasn't already been reported, by checking the currently open issues.
 - [ ] If there are steps to reproduce the problem, make sure to write them down below.
 
-**Describe the bug**
+## Describe the bug
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+### To Reproduce
 Add what needs to be done to reproduce the bug. Add *commented* code examples and make sure to include the original model files / code, and the commit hash you are working on.
 
 1. Clone the hls4ml repository
@@ -25,22 +25,20 @@ Add what needs to be done to reproduce the bug. Add *commented* code examples an
 3. Run unfolding using [...] annealer
 4. See error
 
-**Expected behavior**
+**Machine (please complete the following information):**
+ - CPU arch [x86 or ARM]
+ - OS: [e.g. Linux]
+
+### Expected behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+### Screenshots
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - CPU arch [x86 or ARM]
- - OS: [e.g. iOS]
+## Optional
 
-
-
-### Optional
-
-**Possible fix**
+### Possible fix
 If you already know where the issue stems from, or you have a hint please let us know.
 
-**Additional context**
+### Additional context
 Add any other context about the problem here.
