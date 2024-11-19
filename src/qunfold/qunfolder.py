@@ -8,8 +8,9 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.samplers import SteepestDescentSolver
-from dwave.system import LeapHybridSampler
+from dwave.system import LeapHybridCQMSampler
 from dwave.system import DWaveSampler, FixedEmbeddingComposite
+from dimod import Integer, ConstrainedQuadraticModel
 
 try:
     import gurobipy
@@ -176,22 +177,24 @@ class QUnfolder:
         return sol, cov
 
     def solve_hybrid_sampler(self):
-        self._sampler = LeapHybridSampler()
-        sampleset = self._sampler.sample(self.dwave_bqm)
-        sample = sampleset.record[0].sample
-        sol = self._decode_array(arr=sample)
+        qm = ConstrainedQuadraticModel()
+        x = np.array([Integer(f"x{i}", upper_bound=2**nb - 1) for i, nb in enumerate(self.num_bits)])
+        objective = (self.R @ x - self.d) @ (self.R @ x - self.d)
+        if self.lam != 0:
+            G = self._get_laplacian()
+            objective += self.lam * (G @ x) @ (G @ x)
+        qm.set_objective(objective)
+        sampler = LeapHybridCQMSampler()
+        sampleset = sampler.sample_cqm(qm)
+        sol = np.array([sampleset.first.sample[var] for var in qm.variables])
         cov = np.diag(sol)
         return sol, cov
 
-    def set_quantum_device(self, device_name=None, dwave_token=None):
-        self._sampler = DWaveSampler(solver=device_name, token=dwave_token)
+    def set_quantum_device(self, device_name=None):
+        self._sampler = DWaveSampler(solver=device_name)
 
-    def set_graph_embedding(self, fixed = False, emb = None, **kwargs):
-        if fixed:
-            print("Using fixed embedding")
-            self.graph_embedding = emb
-        else:
-            self.graph_embedding = self._get_graph_embedding(**kwargs)
+    def set_graph_embedding(self, graph_embedding=None, **kwargs):
+        self.graph_embedding = graph_embedding if graph_embedding is not None else self._get_graph_embedding(**kwargs)
 
     def solve_quantum_annealing(self, num_reads, num_toys=None, prog_bar=True, num_cores=None):
         sampler = FixedEmbeddingComposite(self._sampler, embedding=self.graph_embedding)
