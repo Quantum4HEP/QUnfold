@@ -17,6 +17,8 @@ try:
 except ImportError:
     pass
 
+def is_dask_environment():
+    return "DASK_SCHEDULER_ADDRESS" in os.environ or "DASK_WORKER" in os.environ
 
 class QUnfolder:
     def __init__(self, response, measured, binning, lam=0.0):
@@ -41,7 +43,11 @@ class QUnfolder:
     @property
     def num_bits(self):
         eff = np.sum(self.R, axis=0)
-        eff[np.isclose(eff, 0)] = 1
+        if is_dask_environment():
+            da = sys.modules["dask.array"]
+            eff[da.isclose(eff, 0)] = 1
+        else:
+            eff[np.isclose(eff, 0)] = 1
         exp = np.ceil(self.d / eff)
         return [(int(np.ceil(np.log2(x * 1.2))) if x else 1) for x in exp]
 
