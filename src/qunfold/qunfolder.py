@@ -12,13 +12,16 @@ from dwave.system import LeapHybridCQMSampler
 from dwave.system import DWaveSampler, FixedEmbeddingComposite
 from dimod import Integer, ConstrainedQuadraticModel
 
+import inspect
+
 try:
     import gurobipy
 except ImportError:
     pass
 
-def is_dask_environment():
-    return "DASK_SCHEDULER_ADDRESS" in os.environ or "DASK_WORKER" in os.environ
+
+
+    
 
 class QUnfolder:
     def __init__(self, response, measured, binning, lam=0.0):
@@ -27,6 +30,7 @@ class QUnfolder:
         self.binning = binning
         self.lam = lam
         self.sol_pick = "lowest-energy"
+
 
     @property
     def num_bins(self):
@@ -43,11 +47,7 @@ class QUnfolder:
     @property
     def num_bits(self):
         eff = np.sum(self.R, axis=0)
-        if is_dask_environment():
-            da = sys.modules["dask.array"]
-            eff[da.isclose(eff, 0)] = 1
-        else:
-            eff[np.isclose(eff, 0)] = 1
+        eff[np.isclose(eff, 0)] = 1
         exp = np.ceil(self.d / eff)
         return [(int(np.ceil(np.log2(x * 1.2))) if x else 1) for x in exp]
 
@@ -146,7 +146,7 @@ class QUnfolder:
         target_edgelist = self._sampler.edgelist
         return minorminer.find_embedding(S=source_edgelist, T=target_edgelist, **kwargs)
 
-    def _run_montecarlo_toys(self, num_toys, prog_bar, num_cores, **kwargs):
+    def _run_montecarlo_toys(self, num_toys, num_cores,prog_bar=True, **kwargs):
         def run_toy(_):
             smeared_d = np.random.poisson(self.d)
             toy = QUnfolder(self.R, smeared_d, binning=self.binning, lam=self.lam)
@@ -160,14 +160,25 @@ class QUnfolder:
             sol, _ = toy._post_process_sampleset(sampleset)
             return sol
 
-        max_workers = num_cores if num_cores is not None else os.cpu_count()
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            jobs = executor.map(run_toy, range(num_toys))
-            desc = "Running MC toys"
-            disable = not prog_bar
-            results = list(tqdm(jobs, total=num_toys, desc=desc, disable=disable))
-        cov_toys = np.cov(results, rowvar=False)
-        return cov_toys
+        def run_toy_multithread(max_workers=1,num_toys=num_toys):
+            max_workers = num_cores if num_cores is not None else os.cpu_count()
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                jobs = executor.map(run_toy, range(num_toys))
+                desc = "Running MC toys"
+                disable = not prog_bar
+                results = list(tqdm(jobs, total=num_toys, desc=desc, disable=disable))
+            cov_toys = np.cov(results, rowvar=False)
+            return cov_toys
+        #if is_dask_environment():
+        
+            # n_workers = len(self.client.scheduler_info()['workers'])
+            # print(n_workers)
+            # split_toys = [int(num_toys/n_workers)] * n_workers
+            # print(split_toys)
+            # result = self.client.map(run_toy_multithread,zip(split_toys,split_toys))
+            # return result
+
+        return run_toy_multithread()
 
     def initialize_qubo_model(self):
         self.qubo_matrix = self._get_qubo_matrix()
@@ -179,7 +190,45 @@ class QUnfolder:
         sol, cov = self._post_process_sampleset(sampleset)
         if num_toys is not None:
             cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
-            cov += cov_toys
+            np.add(cov, cov_toys, out=cov, casting="unsafe")
+            #cov += cov_toys
+        return sol, cov
+    def simsamplwrapper(self,*args,**kwargs):
+        return self._sampler.sample(bqm=kwargs['bqm'],num_reads=kwargs['num_reads'],seed=kwargs['seed'])
+    def distributed_simulated_annealing(self, num_reads, num_toys=None, num_cores=None, seed=None):
+        try:
+            from dask.distributed import Client
+            from dask.distributed import LocalCluster
+            import dask.array as da
+            import dask.bag as db
+        except ImportError:
+            print("Trying to execute dask routine without the relevant libraries.")
+
+
+        cluster = LocalCluster()
+        client = Client(cluster)
+
+        self._sampler = SimulatedAnnealingSampler()
+        
+        fixed_args = {"bqm" : self.dwave_bqm, "num_reads":1,"seed":seed}
+        iterables = db.from_sequence([db.from_sequence([1, 2, 3]), db.from_sequence([4, 5, 6])])
+        num_calls = range(int(num_reads/100))
+        handle = client.map(self.simsamplwrapper, num_calls, bqm=self.dwave_bqm, num_reads=100, seed=seed )
+
+        sampleset = client.gather(handle)
+        combined_sampleset = dimod.concatenate(sampleset)
+
+        
+        sol, cov = self._post_process_sampleset(combined_sampleset)
+        
+
+        if num_toys is not None:
+            cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
+            np.add(cov, cov_toys, out=cov, casting="unsafe")
+            #cov += cov_toys
+
+
+
         return sol, cov
 
     def solve_hybrid_sampler(self):
