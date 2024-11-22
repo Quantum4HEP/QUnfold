@@ -63,8 +63,8 @@ pip install -e .[gurobi]
 
 ### *Docker container*
 Two different Docker images are ready to be downloaded from DockerHub to start playing with a containerized version of `QUnfold`:
-- [`qunfold`](https://hub.docker.com/r/marcolorusso/qunfold/tags): minimal working version for testing basic functionalities
-- [`qunfold-dev`](https://hub.docker.com/r/marcolorusso/qunfold-dev/tags): full version based on the `conda` distribution for Python, including the installation of `ROOT` framework and `RooUnfold` library for expert users in High-Energy Physics
+- [`qunfold`](https://hub.docker.com/r/quantum4hep/qunfold/tags): minimal working version for testing basic functionalities
+- [`qunfold-dev`](https://hub.docker.com/r/quantum4hep/qunfold-dev/tags): full version based on the `conda` distribution for Python, including the installation of `ROOT` framework and `RooUnfold` library for expert users in High-Energy Physics
 
 Both the containerized solutions offer the possibility to use `QUnfold` running a JupyterLab web-based environment on your favourite browser. First, run the Docker container with the porting option as follows:
 ```docker
