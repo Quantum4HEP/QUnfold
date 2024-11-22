@@ -3,6 +3,9 @@ name: Publish Docker image
 on:
   release:
     types: [published]
+  push:
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
 
 jobs:
@@ -23,6 +26,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -35,8 +41,19 @@ jobs:
       with:
         username: ${{ vars.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Get Repo Owner
+      id: get_repo_owner
+      run: echo ::set-output name=repo_owner::$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
         
-    - name: Build
+    - name: Build on Dockerhub
       uses: docker/build-push-action@v6
       with:
         file: ${{ matrix.dockerfile }}
@@ -44,6 +61,25 @@ jobs:
         tags: marcolorusso/${{ matrix.tagname }}:latest
         push: true
 
-      
-      
-      
+    - name: Build on ghcr.io manually
+      if: github.event_name == 'workflow_dispatch' 
+      uses: docker/build-push-action@v6
+      with:
+        file: ${{ matrix.dockerfile }}
+        platforms: ${{ matrix.platform }}
+        outputs: "type=registry"
+        tags: |
+          ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/${{ matrix.tagname }}:latest
+        push: true
+
+    - name: Build on ghcr.io on release
+      if: github.event_name != 'workflow_dispatch' 
+      uses: docker/build-push-action@v6
+      with:
+        file: ${{ matrix.dockerfile }}
+        platforms: ${{ matrix.platform }}
+        outputs: "type=registry"
+        tags: |
+          ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/${{ matrix.tagname }}:${{ env.RELEASE_VERSION }}
+          ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/${{ matrix.tagname }}:latest
+        push: true
