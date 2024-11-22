@@ -58,7 +58,7 @@ jobs:
       with:
         file: ${{ matrix.dockerfile }}
         platforms: ${{ matrix.platform }}
-        tags: marcolorusso/${{ matrix.tagname }}:latest
+        tags: quantum4hep/${{ matrix.tagname }}:latest
         push: true
 
     - name: Build on ghcr.io manually
