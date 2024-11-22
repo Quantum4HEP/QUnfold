@@ -193,41 +193,26 @@ class QUnfolder:
             np.add(cov, cov_toys, out=cov, casting="unsafe")
             #cov += cov_toys
         return sol, cov
+
     def simsamplwrapper(self,*args,**kwargs):
         return self._sampler.sample(bqm=kwargs['bqm'],num_reads=kwargs['num_reads'],seed=kwargs['seed'])
-    def distributed_simulated_annealing(self, num_reads, num_toys=None, num_cores=None, seed=None):
-        try:
-            from dask.distributed import Client
-            from dask.distributed import LocalCluster
-            import dask.array as da
-            import dask.bag as db
-        except ImportError:
-            print("Trying to execute dask routine without the relevant libraries.")
 
-
-        cluster = LocalCluster()
-        client = Client(cluster)
-
+    def distributed_simulated_annealing(self, num_reads, client, num_toys=None, num_cores=None, seed=None):
         self._sampler = SimulatedAnnealingSampler()
         
         fixed_args = {"bqm" : self.dwave_bqm, "num_reads":1,"seed":seed}
-        iterables = db.from_sequence([db.from_sequence([1, 2, 3]), db.from_sequence([4, 5, 6])])
         num_calls = range(int(num_reads/100))
         handle = client.map(self.simsamplwrapper, num_calls, bqm=self.dwave_bqm, num_reads=100, seed=seed )
 
         sampleset = client.gather(handle)
         combined_sampleset = dimod.concatenate(sampleset)
-
         
         sol, cov = self._post_process_sampleset(combined_sampleset)
         
-
-        if num_toys is not None:
-            cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
-            np.add(cov, cov_toys, out=cov, casting="unsafe")
-            #cov += cov_toys
-
-
+        #if num_toys is not None:
+        #    cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
+        #    np.add(cov, cov_toys, out=cov, casting="unsafe")
+        #    #cov += cov_toys
 
         return sol, cov
 
