@@ -32,9 +32,9 @@ class IsingHamiltonianSimulator:
             H_init -= functools.reduce(lambda A, B: sparse.kron(A, B, format=self.sparse_format), terms)
         return H_init
 
-    def get_H_final(self, num_qubits, h, J):
+    def get_H_final(self, num_qubits, h, J, offset):
         size = 2**num_qubits
-        diag = np.zeros(size, dtype=self.sparse_dtype)
+        diag = np.full(size, fill_value=offset, dtype=self.sparse_dtype)
         i_diag = np.diag(identity)
         z_diag = np.diag(sigma_z)
         for i in range(num_qubits):
@@ -52,15 +52,15 @@ class IsingHamiltonianSimulator:
 
     def run(self, bqm):
         num_qubits = bqm.num_variables
-        linear, quadratic, _ = bqm.to_ising()
+        linear, quadratic, offset = bqm.to_ising()
         h = np.array([linear.get(i, 0) for i in range(num_qubits)])
         J = np.array([[quadratic.get((i, j), 0) for i in range(num_qubits)] for j in range(num_qubits)])
         H_init = self.get_H_init(num_qubits=num_qubits)
-        H_final = self.get_H_final(num_qubits=num_qubits, h=h, J=J)
+        H_final = self.get_H_final(num_qubits=num_qubits, h=h, J=J, offset=offset)
         time = np.linspace(start=0, stop=1, num=self.time_steps)
         H_ising_list = []
         for s in time:
             a, b = self.anneal_schedule(s=s)
-            H_ising = -(a / 2) * H_init + (b / 2) * H_final
+            H_ising = -a * H_init + b * H_final
             H_ising_list.append(H_ising)
         return H_ising_list
