@@ -20,13 +20,15 @@ class IsingHamiltonianSimulator:
         b = s
         return a, b
 
-    @staticmethod
-    def get_H_init(num_qubits):
-        H_init = np.zeros(shape=(2**num_qubits, 2**num_qubits))
+    def get_H_init(self, num_qubits):
+        size = 2**num_qubits
+        H_init = sparse.csr_array((size, size), dtype=self.dtype)
+        i_sparse = sparse.csc_array(identity, dtype=self.dtype)
+        x_sparse = sparse.csc_array(sigma_x, dtype=self.dtype)
         for i in range(num_qubits):
-            terms = [identity] * num_qubits
-            terms[i] = sigma_x
-            H_init -= functools.reduce(np.kron, terms)
+            terms = [i_sparse] * num_qubits
+            terms[i] = x_sparse
+            H_init -= functools.reduce(lambda A, B: sparse.kron(A, B, format="csr"), terms)
         return H_init
 
     def get_H_final(self, num_qubits, h, J):
@@ -55,7 +57,9 @@ class IsingHamiltonianSimulator:
         H_init = self.get_H_init(num_qubits=num_qubits)
         H_final = self.get_H_final(num_qubits=num_qubits, h=h, J=J)
         time = np.linspace(start=0, stop=1, num=self.time_steps)
+        H_ising_list = []
         for s in time:
             a, b = self.anneal_schedule(s=s)
             H_ising = -(a / 2) * H_init + (b / 2) * H_final
-        # What should we return here?
+            H_ising_list.append(H_ising)
+        return H_ising_list
