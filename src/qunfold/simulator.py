@@ -1,5 +1,6 @@
 import functools
 import numpy as np
+from scipy import sparse
 
 
 identity = np.array([[1, 0], [0, 1]])
@@ -8,9 +9,10 @@ sigma_z = np.array([[1, 0], [0, -1]])
 
 
 class IsingHamiltonianSimulator:
-    def __init__(self, anneal_schedule=None, time_steps=100):
+    def __init__(self, anneal_schedule=None, time_steps=100, dtype=np.float64):
         self.anneal_schedule = self.default_anneal_schedule if anneal_schedule is None else anneal_schedule
         self.time_steps = time_steps
+        self.dtype = dtype
 
     @staticmethod
     def default_anneal_schedule(s):
@@ -27,19 +29,22 @@ class IsingHamiltonianSimulator:
             H_init -= functools.reduce(np.kron, terms)
         return H_init
 
-    @staticmethod
-    def get_H_final(num_qubits, h, J):
-        H_final = np.zeros(shape=(2**num_qubits, 2**num_qubits))
+    def get_H_final(self, num_qubits, h, J):
+        size = 2**num_qubits
+        diag = np.zeros(size, dtype=self.dtype)
+        i_diag = np.diag(identity)
+        z_diag = np.diag(sigma_z)
         for i in range(num_qubits):
-            terms = [identity] * num_qubits
-            terms[i] = sigma_z
-            H_final += h[i] * functools.reduce(np.kron, terms)
+            terms = [i_diag] * num_qubits
+            terms[i] = z_diag
+            diag += h[i] * functools.reduce(np.outer, terms).ravel()
         for i in range(num_qubits):
             for j in range(i + 1, num_qubits):
-                terms = [identity] * num_qubits
-                terms[i] = sigma_z
-                terms[j] = sigma_z
-                H_final += J[i, j] * functools.reduce(np.kron, terms)
+                terms = [i_diag] * num_qubits
+                terms[i] = z_diag
+                terms[j] = z_diag
+                diag += J[i, j] * functools.reduce(np.outer, terms).ravel()
+        H_final = sparse.dia_array((diag, [0]), shape=(size, size))
         return H_final
 
     def run(self, bqm):
