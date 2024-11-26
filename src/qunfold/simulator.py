@@ -52,5 +52,5 @@ class IsingHamiltonianSimulator:
         time = np.linspace(start=0, stop=1, num=self.time_steps)
         for s in time:
             a, b = self.anneal_schedule(s=s)
-            H_ising = (a / 2) * H_init + (b / 2) * H_final
+            H_ising = -(a / 2) * H_init + (b / 2) * H_final
         # What should we return here?
