@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import scipy as sp
+import pyscipopt as scip
 import dimod
 import minorminer
 from tqdm import tqdm
@@ -213,6 +214,24 @@ class QUnfolder:
             xbin.extend(map(int, bitstr[::-1]))
         energy = self.dwave_bqm.energy(sample=xbin)
         return energy
+
+    def solve_scip_integer(self):
+        model = scip.Model()
+        model.setParam("display/verblevel", 0)
+        bounds = [2**b - 1 for b in self.num_bits]
+        x = np.array([model.addVar(vtype="I", lb=0, ub=bounds[i]) for i in range(self.num_bins)])
+        y = model.addVar(vtype="C", lb=None, ub=None)
+        R, d = self.R, self.d
+        objective = (R @ x - d) @ (R @ x - d)
+        if self.lam != 0:
+            G = self._get_laplacian()
+            objective += self.lam * (G @ x) @ (G @ x)
+        model.setObjective(y, sense="minimize")
+        model.addCons(y >= objective)
+        model.optimize()
+        sol = np.array([model.getVal(var) for var in x])
+        cov = np.diag(sol)
+        return sol, cov
 
     if "gurobipy" in sys.modules:
 
