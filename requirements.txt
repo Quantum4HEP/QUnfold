@@ -5,3 +5,4 @@ matplotlib
 dwave-ocean-sdk
 scikit-learn
 tqdm
+pyscipopt
