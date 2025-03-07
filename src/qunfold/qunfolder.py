@@ -188,22 +188,32 @@ class QUnfolder:
     def simsamplwrapper(self,*args,**kwargs):
         return self._sampler.sample(bqm=kwargs['bqm'],num_reads=kwargs['num_reads'],seed=kwargs['seed'])
 
-    def distributed_simulated_annealing(self, num_reads, client, num_toys=None, num_cores=None, seed=None):
+    def simsamplwrapper_toy(self,*args,**kwargs):
+        return self._sampler.sample(bqm=kwargs['bqm'],num_reads=kwargs['num_reads'],seed=args[0])
+
+    def distributed_simulated_annealing(self, num_reads, client, reads_per_call=100, num_toys=None, num_cores=None, seed=None):
         self._sampler = SimulatedAnnealingSampler()
         
-        fixed_args = {"bqm" : self.dwave_bqm, "num_reads":1,"seed":seed}
-        num_calls = range(int(num_reads/100))
-        handle = client.map(self.simsamplwrapper, num_calls, bqm=self.dwave_bqm, num_reads=100, seed=seed )
+        num_calls = range(int(num_reads/reads_per_call))
+        handle = client.map(self.simsamplwrapper, num_calls, bqm=self.dwave_bqm, num_reads=reads_per_call, seed=seed )
 
         sampleset = client.gather(handle)
         combined_sampleset = dimod.concatenate(sampleset)
         
         sol, cov = self._post_process_sampleset(combined_sampleset)
         
-        #if num_toys is not None:
-        #    cov_toys = self._run_montecarlo_toys(num_toys, num_cores, num_reads=num_reads, seed=seed)
-        #    np.add(cov, cov_toys, out=cov, casting="unsafe")
-        #    #cov += cov_toys
+
+        if num_toys is not None:
+            handle = client.map(self.simsamplwrapper_toy, range(int(num_reads/reads_per_call)*num_toys), bqm=self.dwave_bqm, num_reads=reads_per_call, seed=seed)
+            sampleset_toys = client.gather(handle)
+            sov_toys = np.empty(shape=(num_toys, len(sol)))
+            a=0   
+            for i in range(0, len(sampleset_toys), int(num_reads/reads_per_call)):
+                sol_toy, _ = self._post_process_sampleset(dimod.concatenate(sampleset_toys[i:i+int(num_reads/reads_per_call)]))
+                sov_toys[a] = sol_toy
+                a+=1
+            cov_toys = np.cov(sov_toys, rowvar=False)
+            np.add(cov, cov_toys, out=cov, casting="unsafe")
 
         return sol, cov
 
