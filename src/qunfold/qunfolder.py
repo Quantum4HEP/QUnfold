@@ -169,15 +169,6 @@ class QUnfolder:
                 results = list(tqdm(jobs, total=num_toys, desc=desc, disable=disable))
             cov_toys = np.cov(results, rowvar=False)
             return cov_toys
-        #if is_dask_environment():
-        
-            # n_workers = len(self.client.scheduler_info()['workers'])
-            # print(n_workers)
-            # split_toys = [int(num_toys/n_workers)] * n_workers
-            # print(split_toys)
-            # result = self.client.map(run_toy_multithread,zip(split_toys,split_toys))
-            # return result
-
         return run_toy_multithread()
 
     def initialize_qubo_model(self):
