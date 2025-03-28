@@ -24,7 +24,7 @@ class QUnfolder:
         self.d = measured
         self.binning = binning
         self.lam = lam
-        self.sol_pick = "lowest-energy"
+        self.sol_pick = "mean"
 
     @property
     def num_bins(self):
