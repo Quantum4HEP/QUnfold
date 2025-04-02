@@ -47,6 +47,7 @@ mkdir root root-build && \
 wget https://root.cern/download/root_v6.34.02.source.tar.gz && \
 tar -xf root_v6.34.02.source.tar.gz && \
 cd root-build && \
+conda install numpy -y && \
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/root $HOME/root-6.34.02 && \
 cmake --build . --target install -- -j4"
 
@@ -58,7 +59,7 @@ mkdir build && \
 cd build && \
 cmake .. && \
 make -j4 && \
-conda install -c conda-forge libstdcxx-ng=12"
+conda install -c conda-forge libstdcxx-ng=12 -y"
 
 RUN git clone https://github.com/Quantum4HEP/QUnfold.git
 WORKDIR /home/qunfold/QUnfold
