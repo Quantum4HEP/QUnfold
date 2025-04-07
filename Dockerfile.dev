@@ -58,7 +58,7 @@ cd RooUnfold && \
 mkdir build && \
 cd build && \
 cmake .. && \
-make -j100 && \
+make -j8 && \
 conda install -c conda-forge libstdcxx-ng=12 -y"
 
 RUN git clone https://github.com/Quantum4HEP/QUnfold.git
