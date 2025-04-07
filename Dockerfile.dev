@@ -49,7 +49,7 @@ tar -xf root_v6.34.02.source.tar.gz && \
 cd root-build && \
 conda install numpy -y && \
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/root $HOME/root-6.34.02 && \
-cmake --build . --target install -- -j4"
+cmake --build . --target install -- -j6"
 
 RUN /bin/bash -c "source activate qunfold-env && \
 source $HOME/root/bin/thisroot.sh && \
@@ -58,7 +58,7 @@ cd RooUnfold && \
 mkdir build && \
 cd build && \
 cmake .. && \
-make -j8 && \
+make -j4 && \
 conda install -c conda-forge libstdcxx-ng=12 -y"
 
 RUN git clone https://github.com/Quantum4HEP/QUnfold.git
