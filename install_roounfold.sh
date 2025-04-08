@@ -27,7 +27,7 @@ fi
 
 echo -e "\U27A1 \033[1;36mStarting root compilation and install\033[0m"
 cd root-build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/root $HOME/root-source/root-6.34.02
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/root-cern $HOME/root-source/root-6.34.02
 cmake --build . --target install -- -j4
 if [ $? -eq 0 ]; then
     echo -e "\033[1;32mDONE \U2705\033[0m"
@@ -36,7 +36,7 @@ else
 fi
 
 echo -e "\U27A1 \033[1;36mStarting RooUnfold Compiling and install\033[0m"
-source $HOME/root/bin/thisroot.sh
+source $HOME/root-cern/bin/thisroot.sh
 git clone https://gitlab.cern.ch/RooUnfold/RooUnfold
 mv RooUnfold $HOME/RooUnfold
 cd $HOME/RooUnfold
@@ -56,7 +56,7 @@ else
 fi
 
 
-echo "source {$HOME}/root/bin/thisroot.sh" >> /home/$USER/.bashrc
+echo "source {$HOME}/root-cern/bin/thisroot.sh" >> /home/$USER/.bashrc
 echo "source {$HOME}/RooUnfold/build/setup.sh" >> /home/$USER/.bashrc
 
 # Cleaning
