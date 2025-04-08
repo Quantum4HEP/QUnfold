@@ -75,6 +75,6 @@ rm -r /home/qunfold/root-6.34.02 && \
 rm /home/qunfold/root_v6.34.02.source.tar.gz"
 
 RUN echo "source activate qunfold-env" >> /home/qunfold/.bashrc
-RUN echo "source /home/qunfold/root/thisroot.sh" >> /home/qunfold/.bashrc
+RUN echo "source /home/qunfold/root/bin/thisroot.sh" >> /home/qunfold/.bashrc
 RUN echo "source RooUnfold/build/setup.sh" >> /home/qunfold/.bashrc
 CMD ["/bin/bash"]
