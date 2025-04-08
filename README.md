@@ -118,7 +118,7 @@ This section contains instructions to solve the unfolding problem by classical m
 
 ### HEP dependencies
 To run the classical unfolding algorithms you need to install the `ROOT` framework developed by CERN (see documentation [here](https://root.cern/doc/v628/)) and the specialized `RooUnfold` library (see documentation [here](http://roounfold.web.cern.ch/index.html)).
-On Linux or Mac OS this can be done automatically by running the following script in the root directory of the repository:
+On Linux or Mac OS this can be done automatically by running the following script in the root directory of the repository AFTER having activated the python environment you want to use (this can take a long time):
 ```shell
 ./install_roounfold.sh
 ```
