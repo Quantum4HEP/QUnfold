@@ -41,26 +41,27 @@ def approx_hessian(f, x):
     return hessian
 
 
-def lambda_optimizer(response, measured, truth, binning, num_reps=30, verbose=False, seed=None):
+def lambda_optimizer(response, binning, num_reps=30, verbose=False, seed=None):
     if "gurobipy" not in sys.modules:
         raise ModuleNotFoundError("Function 'lambda_optimizer' requires Gurobi solver")
     np.random.seed(seed)
+
+    truth = np.sum(response, axis=1)
+    measured = np.random.poisson(np.sum(response, axis=0))
 
     def objective_fun(lam):
         unfolder = QUnfolder(response, measured, binning=binning, lam=lam)
         unfolder.initialize_qubo_model()
         sol, _ = unfolder.solve_gurobi_integer()
-        obs = sol[1:-1]
-        exp = truth[1:-1]
-        chi2 = compute_chi2(observed=obs, expected=exp)
+        chi2 = compute_chi2(observed=sol[1:-1], expected=truth[1:-1])
         return chi2
 
     best_lam = 0
     min_fun = objective_fun(best_lam)
     options = {"xatol": 0, "maxiter": 100, "disp": 3 if verbose else 0}
     for _ in tqdm(range(num_reps), desc="Optimizing lambda"):
-        bounds = (0, np.random.rand())
-        minimizer = sp.optimize.minimize_scalar(fun=objective_fun, method="bounded", bounds=bounds, options=options)
+        minimizer = sp.optimize.minimize_scalar(fun=objective_fun, method="bounded",
+                                                bounds=(0, np.random.rand()), options=options)
         lam = minimizer.x
         fun = minimizer.fun
         if fun < min_fun:

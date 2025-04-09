@@ -46,7 +46,7 @@ truth, _ = np.histogram(truth_data, bins=binning)
 measured, _ = np.histogram(measured_data, bins=binning)
 
 # Find optimal value for regularization parameter lambda
-lam = lambda_optimizer(response=response, measured=measured, truth=truth_mc, binning=binning, num_reps=20, seed=seed)
+lam = lambda_optimizer(response=response, binning=binning, num_reps=20, seed=seed)
 
 # Initialize QUBO model for unfolding
 unfolder = QUnfolder(response=response, measured=measured, binning=binning, lam=lam)

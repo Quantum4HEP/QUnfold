@@ -53,7 +53,7 @@ if __name__ == "__main__":
             response=TH2_to_numpy(roounfold_response.Hresponse(), overflow=True),
             truth_mc=TH1_to_numpy(roounfold_response.Htruth(), overflow=True),
         )
-        lam = lambda_optimizer(response=response, measured=measured, binning=binning, truth=truth, num_reps=20)
+        lam = lambda_optimizer(response=response, binning=binning, num_reps=20)
 
         sol_SA, cov_SA = run_QUnfold(
             method="SA",

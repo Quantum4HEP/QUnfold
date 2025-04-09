@@ -68,7 +68,7 @@ if __name__ == "__main__":
         response = normalize_response(
             response=TH2_to_numpy(th2_response, overflow=True), truth_mc=TH1_to_numpy(th1_truth_mc, overflow=True)
         )
-        lam = lambda_optimizer(response=response, measured=measured, truth=truth, binning=binning)
+        lam = lambda_optimizer(response=response, binning=binning)
 
         sol_SA, cov_SA = run_QUnfold(
             method="SA",
