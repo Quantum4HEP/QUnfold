@@ -1,13 +1,19 @@
 ![logo](logo.png)
 
 <p align="center">
-	<a href="https://doi.org/10.5281/zenodo.10877157"><img title="DOI" alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.8029028.svg">
-  <a href="https://qunfold.readthedocs.io/en/latest/"><img title="docs" alt="docs" src="https://readthedocs.org/projects/qunfold/badge/?version=latest"></br>
   <img title="version" alt="version" src="https://img.shields.io/badge/version-v0.3-informational?color=red">
   <img title="license" alt="license" src="https://img.shields.io/badge/license-MIT-informational?color=red">
-	<img title="python" alt="python" src="https://img.shields.io/badge/python-≥3.9-informational?color=red">
+  <img title="python" alt="python" src="https://img.shields.io/badge/python-%E2%89%A53.9-informational?color=red">
   <a href="https://skillicons.dev">
-    <img src="https://skillicons.dev/icons?i=linux,anaconda,docker" width="80px;"/>
+    <img src="https://skillicons.dev/icons?i=linux,anaconda,docker" width="80" alt="skills">
+  </a>
+</p>
+
+<p align="center">
+  <strong>📝 ArXiv Preprint paper</strong> &nbsp;➜&nbsp;
+  <a href="https://arxiv.org/abs/2602.22776">
+    <img src="https://img.shields.io/badge/arXiv-2602.22776-b3.svg" alt="arXiv">
+  </a>
 </p>
 
 ## Table of contents
