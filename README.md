@@ -1,16 +1,16 @@
-<p align="center">
-  <img title="version" alt="version" src="https://img.shields.io/badge/version-v0.3-informational?color=red">
-  <img title="license" alt="license" src="https://img.shields.io/badge/license-MIT-informational?color=red">
-  <img title="python" alt="python" src="https://img.shields.io/badge/python-%E2%89%A53.9-informational?color=red">
-  <a href="https://skillicons.dev">
-    <img src="https://skillicons.dev/icons?i=linux,anaconda,docker" width="80" alt="skills">
-  </a>
-</p>
+# QUnfold
+
+### Quantum Annealing for distribution unfolding in experimental High-Energy Physics
+
+An open-access paper related to this work has been published on **JINST** (Journal of Instrumentation): https://iopscience.iop.org/article/10.1088/1748-0221/21/08/T08004
+
 
 <p align="center">
-  <strong>📝 ArXiv Preprint paper</strong> &nbsp;➜&nbsp;
-  <a href="https://arxiv.org/abs/2602.22776">
-    <img src="https://img.shields.io/badge/arXiv-2602.22776-b3.svg" alt="arXiv">
+  <img title="version" alt="version" src="https://img.shields.io/badge/version-v0.3-informational?color=green">
+  <img title="license" alt="license" src="https://img.shields.io/badge/license-MIT-informational?color=green">
+  <img title="python" alt="python" src="https://img.shields.io/badge/python-%E2%89%A53.9-informational?">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=linux,anaconda,docker" width="80" alt="skills">
   </a>
 </p>
 
@@ -24,8 +24,6 @@
 - [Unfolding studies](#unfolding-studies)
   - [HEP dependencies](#hep-dependencies)
   - [Performance analysis](#performance-analysis)
-- [Main developers](#main-developers)
-- [Other contributors](#other-contributors)
 
 ## Introduction
 This package provides a quantum-based approach to the *statistical unfolding* problem in High-Energy Physics (HEP). The technique is based on the reformulation of this task as a [Quadratic Unconstrained Binary Optimization](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) (QUBO) problem to be solved by [Quantum Annealing](https://en.wikipedia.org/wiki/Quantum_annealing) (QA) on [D-Wave](https://www.dwavesys.com/) quantum devices.
@@ -139,20 +137,3 @@ In particular, the algorithms currently available are the following:
   - `Gurobi` solver for QUBO unfolding problem
 
 :warning: The HYB and QA solvers require access to a real D-Wave quantum annealer (1 min/month available for free via the [D-Wave Leap](https://cloud.dwavesys.com/leap/login/) cloud platform) while the Gurobi solvers (Python API) require a software license (freely available for 18 months).
-
-***
-
-### Main developers
-<table>
-  <tr>
-    <td align="center"><a href="https://justwhit3.github.io/"><img src="https://avatars.githubusercontent.com/u/48323961?v=4" width="100px;" alt=""/><br /><sub><b>Gianluca Bianco</b></sub></a></td>
-    <td align="center"><a href="https://github.com/SimoneGasperini"><img src="https://avatars2.githubusercontent.com/u/71086758?s=400&v=4" width="100px;" alt=""/><br /><sub><b>Simone Gasperini</b></sub></a></td>
-  </tr>
-</table>
-
-### Other contributors
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/DrWatt"><img src="https://avatars.githubusercontent.com/u/33673848?v=4" width="60px;" alt=""/><br /><sub><b>Marco Lorusso</b></sub></a></td>
-  </tr>
-</table>
