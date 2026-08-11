@@ -1,5 +1,3 @@
-![logo](logo.png)
-
 <p align="center">
   <img title="version" alt="version" src="https://img.shields.io/badge/version-v0.3-informational?color=red">
   <img title="license" alt="license" src="https://img.shields.io/badge/license-MIT-informational?color=red">
@@ -18,7 +16,6 @@
 
 ## Table of contents
 - [Introduction](#introduction)
-- [Documentation](#documentation)
 - [Installation](#installation)
   - [User-mode](#user-mode)
   - [Dev-mode](#dev-mode)
@@ -37,12 +34,6 @@ The code is written in Python and relies on [`numpy`](https://numpy.org/) arrays
 The software is designed leveraging the powerful [D-Wave Ocean SDK](https://docs.ocean.dwavesys.com/en/stable/), which provides several tools to define the QUBO model and run widely-used heuristics for classical computers (e.g. Simulated Annealing) as well as hybrid/quantum solvers running on real QA [D-Wave Systems](https://docs.dwavesys.com/docs/latest/).
 
 The idea for this project was inspired by the work done by K. Cormier, R. Di Sipio, and P. Wittek in 2019 (see [here](https://www.dwavesys.com/resources/application/unfolding-measurement-distributions-in-high-energy-physics-experiments-via-quantum-annealing/) for the links to an oral presentation and the published paper).
-
-:warning: For a comprehensive introduction to the classical problem, see Chapter 11 of the book [*Statistical Data Analysis*](https://academic.oup.com/book/54868) by G. Cowan.
-
-## Documentation
-###### (work in progress...)
-[Read the Docs](https://qunfold.readthedocs.io/en/latest/): API documentation for all the available features of the package.
 
 ## Installation
 ### *User-mode*

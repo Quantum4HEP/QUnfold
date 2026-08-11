@@ -1,4 +1,2 @@
 Introduction
 ============
-
-WORK IN PROGRESS
