@@ -136,4 +136,4 @@ In particular, the algorithms currently available are the following:
   - `Gurobi` solver for integer optimization formulation of the unfolding problem
   - `Gurobi` solver for QUBO unfolding problem
 
-:warning: The HYB and QA solvers require access to a real D-Wave quantum annealer (1 min/month available for free via the [D-Wave Leap](https://cloud.dwavesys.com/leap/login/) cloud platform) while the Gurobi solvers (Python API) require a software license (freely available for 18 months).
+:warning: The HYB and QA solvers require access to a real D-Wave quantum annealer while the Gurobi solvers require its software license.
